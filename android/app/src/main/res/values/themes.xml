@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.Tasks" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#DB4C3F</item>
+        <item name="colorPrimaryDark">#C13B2F</item>
+        <item name="android:statusBarColor">#DB4C3F</item>
+    </style>
+</resources>

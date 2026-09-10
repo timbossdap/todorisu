@@ -324,8 +324,16 @@ async function toggleTask(id) {
     return;
   }
   t.completed = !t.completed;
+  t.completed_at = t.completed ? new Date().toISOString() : null;
   render();
-  await sb.from("tasks").update({ completed: t.completed }).eq("id", id);
+  try {
+    const res = await sb.from("tasks").update({ completed: t.completed, completed_at: t.completed_at }).eq("id", id);
+    if (res.error) {
+      await sb.from("tasks").update({ completed: t.completed }).eq("id", id);
+    }
+  } catch (_) {
+    await sb.from("tasks").update({ completed: t.completed }).eq("id", id);
+  }
 }
 
 async function deleteTask(id) {
@@ -726,22 +734,152 @@ function render() {
   qp.innerHTML = `<option value="Inbox">Inbox</option>` + getProjects().map(p => `<option value="${p}">${p}</option>`).join("");
 
   // Switch view containers
+  const isReporting = currentView === "reporting";
+  $("displayBtn").classList.toggle("hidden", isReporting);
+  $("exportBtn").classList.toggle("hidden", !isReporting);
+
   if (currentView === "upcoming") {
     $("upcomingView").classList.remove("hidden");
     $("standardTaskView").classList.add("hidden");
     $("settingsView").classList.add("hidden");
+    $("reportingView").classList.add("hidden");
     renderUpcomingView();
   } else if (currentView === "settings") {
     $("upcomingView").classList.add("hidden");
     $("standardTaskView").classList.add("hidden");
     $("settingsView").classList.remove("hidden");
+    $("reportingView").classList.add("hidden");
     renderSettings();
+  } else if (currentView === "reporting") {
+    $("upcomingView").classList.add("hidden");
+    $("standardTaskView").classList.add("hidden");
+    $("settingsView").classList.add("hidden");
+    $("reportingView").classList.remove("hidden");
+    renderReportingView();
   } else {
     $("upcomingView").classList.add("hidden");
     $("standardTaskView").classList.remove("hidden");
     $("settingsView").classList.add("hidden");
+    $("reportingView").classList.add("hidden");
     renderStandardView();
   }
+}
+
+// ============================================================
+// REPORTING VIEW RENDERER
+// ============================================================
+function renderReportingView() {
+  const container = $("reportingGroupsContainer");
+  container.innerHTML = "";
+
+  // Gather completed tasks; fall back to sample data if none
+  let completed = tasks.filter(t => t.completed);
+  if (completed.length === 0) {
+    const now = new Date();
+    const todayIso = now.toISOString();
+    const hoursAgo = (h) => new Date(now.getTime() - h * 3600000).toISOString();
+    completed = [
+      { id: "__s1", title: "PHIL hand in", project: "uni", completed: true, completed_at: hoursAgo(4) },
+      { id: "__s2", title: "PDHPE handin", project: "uni", completed: true, completed_at: hoursAgo(5) },
+      { id: "__s3", title: "IMDB AI Milestone", project: "Work", completed: true, completed_at: hoursAgo(6) },
+    ];
+  }
+
+  // Sort by completed_at descending (newest first)
+  completed.sort((a, b) => {
+    const da = a.completed_at ? new Date(a.completed_at) : new Date(0);
+    const db = b.completed_at ? new Date(b.completed_at) : new Date(0);
+    return db - da;
+  });
+
+  // Group by day of completion
+  const groups = new Map();
+  completed.forEach(t => {
+    const d = t.completed_at ? new Date(t.completed_at) : new Date();
+    const key = d.toDateString();
+    if (!groups.has(key)) groups.set(key, { date: d, items: [] });
+    groups.get(key).items.push(t);
+  });
+
+  // Render each group
+  groups.forEach(({ date, items }) => {
+    const group = document.createElement("div");
+    group.className = "reporting-group";
+
+    const header = document.createElement("div");
+    header.className = "reporting-group-header";
+    const now = new Date();
+    const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+    let dayLabel;
+    if (isSameDay(date, now)) dayLabel = "Today · " + date.toLocaleString(undefined, { weekday: "long" });
+    else if (isSameDay(date, yesterday)) dayLabel = "Yesterday · " + date.toLocaleString(undefined, { weekday: "long" });
+    else dayLabel = date.toLocaleString(undefined, { month: "short" }) + " " + date.getDate() + " · " + date.toLocaleString(undefined, { weekday: "long" });
+    header.innerHTML = `<span>${dayLabel}</span><span class="reporting-count-num">${items.length}</span>`;
+    group.appendChild(header);
+
+    items.forEach(t => {
+      const row = document.createElement("div");
+      row.className = "reporting-item";
+
+      // Left: avatar + action + chip
+      const left = document.createElement("div");
+      left.className = "reporting-item-left";
+
+      const avatarWrap = document.createElement("div");
+      avatarWrap.className = "reporting-avatar-wrap";
+      // Get initials from user name
+      const initials = ($("userAvatar").textContent || "U").charAt(0).toUpperCase();
+      avatarWrap.innerHTML = `
+        <div class="reporting-avatar">${initials}</div>
+        <div class="reporting-check-badge">✓</div>
+      `;
+
+      const action = document.createElement("span");
+      action.className = "reporting-action-text";
+      action.textContent = "You completed";
+
+      const chip = document.createElement("button");
+      chip.className = "reporting-task-chip";
+      chip.innerHTML = `<span>✓</span><span>${t.title}</span>`;
+      chip.addEventListener("click", () => {
+        // Un-complete the task (if real task, not sample)
+        if (!t.id.startsWith("__s")) toggleTask(t.id);
+      });
+
+      left.appendChild(avatarWrap);
+      left.appendChild(action);
+      left.appendChild(chip);
+
+      // Right: project + time ago
+      const right = document.createElement("div");
+      right.className = "reporting-item-right";
+      const proj = t.project && t.project !== "Inbox" ? t.project : "";
+      if (proj) {
+        const projEl = document.createElement("span");
+        projEl.className = "reporting-project-label";
+        projEl.textContent = `# ${proj}`;
+        right.appendChild(projEl);
+      }
+      const timeEl = document.createElement("span");
+      timeEl.className = "reporting-time-ago";
+      if (t.completed_at) {
+        const diffMs = Date.now() - new Date(t.completed_at).getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHrs = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHrs / 24);
+        if (diffMins < 60) timeEl.textContent = `${diffMins}m ago`;
+        else if (diffHrs < 24) timeEl.textContent = `${diffHrs} hour${diffHrs !== 1 ? "s" : ""} ago`;
+        else timeEl.textContent = `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
+      }
+      right.appendChild(timeEl);
+
+      row.appendChild(left);
+      row.appendChild(right);
+      group.appendChild(row);
+    });
+
+    container.appendChild(group);
+  });
 }
 
 // ============================================================
@@ -1304,29 +1442,135 @@ document.querySelectorAll("#modeSegmented button").forEach(btn => {
   btn.addEventListener("click", () => { ThemeManager.setMode(btn.dataset.mode); renderSettings(); });
 });
 
-// Mobile menu & sidebar collapse
-$("menuBtn").addEventListener("click", () => $("sidebar").classList.toggle("open"));
+// ============================================================
+// SIDEBAR COLLAPSE / BURGER MENU
+// ============================================================
 $("sidebarCollapseBtn").addEventListener("click", () => {
   if (window.innerWidth > 780) {
-    const isCollapsed = $("sidebar").style.display === "none";
-    $("sidebar").style.display = isCollapsed ? "flex" : "none";
+    // Desktop: toggle .sidebar-collapsed on #app, show/hide burger
+    const app = $("app");
+    const collapsed = app.classList.toggle("sidebar-collapsed");
+    $("menuBtn").classList.toggle("hidden", !collapsed);
   } else {
+    // Mobile: close the drawer
     $("sidebar").classList.remove("open");
   }
 });
 
-// Keyboard shortcuts: 'q' for quick add, 'Esc' to close
+$("menuBtn").addEventListener("click", () => {
+  if (window.innerWidth > 780) {
+    // Desktop: expand sidebar back
+    $("app").classList.remove("sidebar-collapsed");
+    $("menuBtn").classList.add("hidden");
+  } else {
+    // Mobile: open drawer
+    $("sidebar").classList.toggle("open");
+  }
+});
+
+// ============================================================
+// SEARCH MODAL
+// ============================================================
+function openSearch() {
+  $("searchModal").classList.remove("hidden");
+  $("searchInput").value = "";
+  renderSearchResults("");
+  $("searchInput").focus();
+}
+function closeSearch() {
+  $("searchModal").classList.add("hidden");
+}
+function renderSearchResults(query) {
+  const list = $("searchResults");
+  list.innerHTML = "";
+  const q = query.trim().toLowerCase();
+  const results = q.length === 0 ? [] : tasks.filter(t =>
+    t.title.toLowerCase().includes(q) ||
+    (t.project || "").toLowerCase().includes(q) ||
+    (t.tags || []).some(tag => tag.toLowerCase().includes(q))
+  ).slice(0, 20);
+
+  if (results.length === 0 && q.length > 0) {
+    list.innerHTML = `<div style="color:var(--app-text-muted);padding:12px 10px;font-size:13px;">No tasks found for "${query}"</div>`;
+    return;
+  }
+  results.forEach(t => {
+    const item = document.createElement("div");
+    item.className = "search-result-item";
+    const overdue = !t.completed && isOverdue(t.due_at);
+    item.innerHTML = `
+      <div class="search-result-title">${t.title}</div>
+      <div class="search-result-meta">
+        ${t.project && t.project !== "Inbox" ? `<span># ${t.project}</span>` : ""}
+        ${t.due_at ? `<span style="color:${overdue ? "var(--app-primary)" : "var(--app-text-muted)"}">
+          ${isToday(t.due_at) ? "Today" : new Date(t.due_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+        </span>` : ""}
+        ${t.completed ? `<span style="color:#4caf50">✓ Done</span>` : ""}
+      </div>
+    `;
+    item.addEventListener("click", () => {
+      closeSearch();
+      // Navigate to the task's view
+      if (!t.completed) {
+        currentProject = t.project && t.project !== "Inbox" ? t.project : null;
+        currentTag = null;
+        currentView = currentProject ? "project" : (isToday(t.due_at) || isOverdue(t.due_at) ? "today" : "upcoming");
+        render();
+      }
+    });
+    list.appendChild(item);
+  });
+}
+
+$("searchBtn").addEventListener("click", openSearch);
+$("closeSearchModal").addEventListener("click", closeSearch);
+$("searchInput").addEventListener("input", (e) => renderSearchResults(e.target.value));
+$("searchModal").addEventListener("click", (e) => { if (e.target === $("searchModal")) closeSearch(); });
+
+// ============================================================
+// EXPORT BUTTON (Reporting view)
+// ============================================================
+$("exportBtn").addEventListener("click", () => {
+  const completed = tasks.filter(t => t.completed);
+  const headers = ["Title", "Project", "Completed At", "Due At", "Priority", "Tags"];
+  const rows = completed.map(t => [
+    `"${(t.title || "").replace(/"/g, '""')}"`,
+    `"${(t.project || "Inbox").replace(/"/g, '""')}"`,
+    t.completed_at ? new Date(t.completed_at).toLocaleString() : "",
+    t.due_at ? new Date(t.due_at).toLocaleString() : "",
+    t.priority || 4,
+    `"${(t.tags || []).join(", ")}"`
+  ].join(","));
+  const csv = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `todorisu-completed-${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// Keyboard shortcuts: 'q' for quick add, Cmd+K / '/' for search, 'Esc' to close
 document.addEventListener("keydown", (e) => {
-  if (e.key === "q" && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+  const tag = document.activeElement.tagName;
+  const inInput = ["INPUT", "TEXTAREA"].includes(tag);
+
+  if (e.key === "q" && !inInput) {
     e.preventDefault();
     $("quickAdd").classList.remove("hidden");
     $("quickAddInput").focus();
+  }
+  if ((e.key === "/" && !inInput) || ((e.metaKey || e.ctrlKey) && e.key === "k")) {
+    e.preventDefault();
+    openSearch();
   }
   if (e.key === "Escape") {
     $("quickAdd").classList.add("hidden");
     $("calendarModal").classList.add("hidden");
     $("rescheduleModal").classList.add("hidden");
     $("displayDropdown").classList.add("hidden");
+    closeSearch();
   }
 });
 
