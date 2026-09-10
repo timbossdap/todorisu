@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>Tasks</title>
 <link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#DB4C3F" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23DB4C3F%22/><path d=%22M25 52 L42 68 L76 32%22 stroke=%22white%22 stroke-width=%2210%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>" />
+<meta name="theme-color" content="#6750A4" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%236750A4%22/><path d=%22M25 52 L42 68 L76 32%22 stroke=%22white%22 stroke-width=%2210%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -29,7 +29,9 @@
 
 <!-- APP -->
 <div id="app" class="app hidden">
-  <aside class="sidebar">
+  <button id="menuBtn" class="icon-btn menu-btn" aria-label="Menu">☰</button>
+
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <button id="quickAddBtn" class="add-task-btn">+ Add task</button>
     </div>
@@ -40,46 +42,94 @@
     </nav>
     <div class="projects-header">Projects</div>
     <nav id="projectList" class="projects"></nav>
+    <div class="projects-header">Tags</div>
+    <nav id="tagList" class="projects"></nav>
     <div class="sidebar-bottom">
       <button id="notifBtn" class="ghost-btn">Enable notifications</button>
+      <button id="settingsBtn" class="ghost-btn">Settings</button>
       <button id="signOutBtn" class="ghost-btn">Sign out</button>
     </div>
   </aside>
 
   <main class="main">
-    <header class="main-header">
-      <h2 id="viewTitle">Today</h2>
-      <span id="viewDate" class="view-date"></span>
-    </header>
+    <!-- TASK VIEW -->
+    <div id="taskView">
+      <header class="main-header">
+        <h2 id="viewTitle">Today</h2>
+        <span id="viewDate" class="view-date"></span>
+      </header>
 
-    <div id="quickAdd" class="quick-add hidden">
-      <input id="quickAddInput" type="text" placeholder="Task name" />
-      <div class="quick-add-row">
-        <select id="quickAddProject"></select>
-        <input id="quickAddDate" type="datetime-local" />
-        <select id="quickAddPriority">
-          <option value="4">No priority</option>
-          <option value="3">Priority 3</option>
-          <option value="2">Priority 2</option>
-          <option value="1">Priority 1</option>
-        </select>
-        <button id="quickAddSave">Add task</button>
-        <button id="quickAddCancel" class="ghost-btn">Cancel</button>
+      <div id="quickAdd" class="quick-add hidden">
+        <input id="quickAddInput" type="text" placeholder='Try "Pay rent tomorrow 5pm every month @bills #Home"' />
+        <div id="smartPreview" class="smart-preview hidden"></div>
+        <div class="quick-add-row">
+          <select id="quickAddProject"></select>
+          <input id="quickAddDate" type="datetime-local" />
+          <select id="quickAddPriority">
+            <option value="4">No priority</option>
+            <option value="3">Priority 3</option>
+            <option value="2">Priority 2</option>
+            <option value="1">Priority 1</option>
+          </select>
+          <select id="quickAddRecurrence">
+            <option value="">Doesn't repeat</option>
+            <option value="daily">Every day</option>
+            <option value="weekday">Every weekday</option>
+            <option value="weekly">Every week</option>
+            <option value="monthly">Every month</option>
+          </select>
+          <input id="quickAddTags" type="text" placeholder="tags, comma separated" />
+        </div>
+        <div class="quick-add-row">
+          <button id="quickAddSave">Add task</button>
+          <button id="quickAddCancel" class="ghost-btn">Cancel</button>
+        </div>
       </div>
+
+      <ul id="taskList" class="task-list"></ul>
+      <p id="emptyState" class="empty-state hidden">Nothing here. Add a task to get started.</p>
+
+      <div class="completed-toggle-wrap">
+        <button id="toggleCompleted" class="link-btn">Show completed</button>
+      </div>
+      <ul id="completedList" class="task-list hidden"></ul>
     </div>
 
-    <ul id="taskList" class="task-list"></ul>
-    <p id="emptyState" class="empty-state hidden">Nothing here. Add a task to get started.</p>
+    <!-- SETTINGS VIEW -->
+    <div id="settingsView" class="hidden">
+      <header class="main-header">
+        <h2>Settings</h2>
+      </header>
 
-    <div class="completed-toggle-wrap">
-      <button id="toggleCompleted" class="link-btn">Show completed</button>
+      <section class="settings-section">
+        <h3>Appearance</h3>
+        <div class="settings-row">
+          <span>Theme</span>
+          <div class="segmented" id="modeSegmented">
+            <button data-mode="light">Light</button>
+            <button data-mode="dark">Dark</button>
+            <button data-mode="system">System</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h3>Color scheme</h3>
+        <p class="settings-hint">Material You–style seed colors.</p>
+        <div id="schemeSwatches" class="swatch-row"></div>
+      </section>
+
+      <section class="settings-section">
+        <button id="settingsBack" class="ghost-btn">← Back to tasks</button>
+      </section>
     </div>
-    <ul id="completedList" class="task-list hidden"></ul>
   </main>
 </div>
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chrono-node@2/dist/chrono.min.js"></script>
+<script src="theme.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
