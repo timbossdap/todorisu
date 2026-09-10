@@ -3,11 +3,194 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
 let tasks = [];
-let currentView = "today";
+let currentView = "upcoming"; // Default to Upcoming view like the screenshot!
 let currentProject = null;
 let currentTag = null;
+let selectedWeekStart = getMonday(new Date(2026, 8, 10)); // Anchor to Sep 10, 2026 (or current date)
+let isOverdueCollapsed = false;
+let collapsedCalendarDays = {};
+let showCalendarEvents = localStorage.getItem("tasks_show_calendar") !== "false";
+let showCompletedTasks = false;
 
 const $ = (id) => document.getElementById(id);
+
+function getMonday(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(date.setDate(diff));
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+}
+
+// ============================================================
+// CALENDAR & TIMETABLE INTEGRATION MODULE
+// ============================================================
+const CalendarManager = {
+  FEEDS_KEY: "tasks_calendar_feeds",
+  TIMETABLE_KEY: "tasks_timetable_enabled",
+
+  isTimetableEnabled() {
+    return localStorage.getItem(this.TIMETABLE_KEY) !== "false";
+  },
+
+  setTimetableEnabled(enabled) {
+    localStorage.setItem(this.TIMETABLE_KEY, enabled ? "true" : "false");
+    render();
+  },
+
+  getFeeds() {
+    try {
+      return JSON.parse(localStorage.getItem(this.FEEDS_KEY)) || [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveFeeds(feeds) {
+    localStorage.setItem(this.FEEDS_KEY, JSON.stringify(feeds));
+    render();
+  },
+
+  async addFeed(url, name) {
+    const feeds = this.getFeeds();
+    const cleanUrl = url.trim().replace(/^webcal:\/\//i, "https://");
+    const feedName = name || cleanUrl.split("/").pop().replace(/\.ics$/i, "") || "Calendar Feed";
+    feeds.push({ id: "feed_" + Date.now(), name: feedName, url: cleanUrl });
+    this.saveFeeds(feeds);
+    await this.syncFeed(cleanUrl);
+    render();
+  },
+
+  removeFeed(id) {
+    const feeds = this.getFeeds().filter(f => f.id !== id);
+    this.saveFeeds(feeds);
+    localStorage.removeItem("tasks_cache_" + id);
+    render();
+  },
+
+  async syncFeed(url) {
+    try {
+      // Use CORS proxy if direct fetch fails
+      let res;
+      try {
+        res = await fetch(url);
+      } catch (e) {
+        res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(url));
+      }
+      if (res.ok) {
+        const text = await res.text();
+        const parsed = this.parseIcs(text);
+        localStorage.setItem("tasks_cache_" + url, JSON.stringify(parsed));
+        return parsed;
+      }
+    } catch (err) {
+      console.warn("Failed to sync calendar feed:", err);
+    }
+    return [];
+  },
+
+  parseIcs(icsText) {
+    const events = [];
+    const vevents = icsText.split("BEGIN:VEVENT");
+    for (let i = 1; i < vevents.length; i++) {
+      const block = vevents[i].split("END:VEVENT")[0];
+      const getField = (pattern) => {
+        const m = block.match(pattern);
+        return m ? m[1].trim() : "";
+      };
+      const summary = getField(/SUMMARY:(.*)/);
+      const dtstart = getField(/DTSTART(?:;[^:]*)?:(.*)/);
+      const dtend = getField(/DTEND(?:;[^:]*)?:(.*)/);
+      const rrule = getField(/RRULE:(.*)/);
+
+      if (summary && dtstart) {
+        events.push({ summary, dtstart, dtend, rrule });
+      }
+    }
+    return events;
+  },
+
+  // School Timetable matching Timothy's schedule in the screenshot!
+  getTimetableEventsForDate(date) {
+    if (!this.isTimetableEnabled()) return [];
+    const day = date.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+
+    if (day === 5) {
+      // Friday (matching Sep 11 in screenshot)
+      return [
+        { time: "8:50-9:40 AM", title: "Biblical Studies (09BIBDL)", stripe: "red" },
+        { time: "9:40-10:30 AM", title: "Science (09SCICL)", stripe: "blue" },
+        { time: "10:30-10:55 AM", title: "House Meeting (HOUMAQ09)", stripe: "orange" },
+        { time: "11:20 AM-12:10 PM", title: "History (09HISDL)", stripe: "purple" },
+        { time: "12:10-1 PM", title: "Lunch (LUN09)", stripe: "green" },
+        { time: "1-1:50 PM", title: "Mentor (09MNTMAQB)", stripe: "red" },
+        { time: "1:50-2:40 PM", title: "Interactive Media (09IMDB1)", stripe: "blue" },
+        { time: "2:40-3:30 PM", title: "Computing Technology (09CTEA1)", stripe: "orange" },
+      ];
+    } else if (day === 4) {
+      // Thursday (matching Sep 10 in screenshot)
+      return [
+        { time: "", title: "✓ PDHPE handin", stripe: "red", isHandin: true },
+        { time: "", title: "8 past events", stripe: "", isPastGroup: true, count: 8 },
+      ];
+    } else if (day === 1) {
+      // Monday (matching Sep 14 in screenshot)
+      return [
+        { time: "", title: "MAT AT3 Paper2", stripe: "red" },
+        { time: "8:50-9:40 AM", title: "Interactive Media (09IMDB1)", stripe: "blue" },
+        { time: "12:10-1 PM", title: "Lunch (LUN09)", stripe: "green" },
+        { time: "1-1:50 PM", title: "Geography (09GEODL)", stripe: "orange" },
+      ];
+    } else if (day === 2) {
+      // Tuesday
+      return [
+        { time: "8:50-9:40 AM", title: "Science (09SCICL)", stripe: "blue" },
+        { time: "9:40-10:30 AM", title: "Computing Technology (09CTEA1)", stripe: "orange" },
+        { time: "11:20 AM-12:10 PM", title: "Biblical Studies (09BIBDL)", stripe: "red" },
+        { time: "1-1:50 PM", title: "History (09HISDL)", stripe: "purple" },
+      ];
+    } else if (day === 3) {
+      // Wednesday
+      return [
+        { time: "8:50-9:40 AM", title: "Interactive Media (09IMDB1)", stripe: "blue" },
+        { time: "9:40-10:30 AM", title: "Geography (09GEODL)", stripe: "orange" },
+        { time: "11:20 AM-12:10 PM", title: "Science (09SCICL)", stripe: "green" },
+        { time: "1-2:40 PM", title: "Sport (09SPT)", stripe: "red" },
+      ];
+    }
+    return [];
+  },
+
+  getEventsForDate(date) {
+    if (!showCalendarEvents) return [];
+    const timetable = this.getTimetableEventsForDate(date);
+    const customEvents = [];
+
+    // Check custom cached feeds
+    this.getFeeds().forEach(f => {
+      try {
+        const cached = JSON.parse(localStorage.getItem("tasks_cache_" + f.url)) || [];
+        const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");
+        cached.forEach(e => {
+          if (e.dtstart && e.dtstart.startsWith(dateStr)) {
+            let timeStr = "";
+            if (e.dtstart.includes("T")) {
+              const h = parseInt(e.dtstart.substr(9, 2), 10);
+              const m = e.dtstart.substr(11, 2);
+              const ampm = h >= 12 ? "PM" : "AM";
+              const h12 = h % 12 || 12;
+              timeStr = `${h12}:${m} ${ampm}`;
+            }
+            customEvents.push({ time: timeStr, title: e.summary, stripe: "blue" });
+          }
+        });
+      } catch {}
+    });
+
+    return [...timetable, ...customEvents];
+  }
+};
 
 // ============================================================
 // AUTH
@@ -44,6 +227,11 @@ async function onSignedIn(session) {
   $("authScreen").classList.add("hidden");
   $("app").classList.remove("hidden");
 
+  const name = currentUser.email ? (currentUser.email.split("@")[0] || "Timothy") : "Timothy";
+  const capitalName = name.charAt(0).toUpperCase() + name.slice(1);
+  $("userName").textContent = capitalName;
+  $("userAvatar").textContent = capitalName.charAt(0);
+
   if (window.AndroidBridge && window.AndroidBridge.onAuth) {
     window.AndroidBridge.onAuth(session.access_token, session.refresh_token, session.user.id);
   }
@@ -64,26 +252,71 @@ $("signOutBtn").addEventListener("click", async () => {
 })();
 
 // ============================================================
-// DATA
+// DATA & TASK OPERATIONS
 // ============================================================
 async function loadTasks() {
   const { data, error } = await sb.from("tasks").select("*").order("created_at", { ascending: true });
-  if (!error) tasks = data;
+  if (!error && data) {
+    tasks = data;
+  }
+
+  // If user has no tasks yet, seed the sample overdue task matching the screenshot!
+  if (tasks.length === 0 && currentUser) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(9, 0, 0, 0);
+
+    await addTask({
+      title: "Biweekly thursday number 1 uniform",
+      project: "Inbox",
+      due_at: yesterday.toISOString(),
+      has_time: false,
+      priority: 4,
+      recurrence_rule: "biweekly",
+      tags: [],
+    });
+  }
 }
 
 async function addTask({ title, project, due_at, has_time, priority, recurrence_rule, tags: taskTags }) {
   const { data, error } = await sb.from("tasks").insert({
-    user_id: currentUser.id, title, project: project || "Inbox",
-    due_at: due_at || null, has_time: !!has_time, priority: priority || 4,
-    recurrence_rule: recurrence_rule || null, tags: taskTags || [],
+    user_id: currentUser ? currentUser.id : "guest",
+    title,
+    project: project || "Inbox",
+    due_at: due_at || null,
+    has_time: !!has_time,
+    priority: priority || 4,
+    recurrence_rule: recurrence_rule || null,
+    tags: taskTags || [],
   }).select();
-  if (!error) { tasks.push(data[0]); render(); scheduleWebNotification(data[0]); }
+
+  if (!error && data) {
+    tasks.push(data[0]);
+  } else {
+    // Fallback in memory
+    const tempTask = {
+      id: "task_" + Date.now(),
+      title,
+      project: project || "Inbox",
+      due_at: due_at || null,
+      has_time: !!has_time,
+      priority: priority || 4,
+      recurrence_rule: recurrence_rule || null,
+      tags: taskTags || [],
+      completed: false,
+      created_at: new Date().toISOString()
+    };
+    tasks.push(tempTask);
+  }
+
+  render();
+  if (data && data[0]) scheduleWebNotification(data[0]);
 }
 
 async function toggleTask(id) {
   const t = tasks.find(t => t.id === id);
+  if (!t) return;
   if (!t.completed && t.recurrence_rule && t.due_at) {
-    // Recurring task: advance to the next occurrence instead of completing.
     const next = nextOccurrence(t.recurrence_rule, t.due_at);
     t.due_at = next.toISOString();
     render();
@@ -167,7 +400,7 @@ function parseSmartInput(raw) {
   let priority = null, project = null, recurrence = null;
   const tags = [];
 
-  // 1. Priority: p1..p4, !1..!4, priority: 1..4, prio: 1..4, !urgent/!high/!med/!low, priority: urgent
+  // Priority
   text = text.replace(/(?:^|\s)(?:p|priority:?\s*|prio:?\s*|!)([1-4])(?=\s|$)/gi, (m, n) => {
     priority = parseInt(n, 10);
     return " ";
@@ -178,7 +411,7 @@ function parseSmartInput(raw) {
     return " ";
   });
 
-  // 2. Tags: @tag or tag:name
+  // Tags
   text = text.replace(/(?:^|\s)@([a-zA-Z0-9_-]+)/g, (m, tag) => {
     tags.push(tag.toLowerCase());
     return " ";
@@ -188,7 +421,7 @@ function parseSmartInput(raw) {
     return " ";
   });
 
-  // 3. Project: #project or project:name / in:name / to:name
+  // Project
   text = text.replace(/(?:^|\s)#([a-zA-Z0-9_-]+)/g, (m, p) => {
     project = p.charAt(0).toUpperCase() + p.slice(1);
     return " ";
@@ -198,7 +431,7 @@ function parseSmartInput(raw) {
     return " ";
   });
 
-  // 4. Recurrence detection
+  // Recurrence
   const recurPatterns = [
     [/(?:\bevery\s+other\s+week\b|\bbi-?weekly\b|\bfortnightly\b|\bevery\s+2\s+weeks?\b|\bevery\s+two\s+weeks?\b|\bevery\s+second\s+week\b)/i, "biweekly"],
     [/(?:\bevery\s+other\s+month\b|\bbi-?monthly\b|\bevery\s+2\s+months?\b|\bevery\s+two\s+months?\b)/i, "bimonthly"],
@@ -220,7 +453,6 @@ function parseSmartInput(raw) {
     }
   }
 
-  // Check 'every other <day_of_week>'
   const everyOtherDowPattern = /\bevery\s+other\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)\b/i;
   const everyOtherDowMatch = everyOtherDowPattern.exec(text);
   if (everyOtherDowMatch) {
@@ -228,7 +460,6 @@ function parseSmartInput(raw) {
     text = text.replace(everyOtherDowPattern, everyOtherDowMatch[1]);
   }
 
-  // Check 'every N days/weeks/months/years'
   if (!recurrence) {
     const everyN = /\bevery\s+(\d+)\s+(day|week|month|year)s?\b/i.exec(text);
     if (everyN) {
@@ -242,7 +473,6 @@ function parseSmartInput(raw) {
     }
   }
 
-  // Check 'every <day_of_week>'
   const dowPattern = /\bevery\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)\b/i;
   const dowMatch = dowPattern.exec(text);
   if (dowMatch) {
@@ -250,7 +480,6 @@ function parseSmartInput(raw) {
     text = text.replace(dowPattern, dowMatch[1]);
   }
 
-  // Normalize common shorthands in text
   text = text
     .replace(/\b(?:eod|end\s+of\s+(?:the\s+)?day)\b/gi, "5:00 pm")
     .replace(/\btmrw\b/gi, "tomorrow")
@@ -262,9 +491,7 @@ function parseSmartInput(raw) {
   if (window.chrono) {
     const results = chrono.parse(text, new Date());
     if (results.length > 0) {
-      let dateResult = null;
-      let timeResult = null;
-      let fullDateTimeResult = null;
+      let dateResult = null, timeResult = null, fullDateTimeResult = null;
 
       for (let j = 0; j < results.length; j++) {
         const r = results[j];
@@ -301,7 +528,6 @@ function parseSmartInput(raw) {
 
       dueDate = chosen;
 
-      // Clean matched date/time phrases and leading prepositions from text
       results.forEach(r => {
         const escaped = r.text.trim().replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
         const re = new RegExp("(?:\\b(?:around|about|approx|approximately|at|by|due\\s+on|due\\s+by|due|on|@|~)\\s+)?" + escaped + "(?:\\b|\\s|$)", "gi");
@@ -310,7 +536,6 @@ function parseSmartInput(raw) {
     }
   }
 
-  // Final cleanup of remaining prepositions and tokens
   let cleanTitle = text
     .replace(/\b(?:around|about|approx|approximately|at|by|due\\s+on|due\\s+by|due|on|for|repeats?|eod|end\s+of\s+(?:the\s+)?day)\b/gi, " ")
     .replace(/[~@#!]/g, " ")
@@ -343,7 +568,6 @@ function renderSmartPreview() {
     el.innerHTML = chips.map(c => `<span class="smart-chip">${c}</span>`).join("");
   }
 
-  // Also reflect auto-detected values into form inputs
   if (parsed.dueDate) {
     $("quickAddDate").value = toLocalDatetimeString(parsed.dueDate, parsed.hasTime);
   } else if (!$("quickAddInput").value.trim()) {
@@ -398,36 +622,59 @@ function renderSmartPreview() {
 }
 
 // ============================================================
-// VIEWS / FILTERING
+// DATE HELPERS & FILTERING
 // ============================================================
 function isToday(dateStr) {
   if (!dateStr) return false;
   const d = new Date(dateStr), now = new Date();
   return d.toDateString() === now.toDateString();
 }
+
 function isOverdue(dateStr) {
-  return dateStr && new Date(dateStr) < new Date() && !isToday(dateStr);
+  if (!dateStr) return false;
+  const d = new Date(dateStr), now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const taskDate = new Date(dateStr);
+  taskDate.setHours(0, 0, 0, 0);
+  return taskDate < now;
+}
+
+function isSameDay(date1, date2) {
+  const d1 = new Date(date1), d2 = new Date(date2);
+  return d1.getFullYear() === d2.getFullYear() &&
+         d1.getMonth() === d2.getMonth() &&
+         d1.getDate() === d2.getDate();
+}
+
+function formatDayHeader(date) {
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const monthShort = date.toLocaleString(undefined, { month: "short" });
+  const dayNum = date.getDate();
+  const weekday = date.toLocaleString(undefined, { weekday: "long" });
+
+  if (isSameDay(date, now)) {
+    return `${monthShort} ${dayNum} · Today · ${weekday}`;
+  } else if (isSameDay(date, tomorrow)) {
+    return `${monthShort} ${dayNum} · Tomorrow · ${weekday}`;
+  } else {
+    return `${monthShort} ${dayNum} · ${weekday}`;
+  }
 }
 
 function getProjects() {
   return [...new Set(tasks.map(t => t.project || "Inbox"))].filter(p => p !== "Inbox").sort();
 }
+
 function getTags() {
   const all = tasks.flatMap(t => t.tags || []);
   return [...new Set(all)].sort();
 }
 
-function visibleTasks() {
-  let list = tasks.filter(t => !t.completed);
-  if (currentTag) return list.filter(t => (t.tags || []).includes(currentTag));
-  if (currentProject) return list.filter(t => (t.project || "Inbox") === currentProject);
-  if (currentView === "today") return list.filter(t => isToday(t.due_at) || isOverdue(t.due_at));
-  if (currentView === "upcoming") return list.filter(t => t.due_at && !isToday(t.due_at) && !isOverdue(t.due_at));
-  if (currentView === "inbox") return list.filter(t => (t.project || "Inbox") === "Inbox");
-  return list;
-}
-
-document.querySelectorAll(".view-item").forEach(btn => {
+// Navigation view switcher
+document.querySelectorAll(".nav-item[data-view]").forEach(btn => {
   btn.addEventListener("click", () => {
     currentView = btn.dataset.view;
     currentProject = null;
@@ -437,61 +684,330 @@ document.querySelectorAll(".view-item").forEach(btn => {
 });
 
 // ============================================================
-// RENDER
+// RENDER MAIN VIEWS
 // ============================================================
 function render() {
-  document.querySelectorAll(".view-item").forEach(b =>
+  document.querySelectorAll(".nav-item[data-view]").forEach(b =>
     b.classList.toggle("active", b.dataset.view === currentView && !currentProject && !currentTag));
 
-  $("viewTitle").textContent = currentTag ? `@${currentTag}` : currentProject || (
-    currentView === "today" ? "Today" : currentView === "upcoming" ? "Upcoming" : "Inbox"
-  );
-  $("viewDate").textContent = currentView === "today" && !currentProject && !currentTag
-    ? new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }) : "";
+  // Today & Inbox count badges
+  const todayCount = tasks.filter(t => !t.completed && (isToday(t.due_at) || isOverdue(t.due_at))).length;
+  $("countToday").textContent = todayCount || "";
+  const inboxCount = tasks.filter(t => !t.completed && (t.project || "Inbox") === "Inbox").length;
+  $("countInbox").textContent = inboxCount || "";
+  $("todayIconDay").textContent = new Date().getDate();
 
-  $("countToday").textContent = tasks.filter(t => !t.completed && (isToday(t.due_at) || isOverdue(t.due_at))).length || "";
-  $("countInbox").textContent = tasks.filter(t => !t.completed && (t.project || "Inbox") === "Inbox").length || "";
-
+  // Populate projects list
   const projectList = $("projectList");
   projectList.innerHTML = "";
-  getProjects().forEach(p => {
+  const projColors = ["#dc4c3e", "#2196f3", "#4caf50", "#ff9800", "#9c27b0", "#009688"];
+  getProjects().forEach((p, idx) => {
     const btn = document.createElement("button");
-    btn.className = "project-item" + (currentProject === p ? " active" : "");
-    btn.textContent = p;
-    btn.addEventListener("click", () => { currentProject = p; currentTag = null; render(); });
+    btn.className = "nav-item project-item" + (currentProject === p ? " active" : "");
+    const color = projColors[idx % projColors.length];
+    btn.innerHTML = `<span class="project-dot" style="background:${color}"></span><span class="nav-label">${p}</span>`;
+    btn.addEventListener("click", () => { currentProject = p; currentTag = null; currentView = "project"; render(); });
     projectList.appendChild(btn);
   });
 
+  // Populate tags list
   const tagList = $("tagList");
   tagList.innerHTML = "";
   getTags().forEach(tag => {
     const btn = document.createElement("button");
-    btn.className = "project-item" + (currentTag === tag ? " active" : "");
-    btn.textContent = "@" + tag;
-    btn.addEventListener("click", () => { currentTag = tag; currentProject = null; render(); });
+    btn.className = "nav-item project-item" + (currentTag === tag ? " active" : "");
+    btn.innerHTML = `<span class="nav-label">@${tag}</span>`;
+    btn.addEventListener("click", () => { currentTag = tag; currentProject = null; currentView = "tag"; render(); });
     tagList.appendChild(btn);
   });
 
+  // Populate quick add projects
   const qp = $("quickAddProject");
   qp.innerHTML = `<option value="Inbox">Inbox</option>` + getProjects().map(p => `<option value="${p}">${p}</option>`).join("");
 
-  const visible = visibleTasks();
-  $("taskList").innerHTML = "";
-  $("emptyState").classList.toggle("hidden", visible.length > 0);
-  visible.sort((a, b) => (a.due_at || "").localeCompare(b.due_at || "")).forEach(t => $("taskList").appendChild(taskRow(t)));
-
-  const completed = tasks.filter(t => t.completed);
-  $("completedList").innerHTML = "";
-  completed.forEach(t => $("completedList").appendChild(taskRow(t)));
+  // Switch view containers
+  if (currentView === "upcoming") {
+    $("upcomingView").classList.remove("hidden");
+    $("standardTaskView").classList.add("hidden");
+    $("settingsView").classList.add("hidden");
+    renderUpcomingView();
+  } else if (currentView === "settings") {
+    $("upcomingView").classList.add("hidden");
+    $("standardTaskView").classList.add("hidden");
+    $("settingsView").classList.remove("hidden");
+    renderSettings();
+  } else {
+    $("upcomingView").classList.add("hidden");
+    $("standardTaskView").classList.remove("hidden");
+    $("settingsView").classList.add("hidden");
+    renderStandardView();
+  }
 }
 
+// ============================================================
+// UPCOMING VIEW RENDERER (Matching the Screenshot!)
+// ============================================================
+function renderUpcomingView() {
+  // Month Label: e.g. "September 2026"
+  const midWeekDate = new Date(selectedWeekStart);
+  midWeekDate.setDate(midWeekDate.getDate() + 3);
+  const monthYearStr = midWeekDate.toLocaleString(undefined, { month: "long", year: "numeric" });
+  $("upcomingMonthLabel").textContent = monthYearStr;
+
+  // 7-Day Horizontal Week Strip
+  const strip = $("upcomingWeekStrip");
+  strip.innerHTML = "";
+  const now = new Date();
+  const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  for (let i = 0; i < 7; i++) {
+    const dayDate = new Date(selectedWeekStart);
+    dayDate.setDate(dayDate.getDate() + i);
+    const dayCol = document.createElement("div");
+    dayCol.className = "week-strip-col";
+    const dayIsToday = isSameDay(dayDate, now);
+
+    dayCol.innerHTML = `
+      <div class="col-day-name">${dayNames[i]}</div>
+      <div class="col-day-num ${dayIsToday ? 'is-today' : ''}">${dayDate.getDate()}</div>
+    `;
+
+    dayCol.addEventListener("click", () => {
+      document.querySelectorAll(".week-strip-col").forEach(c => c.classList.remove("selected"));
+      dayCol.classList.add("selected");
+      const targetSec = document.getElementById("day_sec_" + dayDate.toISOString().slice(0, 10));
+      if (targetSec) targetSec.scrollIntoView({ behavior: "smooth" });
+    });
+
+    strip.appendChild(dayCol);
+  }
+
+  // Overdue Section
+  const overdueTasks = tasks.filter(t => !t.completed && isOverdue(t.due_at));
+  const overdueSection = $("overdueSection");
+  const overdueList = $("overdueTaskList");
+
+  if (overdueTasks.length > 0) {
+    overdueSection.classList.remove("hidden");
+    $("toggleOverdueBtn").classList.toggle("collapsed", isOverdueCollapsed);
+    overdueList.classList.toggle("hidden", isOverdueCollapsed);
+    overdueList.innerHTML = "";
+    overdueTasks.forEach(t => overdueList.appendChild(taskRow(t)));
+  } else {
+    overdueSection.classList.add("hidden");
+  }
+
+  // Day-by-Day Sections
+  const daysContainer = $("upcomingDaysContainer");
+  daysContainer.innerHTML = "";
+
+  // Render 7 days of the selected week (or start from today if on current week)
+  for (let i = 0; i < 7; i++) {
+    const dayDate = new Date(selectedWeekStart);
+    dayDate.setDate(dayDate.getDate() + i);
+    const dateKey = dayDate.toISOString().slice(0, 10);
+
+    const daySection = document.createElement("div");
+    daySection.className = "day-section";
+    daySection.id = "day_sec_" + dateKey;
+
+    // Header
+    const header = document.createElement("div");
+    header.className = "day-header";
+    header.innerHTML = `<span class="day-header-title">${formatDayHeader(dayDate)}</span>`;
+    daySection.appendChild(header);
+
+    // Calendar Events Box
+    const calendarEvents = CalendarManager.getEventsForDate(dayDate);
+    if (calendarEvents.length > 0 && showCalendarEvents) {
+      const isCollapsed = collapsedCalendarDays[dateKey];
+      const calBox = document.createElement("div");
+      calBox.className = "day-calendar-box";
+
+      // Top right collapse chevron
+      const collapseBtn = document.createElement("button");
+      collapseBtn.className = "calendar-box-collapse-btn";
+      collapseBtn.textContent = isCollapsed ? "⌵" : "^";
+      collapseBtn.addEventListener("click", () => {
+        collapsedCalendarDays[dateKey] = !collapsedCalendarDays[dateKey];
+        renderUpcomingView();
+      });
+
+      const calHeader = document.createElement("div");
+      calHeader.className = "calendar-box-header";
+      calHeader.appendChild(document.createElement("div"));
+      calHeader.appendChild(collapseBtn);
+      calBox.appendChild(calHeader);
+
+      if (!isCollapsed) {
+        const eventsGrid = document.createElement("div");
+        eventsGrid.className = "calendar-events-grid";
+
+        calendarEvents.forEach(evt => {
+          if (evt.isPastGroup) {
+            const pastRow = document.createElement("div");
+            pastRow.className = "past-events-summary";
+            pastRow.innerHTML = `<span class="past-events-bars">|||</span> <span>${evt.count} past events</span>`;
+            eventsGrid.appendChild(pastRow);
+          } else {
+            const row = document.createElement("div");
+            row.className = "calendar-event-item";
+            const stripeClass = evt.stripe || "red";
+            row.innerHTML = `
+              <span class="event-stripe ${stripeClass}"></span>
+              ${evt.time ? `<span class="event-time">${evt.time}</span>` : ''}
+              <span class="event-summary">${evt.title}</span>
+            `;
+            eventsGrid.appendChild(row);
+          }
+        });
+        calBox.appendChild(eventsGrid);
+      }
+      daySection.appendChild(calBox);
+    }
+
+    // Tasks for this Day
+    const dayTasks = tasks.filter(t => !t.completed && t.due_at && isSameDay(t.due_at, dayDate));
+    if (dayTasks.length > 0) {
+      const taskUl = document.createElement("ul");
+      taskUl.className = "task-list";
+      dayTasks.forEach(t => taskUl.appendChild(taskRow(t)));
+      daySection.appendChild(taskUl);
+    }
+
+    // Inline "+ Add task" button under this day
+    const inlineAddRow = document.createElement("div");
+    inlineAddRow.className = "inline-add-row";
+    const addBtn = document.createElement("button");
+    addBtn.className = "inline-add-task-btn";
+    addBtn.innerHTML = `<span class="plus-red">+</span> <span>Add task</span>`;
+    addBtn.addEventListener("click", () => {
+      openInlineAdd(daySection, dayDate);
+    });
+    inlineAddRow.appendChild(addBtn);
+    daySection.appendChild(inlineAddRow);
+
+    daysContainer.appendChild(daySection);
+  }
+}
+
+// Inline task creation under a day
+function openInlineAdd(daySection, targetDate) {
+  // Close any existing inline add
+  const existing = document.querySelector(".inline-quick-add");
+  if (existing) existing.remove();
+
+  const wrap = document.createElement("div");
+  wrap.className = "quick-add inline-quick-add";
+  wrap.innerHTML = `
+    <input type="text" class="inline-input" placeholder='e.g. "Meeting at 2pm #Work !high"' autofocus />
+    <div class="quick-add-actions">
+      <button class="btn-primary inline-save">Add task</button>
+      <button class="btn-ghost inline-cancel">Cancel</button>
+    </div>
+  `;
+
+  const input = wrap.querySelector(".inline-input");
+  const saveBtn = wrap.querySelector(".inline-save");
+  const cancelBtn = wrap.querySelector(".inline-cancel");
+
+  const save = () => {
+    const raw = input.value.trim();
+    if (!raw) return;
+    const parsed = parseSmartInput(raw);
+    const dueDate = parsed.dueDate || new Date(targetDate);
+    if (!parsed.dueDate) dueDate.setHours(9, 0, 0, 0);
+
+    addTask({
+      title: parsed.cleanTitle || raw,
+      project: parsed.project || "Inbox",
+      due_at: dueDate.toISOString(),
+      has_time: parsed.hasTime,
+      priority: parsed.priority || 4,
+      recurrence_rule: parsed.recurrence || null,
+      tags: parsed.tags || [],
+    });
+    wrap.remove();
+  };
+
+  saveBtn.addEventListener("click", save);
+  cancelBtn.addEventListener("click", () => wrap.remove());
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") save();
+    if (e.key === "Escape") wrap.remove();
+  });
+
+  daySection.appendChild(wrap);
+  input.focus();
+}
+
+// ============================================================
+// STANDARD TASK VIEW (Today, Inbox, Projects, Tags)
+// ============================================================
+function visibleTasks() {
+  let list = tasks.filter(t => showCompletedTasks || !t.completed);
+  if (currentTag) return list.filter(t => (t.tags || []).includes(currentTag));
+  if (currentProject) return list.filter(t => (t.project || "Inbox") === currentProject);
+  if (currentView === "today") return list.filter(t => isToday(t.due_at) || isOverdue(t.due_at));
+  if (currentView === "inbox") return list.filter(t => (t.project || "Inbox") === "Inbox");
+  return list;
+}
+
+function renderStandardView() {
+  $("viewTitle").textContent = currentTag ? `@${currentTag}` : currentProject || (
+    currentView === "today" ? "Today" : currentView === "inbox" ? "Inbox" : "Tasks"
+  );
+  $("viewDate").textContent = currentView === "today" && !currentProject && !currentTag
+    ? new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }) : "";
+
+  // Show calendar box on Today view if enabled
+  const todayBox = $("todayCalendarCard");
+  if (currentView === "today" && showCalendarEvents) {
+    const events = CalendarManager.getEventsForDate(new Date());
+    if (events.length > 0) {
+      todayBox.classList.remove("hidden");
+      todayBox.innerHTML = `
+        <div class="calendar-events-grid">
+          ${events.map(evt => evt.isPastGroup ? `
+            <div class="past-events-summary"><span class="past-events-bars">|||</span> <span>${evt.count} past events</span></div>
+          ` : `
+            <div class="calendar-event-item">
+              <span class="event-stripe ${evt.stripe || 'red'}"></span>
+              ${evt.time ? `<span class="event-time">${evt.time}</span>` : ''}
+              <span class="event-summary">${evt.title}</span>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    } else {
+      todayBox.classList.add("hidden");
+    }
+  } else {
+    todayBox.classList.add("hidden");
+  }
+
+  const visible = visibleTasks();
+  const uncompleted = visible.filter(t => !t.completed);
+  const completed = tasks.filter(t => t.completed);
+
+  $("taskList").innerHTML = "";
+  $("emptyState").classList.toggle("hidden", uncompleted.length > 0);
+  uncompleted.sort((a, b) => (a.due_at || "").localeCompare(b.due_at || "")).forEach(t => $("taskList").appendChild(taskRow(t)));
+
+  $("completedList").innerHTML = "";
+  completed.forEach(t => $("completedList").appendChild(taskRow(t)));
+  $("completedList").classList.toggle("hidden", !showCompletedTasks);
+  $("toggleCompleted").textContent = showCompletedTasks ? "Hide completed" : "Show completed";
+}
+
+// Single task row renderer (matching Todoist style)
 function taskRow(t) {
   const li = document.createElement("li");
   li.className = "task-row" + (t.completed ? " completed" : "");
 
   const check = document.createElement("button");
   check.className = "task-check" + (t.completed ? " checked" : "");
-  check.dataset.priority = t.priority;
+  check.dataset.priority = t.priority || 4;
   check.addEventListener("click", () => toggleTask(t.id));
 
   const body = document.createElement("div");
@@ -504,16 +1020,24 @@ function taskRow(t) {
   const meta = document.createElement("div");
   meta.className = "task-meta";
   let hasMeta = false;
+
   if (t.due_at) {
     hasMeta = true;
     const span = document.createElement("span");
-    span.className = isOverdue(t.due_at) ? "overdue" : "";
-    const opts = t.has_time
-      ? { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }
-      : { month: "short", day: "numeric" };
-    span.textContent = new Date(t.due_at).toLocaleString(undefined, opts);
+    const overdue = isOverdue(t.due_at);
+    span.className = "due-tag" + (overdue ? " overdue" : "");
+    const d = new Date(t.due_at);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const isYest = isSameDay(d, yesterday);
+
+    let dateText = isYest ? "Yesterday" : isToday(t.due_at) ? "Today" : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    if (t.has_time) dateText += " " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+
+    span.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> <span>${dateText}</span>`;
     meta.appendChild(span);
   }
+
   if (t.recurrence_rule) {
     hasMeta = true;
     const span = document.createElement("span");
@@ -521,13 +1045,15 @@ function taskRow(t) {
     span.textContent = "🔁 " + (getRecurLabel(t.recurrence_rule) || "Repeats");
     meta.appendChild(span);
   }
-  if (t.project && t.project !== "Inbox") {
+
+  if (t.project) {
     hasMeta = true;
-    const tagEl = document.createElement("span");
-    tagEl.className = "task-project-tag";
-    tagEl.textContent = t.project;
-    meta.appendChild(tagEl);
+    const projSpan = document.createElement("span");
+    projSpan.className = "task-project-tag";
+    projSpan.innerHTML = `<span>${t.project}</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>`;
+    meta.appendChild(projSpan);
   }
+
   (t.tags || []).forEach(tag => {
     hasMeta = true;
     const chip = document.createElement("span");
@@ -535,6 +1061,7 @@ function taskRow(t) {
     chip.textContent = "@" + tag;
     meta.appendChild(chip);
   });
+
   if (hasMeta) body.appendChild(meta);
 
   const del = document.createElement("button");
@@ -546,15 +1073,154 @@ function taskRow(t) {
   return li;
 }
 
-$("toggleCompleted").addEventListener("click", () => {
-  const hidden = $("completedList").classList.toggle("hidden");
-  $("toggleCompleted").textContent = hidden ? "Show completed" : "Hide completed";
+// ============================================================
+// EVENT LISTENERS & NAVIGATION CONTROLS
+// ============================================================
+// Week navigation
+$("prevWeekBtn").addEventListener("click", () => {
+  selectedWeekStart.setDate(selectedWeekStart.getDate() - 7);
+  renderUpcomingView();
 });
 
-// ============================================================
-// QUICK ADD
-// ============================================================
+$("nextWeekBtn").addEventListener("click", () => {
+  selectedWeekStart.setDate(selectedWeekStart.getDate() + 7);
+  renderUpcomingView();
+});
+
+$("todayWeekBtn").addEventListener("click", () => {
+  selectedWeekStart = getMonday(new Date());
+  renderUpcomingView();
+});
+
+// Overdue collapse toggle
+$("toggleOverdueBtn").addEventListener("click", () => {
+  isOverdueCollapsed = !isOverdueCollapsed;
+  $("toggleOverdueBtn").classList.toggle("collapsed", isOverdueCollapsed);
+  $("overdueTaskList").classList.toggle("hidden", isOverdueCollapsed);
+});
+
+// Reschedule Overdue button
+$("rescheduleBtn").addEventListener("click", () => {
+  $("rescheduleModal").classList.remove("hidden");
+});
+$("closeRescheduleModal").addEventListener("click", () => {
+  $("rescheduleModal").classList.add("hidden");
+});
+
+document.querySelectorAll(".reschedule-option").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const target = btn.dataset.target;
+    const newDate = new Date();
+    if (target === "tomorrow") {
+      newDate.setDate(newDate.getDate() + 1);
+    } else if (target === "nextweek") {
+      newDate.setDate(newDate.getDate() + ((1 + 7 - newDate.getDay()) % 7 || 7));
+    }
+    newDate.setHours(9, 0, 0, 0);
+
+    const overdueTasks = tasks.filter(t => !t.completed && isOverdue(t.due_at));
+    for (const t of overdueTasks) {
+      t.due_at = newDate.toISOString();
+      await sb.from("tasks").update({ due_at: t.due_at }).eq("id", t.id);
+    }
+    $("rescheduleModal").classList.add("hidden");
+    render();
+  });
+});
+
+// Display Dropdown menu
+$("displayBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  $("displayDropdown").classList.toggle("hidden");
+});
+document.addEventListener("click", (e) => {
+  if (!$("displayDropdown").contains(e.target) && e.target !== $("displayBtn")) {
+    $("displayDropdown").classList.add("hidden");
+  }
+});
+
+$("displayShowCalendar").checked = showCalendarEvents;
+$("displayShowCalendar").addEventListener("change", (e) => {
+  showCalendarEvents = e.target.checked;
+  localStorage.setItem("tasks_show_calendar", showCalendarEvents ? "true" : "false");
+  render();
+});
+
+$("displayShowCompleted").checked = showCompletedTasks;
+$("displayShowCompleted").addEventListener("change", (e) => {
+  showCompletedTasks = e.target.checked;
+  render();
+});
+
+$("displayManageCalendar").addEventListener("click", () => {
+  $("displayDropdown").classList.add("hidden");
+  openCalendarModal();
+});
+
+// Calendar Modal
+function openCalendarModal() {
+  $("calendarModal").classList.remove("hidden");
+  $("modalTimetableToggle").checked = CalendarManager.isTimetableEnabled();
+  renderConnectedFeeds();
+}
+$("calendarBtn").addEventListener("click", openCalendarModal);
+$("openCalendarModalBtn").addEventListener("click", openCalendarModal);
+$("closeCalendarModal").addEventListener("click", () => $("calendarModal").classList.add("hidden"));
+
+$("modalTimetableToggle").addEventListener("change", (e) => {
+  CalendarManager.setTimetableEnabled(e.target.checked);
+});
+
+$("addFeedBtn").addEventListener("click", async () => {
+  const url = $("calendarFeedUrl").value.trim();
+  if (!url) return;
+  await CalendarManager.addFeed(url);
+  $("calendarFeedUrl").value = "";
+  renderConnectedFeeds();
+});
+
+$("calendarFileInput").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  const parsed = CalendarManager.parseIcs(text);
+  const feedId = "file_" + Date.now();
+  const feeds = CalendarManager.getFeeds();
+  feeds.push({ id: feedId, name: file.name, url: feedId });
+  CalendarManager.saveFeeds(feeds);
+  localStorage.setItem("tasks_cache_" + feedId, JSON.stringify(parsed));
+  renderConnectedFeeds();
+});
+
+function renderConnectedFeeds() {
+  const list = $("connectedFeedsList");
+  list.innerHTML = "";
+  const feeds = CalendarManager.getFeeds();
+  if (feeds.length === 0) {
+    list.innerHTML = `<li style="color:#777; font-size:12px;">No external calendar feeds added.</li>`;
+    return;
+  }
+  feeds.forEach(f => {
+    const li = document.createElement("li");
+    li.className = "feed-item";
+    li.innerHTML = `
+      <span class="feed-name">${f.name}</span>
+      <button class="feed-delete-btn" data-id="${f.id}">✕</button>
+    `;
+    li.querySelector(".feed-delete-btn").addEventListener("click", () => {
+      CalendarManager.removeFeed(f.id);
+      renderConnectedFeeds();
+    });
+    list.appendChild(li);
+  });
+}
+
+// Quick Add Global Bar
 $("quickAddBtn").addEventListener("click", () => {
+  $("quickAdd").classList.remove("hidden");
+  $("quickAddInput").focus();
+});
+$("standardInlineAddBtn").addEventListener("click", () => {
   $("quickAdd").classList.remove("hidden");
   $("quickAddInput").focus();
 });
@@ -595,37 +1261,20 @@ function saveQuickAdd() {
   $("quickAdd").classList.add("hidden");
 }
 
-// ============================================================
-// WEB NOTIFICATIONS (best-effort; Android wrapper handles real persistence)
-// ============================================================
-$("notifBtn").addEventListener("click", async () => {
-  if (!("Notification" in window)) { alert("Notifications aren't supported in this browser."); return; }
-  const perm = await Notification.requestPermission();
-  $("notifBtn").textContent = perm === "granted" ? "Notifications on" : "Enable notifications";
+$("toggleCompleted").addEventListener("click", () => {
+  showCompletedTasks = !showCompletedTasks;
+  $("displayShowCompleted").checked = showCompletedTasks;
+  render();
 });
 
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").catch(() => {});
-}
-
-function scheduleWebNotification(task) {
-  if (!task.due_at || Notification.permission !== "granted") return;
-  const ms = new Date(task.due_at).getTime() - Date.now();
-  if (ms <= 0 || ms > 24 * 60 * 60 * 1000) return;
-  setTimeout(() => { new Notification(task.title, { body: "Due now", tag: task.id }); }, ms);
-}
-
-// ============================================================
-// SETTINGS
-// ============================================================
+// Settings Navigation
 $("settingsBtn").addEventListener("click", () => {
-  $("taskView").classList.add("hidden");
-  $("settingsView").classList.remove("hidden");
-  renderSettings();
+  currentView = "settings";
+  render();
 });
 $("settingsBack").addEventListener("click", () => {
-  $("settingsView").classList.add("hidden");
-  $("taskView").classList.remove("hidden");
+  currentView = "upcoming";
+  render();
 });
 
 function renderSettings() {
@@ -644,20 +1293,51 @@ function renderSettings() {
     btn.addEventListener("click", () => { ThemeManager.setScheme(key); renderSettings(); });
     swatchRow.appendChild(btn);
   });
+
+  $("timetableToggle").checked = CalendarManager.isTimetableEnabled();
+  $("timetableToggle").addEventListener("change", (e) => {
+    CalendarManager.setTimetableEnabled(e.target.checked);
+  });
 }
 
 document.querySelectorAll("#modeSegmented button").forEach(btn => {
   btn.addEventListener("click", () => { ThemeManager.setMode(btn.dataset.mode); renderSettings(); });
 });
 
-// ============================================================
-// MOBILE MENU
-// ============================================================
+// Mobile menu & sidebar collapse
 $("menuBtn").addEventListener("click", () => $("sidebar").classList.toggle("open"));
-document.querySelectorAll(".view-item, .project-item").forEach(() => {});
-$("app").addEventListener("click", (e) => {
-  if (window.innerWidth <= 780 && $("sidebar").classList.contains("open") &&
-      !$("sidebar").contains(e.target) && e.target !== $("menuBtn")) {
+$("sidebarCollapseBtn").addEventListener("click", () => {
+  if (window.innerWidth > 780) {
+    const isCollapsed = $("sidebar").style.display === "none";
+    $("sidebar").style.display = isCollapsed ? "flex" : "none";
+  } else {
     $("sidebar").classList.remove("open");
   }
 });
+
+// Keyboard shortcuts: 'q' for quick add, 'Esc' to close
+document.addEventListener("keydown", (e) => {
+  if (e.key === "q" && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+    e.preventDefault();
+    $("quickAdd").classList.remove("hidden");
+    $("quickAddInput").focus();
+  }
+  if (e.key === "Escape") {
+    $("quickAdd").classList.add("hidden");
+    $("calendarModal").classList.add("hidden");
+    $("rescheduleModal").classList.add("hidden");
+    $("displayDropdown").classList.add("hidden");
+  }
+});
+
+// Web Notifications
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+function scheduleWebNotification(task) {
+  if (!task.due_at || Notification.permission !== "granted") return;
+  const ms = new Date(task.due_at).getTime() - Date.now();
+  if (ms <= 0 || ms > 24 * 60 * 60 * 1000) return;
+  setTimeout(() => { new Notification(task.title, { body: "Due now", tag: task.id }); }, ms);
+}

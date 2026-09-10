@@ -4,28 +4,28 @@
 
 const NEUTRALS = {
   light: {
-    surface: "#FFFBFF", onSurface: "#1C1B1F",
-    surfaceVariant: "#E6E0E9", onSurfaceVariant: "#49454F",
-    outline: "#79747E", background: "#FFFBFF", onBackground: "#1C1B1F",
-    surfaceContainer: "#F2ECF4", surfaceContainerHigh: "#ECE6EF",
+    surface: "#ffffff", onSurface: "#202020",
+    surfaceVariant: "#f5f5f5", onSurfaceVariant: "#666666",
+    outline: "#e0e0e0", background: "#ffffff", onBackground: "#202020",
+    surfaceContainer: "#fafafa", surfaceContainerHigh: "#f0f0f0",
     error: "#BA1A1A", onError: "#FFFFFF",
   },
   dark: {
-    surface: "#141218", onSurface: "#E6E1E5",
-    surfaceVariant: "#49454F", onSurfaceVariant: "#CAC4D0",
-    outline: "#938F99", background: "#141218", onBackground: "#E6E1E5",
-    surfaceContainer: "#211F26", surfaceContainerHigh: "#2B2930",
-    error: "#FFB4AB", onError: "#690005",
+    surface: "#1e1e1e", onSurface: "#ffffff",
+    surfaceVariant: "#333333", onSurfaceVariant: "#a6a6a6",
+    outline: "#363636", background: "#1e1e1e", onBackground: "#ffffff",
+    surfaceContainer: "#262626", surfaceContainerHigh: "#2e2e2e",
+    error: "#ff8c82", onError: "#690005",
   },
 };
 
 const SCHEMES = {
+  red: { label: "Todoist Red", swatch: "#dc4c3e",
+    light: { primary: "#dc4c3e", onPrimary: "#ffffff", primaryContainer: "#ffdad4", onPrimaryContainer: "#410e0b", secondaryContainer: "#fbebe9", onSecondaryContainer: "#dc4c3e" },
+    dark:  { primary: "#dc4c3e", onPrimary: "#ffffff", primaryContainer: "#382323", onPrimaryContainer: "#ffdad4", secondaryContainer: "#352424", onSecondaryContainer: "#dc4c3e" } },
   purple: { label: "Purple", swatch: "#6750A4",
     light: { primary: "#6750A4", onPrimary: "#FFFFFF", primaryContainer: "#EADDFF", onPrimaryContainer: "#21005D", secondaryContainer: "#E8DEF8", onSecondaryContainer: "#1D192B" },
     dark:  { primary: "#D0BCFF", onPrimary: "#381E72", primaryContainer: "#4F378B", onPrimaryContainer: "#EADDFF", secondaryContainer: "#4A4458", onSecondaryContainer: "#E8DEF8" } },
-  red: { label: "Red", swatch: "#BB3E32",
-    light: { primary: "#BB3E32", onPrimary: "#FFFFFF", primaryContainer: "#FFDAD4", onPrimaryContainer: "#410E0B", secondaryContainer: "#FFDAD4", onSecondaryContainer: "#410E0B" },
-    dark:  { primary: "#FFB4A8", onPrimary: "#690600", primaryContainer: "#8C1D14", onPrimaryContainer: "#FFDAD4", secondaryContainer: "#5D3F3A", onSecondaryContainer: "#FFDAD4" } },
   blue: { label: "Blue", swatch: "#415F91",
     light: { primary: "#415F91", onPrimary: "#FFFFFF", primaryContainer: "#D6E3FF", onPrimaryContainer: "#001B3E", secondaryContainer: "#DBE3F9", onSecondaryContainer: "#131C2B" },
     dark:  { primary: "#AAC7FF", onPrimary: "#0A305F", primaryContainer: "#284777", onPrimaryContainer: "#D6E3FF", secondaryContainer: "#3B4858", onSecondaryContainer: "#D7E3F8" } },
@@ -48,9 +48,9 @@ const ThemeManager = {
 
   getPrefs() {
     try {
-      return JSON.parse(localStorage.getItem(this.STORAGE_KEY)) || { mode: "system", scheme: "purple" };
+      return JSON.parse(localStorage.getItem(this.STORAGE_KEY)) || { mode: "dark", scheme: "red" };
     } catch (e) {
-      return { mode: "system", scheme: "purple" };
+      return { mode: "dark", scheme: "red" };
     }
   },
 

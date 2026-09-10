@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>Tasks</title>
 <link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#6750A4" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%236750A4%22/><path d=%22M25 52 L42 68 L76 32%22 stroke=%22white%22 stroke-width=%2210%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>" />
+<meta name="theme-color" content="#1e1e1e" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%23dc4c3e%22/><path d=%22M25 52 L42 68 L76 32%22 stroke=%22white%22 stroke-width=%2210%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -32,35 +32,180 @@
   <button id="menuBtn" class="icon-btn menu-btn" aria-label="Menu">☰</button>
 
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-top">
-      <button id="quickAddBtn" class="add-task-btn">+ Add task</button>
+    <!-- User Profile Row -->
+    <div class="sidebar-profile">
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar">T</div>
+        <button class="user-dropdown-btn" id="userDropdownBtn">
+          <span id="userName">Timothy</span>
+          <svg class="chevron-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+      </div>
+      <div class="profile-actions">
+        <button id="notifIconBtn" class="icon-btn-small" title="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <button id="sidebarCollapseBtn" class="icon-btn-small" title="Collapse sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        </button>
+      </div>
     </div>
+
+    <!-- Quick Add Button -->
+    <div class="sidebar-add-wrap">
+      <button id="quickAddBtn" class="todoist-add-btn">
+        <div class="add-circle-icon">+</div>
+        <span class="add-btn-label">Add task</span>
+        <svg class="add-quick-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v18M8 7v10M16 7v10M4 11v2M20 11v2"/></svg>
+      </button>
+    </div>
+
+    <!-- Search Button / Bar -->
+    <div class="sidebar-search">
+      <button id="searchBtn" class="nav-item search-item">
+        <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <span>Search</span>
+      </button>
+    </div>
+
+    <!-- Main Navigation Views -->
     <nav class="views">
-      <button class="view-item active" data-view="today">Today <span id="countToday" class="count"></span></button>
-      <button class="view-item" data-view="upcoming">Upcoming</button>
-      <button class="view-item" data-view="inbox">Inbox <span id="countInbox" class="count"></span></button>
+      <button class="nav-item" data-view="inbox">
+        <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+        <span class="nav-label">Inbox</span>
+        <span id="countInbox" class="count-badge"></span>
+      </button>
+      <button class="nav-item" data-view="today">
+        <div class="today-cal-icon">
+          <span class="cal-day-num" id="todayIconDay">10</span>
+        </div>
+        <span class="nav-label">Today</span>
+        <span id="countToday" class="count-badge red-badge"></span>
+      </button>
+      <button class="nav-item active" data-view="upcoming">
+        <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="9" y1="10" x2="9" y2="22"></line><line x1="15" y1="10" x2="15" y2="22"></line></svg>
+        <span class="nav-label">Upcoming</span>
+      </button>
+      <button class="nav-item" data-view="filters">
+        <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span class="nav-label">Filters & Labels</span>
+      </button>
+      <button class="nav-item" data-view="reporting">
+        <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        <span class="nav-label">Reporting</span>
+      </button>
     </nav>
-    <div class="projects-header">Projects</div>
+
+    <!-- Favorites Section -->
+    <div class="nav-section-title">
+      <span>Favorites</span>
+    </div>
+    <nav class="projects" id="favoritesList">
+      <button class="nav-item project-item" data-favorite="hobby">
+        <span class="favorite-icon">⬡</span>
+        <span class="nav-label">Hobby</span>
+        <span class="count-badge">1</span>
+      </button>
+    </nav>
+
+    <!-- Projects Section -->
+    <div class="nav-section-title projects-header">
+      <span>My Projects</span>
+      <button class="section-add-btn" id="addProjectBtn" title="Add project">+</button>
+    </div>
     <nav id="projectList" class="projects"></nav>
-    <div class="projects-header">Tags</div>
+
+    <!-- Tags Section -->
+    <div class="nav-section-title">
+      <span>Tags</span>
+    </div>
     <nav id="tagList" class="projects"></nav>
+
+    <!-- Sidebar Bottom -->
     <div class="sidebar-bottom">
-      <button id="notifBtn" class="ghost-btn">Enable notifications</button>
-      <button id="settingsBtn" class="ghost-btn">Settings</button>
-      <button id="signOutBtn" class="ghost-btn">Sign out</button>
+      <button id="calendarBtn" class="sidebar-link-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <span>Calendar feeds</span>
+      </button>
+      <button id="helpBtn" class="sidebar-link-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        <span>Help & resources</span>
+      </button>
+      <button id="settingsBtn" class="sidebar-link-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>Settings</span>
+      </button>
+      <button id="signOutBtn" class="sidebar-link-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>Sign out</span>
+      </button>
     </div>
   </aside>
 
-  <main class="main">
-    <!-- TASK VIEW -->
-    <div id="taskView">
+  <main class="main" id="mainContent">
+    <!-- Top Action Bar -->
+    <div class="top-action-bar">
+      <div class="top-left"></div>
+      <div class="top-right">
+        <button id="displayBtn" class="display-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          <span>Display</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- UPCOMING VIEW -->
+    <div id="upcomingView" class="view-content">
+      <h1 class="view-main-title">Upcoming</h1>
+
+      <!-- Month & Week Navigation Bar -->
+      <div class="upcoming-nav-bar">
+        <div class="month-label-wrap">
+          <button id="monthTitleBtn" class="month-title-btn">
+            <span id="upcomingMonthLabel">September 2026</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+        </div>
+        <div class="week-nav-group">
+          <button id="prevWeekBtn" class="nav-arrow-btn" title="Previous week">‹</button>
+          <button id="todayWeekBtn" class="today-nav-btn">Today</button>
+          <button id="nextWeekBtn" class="nav-arrow-btn" title="Next week">›</button>
+        </div>
+      </div>
+
+      <!-- Horizontal 7-Day Week Strip -->
+      <div id="upcomingWeekStrip" class="week-strip"></div>
+
+      <!-- Overdue Section -->
+      <div id="overdueSection" class="overdue-section hidden">
+        <div class="overdue-header">
+          <button id="toggleOverdueBtn" class="overdue-toggle-btn">
+            <span class="chevron" id="overdueChevron">⌵</span>
+            <span>Overdue</span>
+          </button>
+          <button id="rescheduleBtn" class="reschedule-btn">Reschedule</button>
+        </div>
+        <ul id="overdueTaskList" class="task-list"></ul>
+      </div>
+
+      <!-- Day-by-Day Sections Container -->
+      <div id="upcomingDaysContainer" class="upcoming-days-container"></div>
+    </div>
+
+    <!-- STANDARD TASK VIEW (Today, Inbox, Projects, Tags) -->
+    <div id="standardTaskView" class="view-content hidden">
       <header class="main-header">
-        <h2 id="viewTitle">Today</h2>
+        <h1 id="viewTitle" class="view-main-title">Today</h1>
         <span id="viewDate" class="view-date"></span>
       </header>
 
+      <!-- Calendar Events on Today View -->
+      <div id="todayCalendarCard" class="day-calendar-box hidden"></div>
+
+      <!-- Quick Add Composer -->
       <div id="quickAdd" class="quick-add hidden">
-        <input id="quickAddInput" type="text" placeholder='Try "Pay rent tomorrow 5pm every month @bills #Home"' />
+        <input id="quickAddInput" type="text" placeholder='e.g. "Pay rent every thursday biweekly around 5pm @bills #Home"' />
         <div id="smartPreview" class="smart-preview hidden"></div>
         <div class="quick-add-row">
           <select id="quickAddProject"></select>
@@ -83,10 +228,17 @@
           </select>
           <input id="quickAddTags" type="text" placeholder="tags, comma separated" />
         </div>
-        <div class="quick-add-row">
-          <button id="quickAddSave">Add task</button>
-          <button id="quickAddCancel" class="ghost-btn">Cancel</button>
+        <div class="quick-add-actions">
+          <button id="quickAddSave" class="btn-primary">Add task</button>
+          <button id="quickAddCancel" class="btn-ghost">Cancel</button>
         </div>
+      </div>
+
+      <div class="inline-add-row" id="standardAddRow">
+        <button id="standardInlineAddBtn" class="inline-add-task-btn">
+          <span class="plus-red">+</span>
+          <span>Add task</span>
+        </button>
       </div>
 
       <ul id="taskList" class="task-list"></ul>
@@ -99,9 +251,9 @@
     </div>
 
     <!-- SETTINGS VIEW -->
-    <div id="settingsView" class="hidden">
+    <div id="settingsView" class="view-content hidden">
       <header class="main-header">
-        <h2>Settings</h2>
+        <h1 class="view-main-title">Settings</h1>
       </header>
 
       <section class="settings-section">
@@ -118,15 +270,114 @@
 
       <section class="settings-section">
         <h3>Color scheme</h3>
-        <p class="settings-hint">Material You–style seed colors.</p>
+        <p class="settings-hint">Todoist Red, Material You, and custom themes.</p>
         <div id="schemeSwatches" class="swatch-row"></div>
       </section>
 
       <section class="settings-section">
-        <button id="settingsBack" class="ghost-btn">← Back to tasks</button>
+        <h3>Calendar & Timetable</h3>
+        <p class="settings-hint">Configure school timetable and external calendar feeds.</p>
+        <div class="settings-row">
+          <span>School Timetable</span>
+          <label class="switch">
+            <input type="checkbox" id="timetableToggle" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="margin-top: 14px;">
+          <button id="openCalendarModalBtn" class="btn-primary">Manage Calendar Feeds (.ics)</button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <button id="settingsBack" class="btn-ghost">← Back to tasks</button>
       </section>
     </div>
   </main>
+</div>
+
+<!-- DISPLAY DROPDOWN POPUP -->
+<div id="displayDropdown" class="popup-menu hidden">
+  <div class="popup-title">View Options</div>
+  <label class="popup-check-item">
+    <input type="checkbox" id="displayShowCalendar" checked />
+    <span>Show calendar events</span>
+  </label>
+  <label class="popup-check-item">
+    <input type="checkbox" id="displayShowCompleted" />
+    <span>Show completed tasks</span>
+  </label>
+  <hr class="popup-divider" />
+  <button id="displayManageCalendar" class="popup-link-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+    <span>Calendar feeds integration</span>
+  </button>
+</div>
+
+<!-- CALENDAR FEEDS MODAL -->
+<div id="calendarModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>Calendar Integration</h2>
+      <button id="closeCalendarModal" class="close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-hint">Sync your school schedule, Google Calendar, Outlook, or Canvas feeds to see classes and events side by side with your tasks.</p>
+
+      <div class="form-group">
+        <label>School Timetable (Demo schedule)</label>
+        <div class="toggle-row">
+          <span>Display timetable classes in Upcoming & Today</span>
+          <input type="checkbox" id="modalTimetableToggle" checked />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Add iCal / Webcal feed URL (.ics)</label>
+        <div class="input-with-button">
+          <input type="url" id="calendarFeedUrl" placeholder="webcal://... or https://.../calendar.ics" />
+          <button id="addFeedBtn" class="btn-primary">Add Feed</button>
+        </div>
+        <span class="field-hint">Supports Google Calendar secret address in iCal format, Canvas LMS calendar URL, Outlook, and Apple Calendar feeds.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Or import .ics file</label>
+        <input type="file" id="calendarFileInput" accept=".ics,text/calendar" />
+      </div>
+
+      <div class="form-group">
+        <label>Connected Feeds</label>
+        <ul id="connectedFeedsList" class="feeds-list"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESCHEDULE OVERDUE MODAL -->
+<div id="rescheduleModal" class="modal-overlay hidden">
+  <div class="modal-card modal-card-small">
+    <div class="modal-header">
+      <h2>Reschedule Overdue</h2>
+      <button id="closeRescheduleModal" class="close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="reschedule-options">
+        <button class="reschedule-option" data-target="today">
+          <span class="icon">📅</span>
+          <span>Today</span>
+        </button>
+        <button class="reschedule-option" data-target="tomorrow">
+          <span class="icon">☀️</span>
+          <span>Tomorrow</span>
+        </button>
+        <button class="reschedule-option" data-target="nextweek">
+          <span class="icon">🗓️</span>
+          <span>Next Week (Monday)</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="config.js"></script>
