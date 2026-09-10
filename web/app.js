@@ -109,76 +109,291 @@ function nextOccurrence(rule, fromIso) {
     return d;
   }
   if (rule === "weekly") { d.setDate(d.getDate() + 7); return d; }
+  if (rule === "biweekly") { d.setDate(d.getDate() + 14); return d; }
   if (rule === "monthly") { d.setMonth(d.getMonth() + 1); return d; }
-  const m = /^every:(\d+):days$/.exec(rule || "");
+  if (rule === "bimonthly") { d.setMonth(d.getMonth() + 2); return d; }
+  if (rule === "yearly") { d.setFullYear(d.getFullYear() + 1); return d; }
+  let m = /^every:(\d+):days$/.exec(rule || "");
   if (m) { d.setDate(d.getDate() + parseInt(m[1], 10)); return d; }
+  m = /^every:(\d+):weeks$/.exec(rule || "");
+  if (m) { d.setDate(d.getDate() + parseInt(m[1], 10) * 7); return d; }
+  m = /^every:(\d+):months$/.exec(rule || "");
+  if (m) { d.setMonth(d.getMonth() + parseInt(m[1], 10)); return d; }
+  m = /^every:(\d+):years$/.exec(rule || "");
+  if (m) { d.setFullYear(d.getFullYear() + parseInt(m[1], 10)); return d; }
   return d;
 }
 
-const RECUR_LABEL = { daily: "Daily", weekday: "Weekdays", weekly: "Weekly", monthly: "Monthly" };
+const RECUR_LABEL = {
+  daily: "Daily",
+  weekday: "Weekdays",
+  weekly: "Weekly",
+  biweekly: "Biweekly",
+  monthly: "Monthly",
+  bimonthly: "Every 2 months",
+  yearly: "Yearly",
+};
+
+function getRecurLabel(rule) {
+  if (!rule) return "";
+  if (RECUR_LABEL[rule]) return RECUR_LABEL[rule];
+  let m = /^every:(\d+):days$/.exec(rule);
+  if (m) return `Every ${m[1]} days`;
+  m = /^every:(\d+):weeks$/.exec(rule);
+  if (m) return `Every ${m[1]} weeks`;
+  m = /^every:(\d+):months$/.exec(rule);
+  if (m) return `Every ${m[1]} months`;
+  m = /^every:(\d+):years$/.exec(rule);
+  if (m) return `Every ${m[1]} years`;
+  return "Repeats";
+}
+
+function toLocalDatetimeString(date, hasTime) {
+  if (!date) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  const y = date.getFullYear();
+  const m = pad(date.getMonth() + 1);
+  const d = pad(date.getDate());
+  const hh = hasTime ? pad(date.getHours()) : "09";
+  const mm = hasTime ? pad(date.getMinutes()) : "00";
+  return `${y}-${m}-${d}T${hh}:${mm}`;
+}
 
 // ============================================================
-// SMART TEXT PARSING (tags, project, priority, recurrence, date)
+// SMART TEXT PARSING (tags, project, priority, recurrence, date, time)
 // ============================================================
 function parseSmartInput(raw) {
-  let text = raw;
+  let text = " " + raw + " ";
   let priority = null, project = null, recurrence = null;
   const tags = [];
 
-  text = text.replace(/(^|\s)p([1-4])\b/gi, (m, pre, n) => { priority = parseInt(n, 10); return pre; });
-  text = text.replace(/(^|\s)@([a-zA-Z0-9_-]+)/g, (m, pre, tag) => { tags.push(tag.toLowerCase()); return pre; });
-  text = text.replace(/(^|\s)#([a-zA-Z0-9_-]+)/g, (m, pre, p) => {
-    project = p.charAt(0).toUpperCase() + p.slice(1);
-    return pre;
+  // 1. Priority: p1..p4, !1..!4, priority: 1..4, prio: 1..4, !urgent/!high/!med/!low, priority: urgent
+  text = text.replace(/(?:^|\s)(?:p|priority:?\s*|prio:?\s*|!)([1-4])(?=\s|$)/gi, (m, n) => {
+    priority = parseInt(n, 10);
+    return " ";
+  });
+  text = text.replace(/(?:^|\s)(?:!|priority:?\s*)(urgent|high|med(?:ium)?|low)(?=\s|$)/gi, (m, lvl) => {
+    lvl = lvl.toLowerCase();
+    priority = (lvl === "urgent" || lvl === "high") ? 1 : (lvl === "low" ? 3 : 2);
+    return " ";
   });
 
-  const recurPatterns = [
-    [/every\s+weekday/i, "weekday"],
-    [/every\s+day\b/i, "daily"],
-    [/\bdaily\b/i, "daily"],
-    [/every\s+week\b/i, "weekly"],
-    [/\bweekly\b/i, "weekly"],
-    [/every\s+month\b/i, "monthly"],
-    [/\bmonthly\b/i, "monthly"],
-  ];
-  for (const [re, rule] of recurPatterns) {
-    if (re.test(text)) { recurrence = rule; text = text.replace(re, ""); break; }
-  }
-  if (!recurrence) {
-    const everyN = /every\s+(\d+)\s+days?/i.exec(text);
-    if (everyN) { recurrence = `every:${everyN[1]}:days`; text = text.replace(everyN[0], ""); }
-  }
+  // 2. Tags: @tag or tag:name
+  text = text.replace(/(?:^|\s)@([a-zA-Z0-9_-]+)/g, (m, tag) => {
+    tags.push(tag.toLowerCase());
+    return " ";
+  });
+  text = text.replace(/(?:^|\s)tags?:([a-zA-Z0-9_-]+)/gi, (m, tag) => {
+    tags.push(tag.toLowerCase());
+    return " ";
+  });
 
-  let dueDate = null, hasTime = false;
-  if (window.chrono) {
-    const results = chrono.parse(text);
-    if (results.length > 0) {
-      const r = results[0];
-      dueDate = r.start.date();
-      hasTime = r.start.isCertain("hour");
-      text = text.slice(0, r.index) + text.slice(r.index + r.text.length);
+  // 3. Project: #project or project:name / in:name / to:name
+  text = text.replace(/(?:^|\s)#([a-zA-Z0-9_-]+)/g, (m, p) => {
+    project = p.charAt(0).toUpperCase() + p.slice(1);
+    return " ";
+  });
+  text = text.replace(/(?:^|\s)(?:project|in|to):([a-zA-Z0-9_-]+)/gi, (m, p) => {
+    project = p.charAt(0).toUpperCase() + p.slice(1);
+    return " ";
+  });
+
+  // 4. Recurrence detection
+  const recurPatterns = [
+    [/(?:\bevery\s+other\s+week\b|\bbi-?weekly\b|\bfortnightly\b|\bevery\s+2\s+weeks?\b|\bevery\s+two\s+weeks?\b|\bevery\s+second\s+week\b)/i, "biweekly"],
+    [/(?:\bevery\s+other\s+month\b|\bbi-?monthly\b|\bevery\s+2\s+months?\b|\bevery\s+two\s+months?\b)/i, "bimonthly"],
+    [/(?:\bquarterly\b|\bevery\s+quarter\b|\bevery\s+3\s+months?\b|\bevery\s+three\s+months?\b)/i, "every:3:months"],
+    [/(?:\bsemi-?annually\b|\bevery\s+6\s+months?\b|\bevery\s+six\s+months?\b)/i, "every:6:months"],
+    [/(?:\bevery\s+weekday\b|\bon\s+weekdays?\b|\bweekdays?\b|\bworkdays?\b|\bevery\s+work\s*day\b)/i, "weekday"],
+    [/(?:\bevery\s+day\b|\bdaily\b|\beach\s+day\b)/i, "daily"],
+    [/(?:\bevery\s+week\b|\bweekly\b|\beach\s+week\b|\bonce\s+a\s+week\b)/i, "weekly"],
+    [/(?:\bevery\s+month\b|\bmonthly\b|\beach\s+month\b|\bonce\s+a\s+month\b)/i, "monthly"],
+    [/(?:\bevery\s+year\b|\byearly\b|\bannually\b|\bannual\b|\beach\s+year\b|\bonce\s+a\s+year\b)/i, "yearly"],
+    [/(?:\bevery\s+other\s+day\b)/i, "every:2:days"],
+  ];
+
+  for (const [re, rule] of recurPatterns) {
+    if (re.test(text)) {
+      recurrence = rule;
+      text = text.replace(re, " ");
+      break;
     }
   }
 
-  const cleanTitle = text.replace(/\s{2,}/g, " ").trim();
-  return { cleanTitle, project, tags, priority, recurrence, dueDate, hasTime };
+  // Check 'every other <day_of_week>'
+  const everyOtherDowPattern = /\bevery\s+other\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)\b/i;
+  const everyOtherDowMatch = everyOtherDowPattern.exec(text);
+  if (everyOtherDowMatch) {
+    if (!recurrence) recurrence = "biweekly";
+    text = text.replace(everyOtherDowPattern, everyOtherDowMatch[1]);
+  }
+
+  // Check 'every N days/weeks/months/years'
+  if (!recurrence) {
+    const everyN = /\bevery\s+(\d+)\s+(day|week|month|year)s?\b/i.exec(text);
+    if (everyN) {
+      const num = parseInt(everyN[1], 10);
+      const unit = everyN[2].toLowerCase();
+      if (unit === "day") recurrence = num === 1 ? "daily" : (num === 2 ? "every:2:days" : `every:${num}:days`);
+      else if (unit === "week") recurrence = num === 1 ? "weekly" : (num === 2 ? "biweekly" : `every:${num}:weeks`);
+      else if (unit === "month") recurrence = num === 1 ? "monthly" : (num === 2 ? "bimonthly" : `every:${num}:months`);
+      else if (unit === "year") recurrence = num === 1 ? "yearly" : `every:${num}:years`;
+      text = text.replace(everyN[0], " ");
+    }
+  }
+
+  // Check 'every <day_of_week>'
+  const dowPattern = /\bevery\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)\b/i;
+  const dowMatch = dowPattern.exec(text);
+  if (dowMatch) {
+    if (!recurrence) recurrence = "weekly";
+    text = text.replace(dowPattern, dowMatch[1]);
+  }
+
+  // Normalize common shorthands in text
+  text = text
+    .replace(/\b(?:eod|end\s+of\s+(?:the\s+)?day)\b/gi, "5:00 pm")
+    .replace(/\btmrw\b/gi, "tomorrow")
+    .replace(/\btmw\b/gi, "tomorrow")
+    .replace(/\btod\b/gi, "today")
+    .replace(/\b(\d{1,2})\s*([ap])\b/gi, "$1$2m");
+
+  let dueDate = null, hasTime = false;
+  if (window.chrono) {
+    const results = chrono.parse(text, new Date());
+    if (results.length > 0) {
+      let dateResult = null;
+      let timeResult = null;
+      let fullDateTimeResult = null;
+
+      for (let j = 0; j < results.length; j++) {
+        const r = results[j];
+        const isDateCertain = r.start.isCertain("day") || r.start.isCertain("weekday") || r.start.isCertain("month");
+        const isTimeCertain = r.start.isCertain("hour");
+        if (isDateCertain && isTimeCertain) {
+          fullDateTimeResult = r;
+          break;
+        }
+        if (isDateCertain && !dateResult) dateResult = r;
+        if (isTimeCertain && !timeResult) timeResult = r;
+      }
+
+      let chosen = null;
+      if (fullDateTimeResult) {
+        chosen = fullDateTimeResult.start.date();
+        hasTime = true;
+      } else if (dateResult && timeResult) {
+        const d = new Date(dateResult.start.date().getTime());
+        const t = timeResult.start.date();
+        d.setHours(t.getHours(), t.getMinutes(), t.getSeconds(), 0);
+        chosen = d;
+        hasTime = true;
+      } else if (timeResult) {
+        chosen = timeResult.start.date();
+        hasTime = true;
+      } else if (dateResult) {
+        chosen = dateResult.start.date();
+        hasTime = false;
+      } else if (results[0]) {
+        chosen = results[0].start.date();
+        hasTime = results[0].start.isCertain("hour");
+      }
+
+      dueDate = chosen;
+
+      // Clean matched date/time phrases and leading prepositions from text
+      results.forEach(r => {
+        const escaped = r.text.trim().replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+        const re = new RegExp("(?:\\b(?:around|about|approx|approximately|at|by|due\\s+on|due\\s+by|due|on|@|~)\\s+)?" + escaped + "(?:\\b|\\s|$)", "gi");
+        text = text.replace(re, " ");
+      });
+    }
+  }
+
+  // Final cleanup of remaining prepositions and tokens
+  let cleanTitle = text
+    .replace(/\b(?:around|about|approx|approximately|at|by|due\\s+on|due\\s+by|due|on|for|repeats?|eod|end\s+of\s+(?:the\s+)?day)\b/gi, " ")
+    .replace(/[~@#!]/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  return { cleanTitle: cleanTitle || raw.trim(), project, tags, priority, recurrence, dueDate, hasTime };
 }
 
 function renderSmartPreview() {
   const parsed = parseSmartInput($("quickAddInput").value);
   const chips = [];
   if (parsed.dueDate) {
-    chips.push(`📅 ${parsed.dueDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })}${parsed.hasTime ? " " + parsed.dueDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : ""}`);
+    const opts = parsed.hasTime
+      ? { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }
+      : { month: "short", day: "numeric" };
+    chips.push(`📅 ${parsed.dueDate.toLocaleString(undefined, opts)}`);
   }
-  if (parsed.recurrence) chips.push(`🔁 ${RECUR_LABEL[parsed.recurrence] || "Repeats"}`);
+  if (parsed.recurrence) chips.push(`🔁 ${getRecurLabel(parsed.recurrence)}`);
   if (parsed.priority) chips.push(`⚑ Priority ${parsed.priority}`);
   if (parsed.project) chips.push(`# ${parsed.project}`);
   parsed.tags.forEach(t => chips.push(`@${t}`));
 
   const el = $("smartPreview");
-  if (!chips.length) { el.classList.add("hidden"); el.innerHTML = ""; return; }
-  el.classList.remove("hidden");
-  el.innerHTML = chips.map(c => `<span class="smart-chip">${c}</span>`).join("");
+  if (!chips.length) {
+    el.classList.add("hidden");
+    el.innerHTML = "";
+  } else {
+    el.classList.remove("hidden");
+    el.innerHTML = chips.map(c => `<span class="smart-chip">${c}</span>`).join("");
+  }
+
+  // Also reflect auto-detected values into form inputs
+  if (parsed.dueDate) {
+    $("quickAddDate").value = toLocalDatetimeString(parsed.dueDate, parsed.hasTime);
+  } else if (!$("quickAddInput").value.trim()) {
+    $("quickAddDate").value = "";
+  }
+
+  if (parsed.recurrence) {
+    let found = false;
+    for (let opt of $("quickAddRecurrence").options) {
+      if (opt.value === parsed.recurrence) {
+        $("quickAddRecurrence").value = parsed.recurrence;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      const customOpt = new Option(getRecurLabel(parsed.recurrence), parsed.recurrence);
+      $("quickAddRecurrence").add(customOpt);
+      $("quickAddRecurrence").value = parsed.recurrence;
+    }
+  } else if (!$("quickAddInput").value.trim()) {
+    $("quickAddRecurrence").value = "";
+  }
+
+  if (parsed.priority) {
+    $("quickAddPriority").value = String(parsed.priority);
+  } else if (!$("quickAddInput").value.trim()) {
+    $("quickAddPriority").value = "4";
+  }
+
+  if (parsed.project) {
+    let found = false;
+    for (let opt of $("quickAddProject").options) {
+      if (opt.value.toLowerCase() === parsed.project.toLowerCase()) {
+        $("quickAddProject").value = opt.value;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      const opt = new Option(parsed.project, parsed.project);
+      $("quickAddProject").add(opt);
+      $("quickAddProject").value = parsed.project;
+    }
+  }
+
+  if (parsed.tags && parsed.tags.length > 0) {
+    $("quickAddTags").value = parsed.tags.join(", ");
+  }
+
   return parsed;
 }
 
@@ -303,7 +518,7 @@ function taskRow(t) {
     hasMeta = true;
     const span = document.createElement("span");
     span.className = "recur-icon";
-    span.textContent = "🔁 " + (RECUR_LABEL[t.recurrence_rule] || "Repeats");
+    span.textContent = "🔁 " + (getRecurLabel(t.recurrence_rule) || "Repeats");
     meta.appendChild(span);
   }
   if (t.project && t.project !== "Inbox") {
@@ -375,6 +590,7 @@ function saveQuickAdd() {
   $("quickAddDate").value = "";
   $("quickAddTags").value = "";
   $("quickAddRecurrence").value = "";
+  $("quickAddPriority").value = "4";
   $("smartPreview").classList.add("hidden");
   $("quickAdd").classList.add("hidden");
 }
