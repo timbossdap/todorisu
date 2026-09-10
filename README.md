@@ -1,3 +1,5 @@
+# DO NOT USE, THIS IS AI GENERATED AND FOR PERSONAL USE, I WILL NOT BE ACCEPTING ANY ERROR REPORTS
+
 # Tasks — setup guide
 
 Three parts, in this order: **Supabase** (free database + login) → **Web app** (free hosting) → **Android app** (native reminders).
