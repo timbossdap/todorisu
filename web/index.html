@@ -50,6 +50,106 @@
       </div>
     </div>
 
+    <!-- PROFILE DROPDOWN MENU (Matching Todoist Screenshot 2) -->
+    <div id="profileDropdownMenu" class="profile-dropdown hidden">
+      <!-- User / Goal Row -->
+      <div class="profile-menu-item profile-goal-item" id="menuItemProfile">
+        <div class="profile-menu-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="profile-goal-text">
+          <span class="profile-goal-name" id="menuUserName">Timothy Ng</span>
+          <span class="profile-goal-sub" id="menuUserTasksCount">1/5 tasks</span>
+        </div>
+        <span class="profile-shortcut">O then P</span>
+      </div>
+
+      <div class="profile-dropdown-divider"></div>
+
+      <!-- Settings -->
+      <button class="profile-menu-item" id="menuItemSettings">
+        <div class="profile-menu-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+        <span class="profile-menu-label">Settings</span>
+        <span class="profile-shortcut">O then S</span>
+      </button>
+
+      <!-- Add a team -->
+      <button class="profile-menu-item" id="menuItemAddTeam">
+        <div class="profile-menu-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </div>
+        <span class="profile-menu-label">Add a team</span>
+      </button>
+
+      <div class="profile-dropdown-divider"></div>
+
+      <!-- Reporting -->
+      <button class="profile-menu-item" id="menuItemReporting">
+        <div class="profile-menu-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        </div>
+        <span class="profile-menu-label">Reporting</span>
+        <span class="profile-shortcut">G then A</span>
+      </button>
+
+      <!-- Print -->
+      <button class="profile-menu-item" id="menuItemPrint">
+        <div class="profile-menu-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        </div>
+        <span class="profile-menu-label">Print</span>
+        <span class="profile-shortcut">⌘ P</span>
+      </button>
+
+      <!-- What's new -->
+      <button class="profile-menu-item" id="menuItemWhatsNew">
+        <div class="profile-menu-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+        </div>
+        <span class="profile-menu-label">What's new</span>
+      </button>
+
+      <div class="profile-dropdown-divider"></div>
+
+      <!-- Try Pro for free -->
+      <button class="profile-menu-item" id="menuItemTryPro">
+        <div class="profile-menu-icon pro-star-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#ff9800" stroke="#ff9800" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </div>
+        <span class="profile-menu-label">Try Pro for free</span>
+      </button>
+
+      <div class="profile-dropdown-divider"></div>
+
+      <!-- Sync -->
+      <button class="profile-menu-item" id="menuItemSync">
+        <div class="profile-menu-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        </div>
+        <span class="profile-menu-label">Sync</span>
+        <span class="profile-sub-right" id="syncStatusText">Just now</span>
+      </button>
+
+      <div class="profile-dropdown-divider"></div>
+
+      <!-- Log out -->
+      <button class="profile-menu-item" id="menuItemLogout">
+        <div class="profile-menu-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </div>
+        <span class="profile-menu-label">Log out</span>
+      </button>
+
+      <div class="profile-dropdown-divider"></div>
+
+      <!-- Footer -->
+      <div class="profile-menu-footer">
+        <span>v11486 · <span id="menuChangelogBtn" class="link-coral">Changelog</span></span>
+      </div>
+    </div>
+
     <!-- Quick Add Button -->
     <div class="sidebar-add-wrap">
       <button id="quickAddBtn" class="todoist-add-btn">
@@ -120,23 +220,11 @@
     </div>
     <nav id="tagList" class="projects"></nav>
 
-    <!-- Sidebar Bottom -->
+    <!-- Sidebar Bottom (Decluttered, settings & logout accessed via profile menu) -->
     <div class="sidebar-bottom">
-      <button id="calendarBtn" class="sidebar-link-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        <span>Calendar feeds</span>
-      </button>
       <button id="helpBtn" class="sidebar-link-btn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
         <span>Help & resources</span>
-      </button>
-      <button id="settingsBtn" class="sidebar-link-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        <span>Settings</span>
-      </button>
-      <button id="signOutBtn" class="sidebar-link-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-        <span>Sign out</span>
       </button>
     </div>
   </aside>
@@ -300,49 +388,7 @@
       <ul id="completedList" class="task-list hidden"></ul>
     </div>
 
-    <!-- SETTINGS VIEW -->
-    <div id="settingsView" class="view-content hidden">
-      <header class="main-header">
-        <h1 class="view-main-title">Settings</h1>
-      </header>
 
-      <section class="settings-section">
-        <h3>Appearance</h3>
-        <div class="settings-row">
-          <span>Theme</span>
-          <div class="segmented" id="modeSegmented">
-            <button data-mode="light">Light</button>
-            <button data-mode="dark">Dark</button>
-            <button data-mode="system">System</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="settings-section">
-        <h3>Color scheme</h3>
-        <p class="settings-hint">Todoist Red, Material You, and custom themes.</p>
-        <div id="schemeSwatches" class="swatch-row"></div>
-      </section>
-
-      <section class="settings-section">
-        <h3>Calendar & Timetable</h3>
-        <p class="settings-hint">Configure school timetable and external calendar feeds.</p>
-        <div class="settings-row">
-          <span>School Timetable</span>
-          <label class="switch">
-            <input type="checkbox" id="timetableToggle" checked />
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div style="margin-top: 14px;">
-          <button id="openCalendarModalBtn" class="btn-primary">Manage Calendar Feeds (.ics)</button>
-        </div>
-      </section>
-
-      <section class="settings-section">
-        <button id="settingsBack" class="btn-ghost">← Back to tasks</button>
-      </section>
-    </div>
 
     <!-- FILTERS & LABELS VIEW (Matching Todoist Screenshot) -->
     <div id="filtersView" class="view-content hidden">
@@ -488,6 +534,89 @@
       </div>
     </div>
     <div id="searchResults" class="search-results-list"></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL (Matching Todoist Screenshot 1) -->
+<div id="settingsModal" class="modal-overlay hidden">
+  <div class="settings-modal-card">
+    <!-- Left: Settings Sidebar -->
+    <div class="settings-modal-sidebar">
+      <div class="settings-sidebar-top">
+        <h2 class="settings-sidebar-title">Settings</h2>
+        <div class="settings-search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="settingsSearchInput" placeholder="Search" />
+        </div>
+      </div>
+      <div class="settings-tabs-list" id="settingsTabsList">
+        <button class="settings-tab-btn" data-tab="account">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>Account</span>
+        </button>
+        <button class="settings-tab-btn" data-tab="general">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>General</span>
+        </button>
+        <button class="settings-tab-btn" data-tab="subscription">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          <span>Subscription</span>
+        </button>
+        <button class="settings-tab-btn" data-tab="theme">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.2-.64-1.67-.4-.46-.64-1.06-.64-1.67 0-1.38 1.12-2.5 2.5-2.5H18c2.21 0 4-1.79 4-4 0-4.42-4.48-8-10-8z"></path></svg>
+          <span>Theme</span>
+        </button>
+        <button class="settings-tab-btn" data-tab="sidebar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+          <span>Sidebar</span>
+        </button>
+        <button class="settings-tab-btn" data-tab="quickadd">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          <span>Quick Add</span>
+        </button>
+        <button class="settings-tab-btn" data-tab="productivity">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+          <span>Productivity</span>
+        </button>
+        <button class="settings-tab-btn" data-tab="reminders">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2"></path><path d="M5 3L2 6"></path><path d="M22 6l-3-3"></path></svg>
+          <span>Reminders</span>
+        </button>
+        <button class="settings-tab-btn active" data-tab="notifications">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Notifications</span>
+        </button>
+        <button class="settings-tab-btn" data-tab="backups">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+          <span>Backups</span>
+        </button>
+        <button class="settings-tab-btn" data-tab="integrations">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+          <span>Integrations</span>
+        </button>
+        <button class="settings-tab-btn" data-tab="calendars">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span>Calendars</span>
+        </button>
+      </div>
+      <div class="settings-sidebar-bottom">
+        <button class="settings-add-team-link" id="settingsAddTeamBtn">
+          <span>+</span>
+          <span>Add team</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Settings Content -->
+    <div class="settings-modal-content">
+      <div class="settings-content-header">
+        <h2 id="settingsHeaderTitle">Notifications</h2>
+        <button id="closeSettingsModal" class="settings-close-btn" title="Close">✕</button>
+      </div>
+      <div class="settings-content-body" id="settingsContentBody">
+        <!-- Injected via renderSettingsTab() in app.js -->
+      </div>
+    </div>
   </div>
 </div>
 
