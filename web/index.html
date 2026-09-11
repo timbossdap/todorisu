@@ -343,16 +343,149 @@
         <button id="settingsBack" class="btn-ghost">← Back to tasks</button>
       </section>
     </div>
+
+    <!-- FILTERS & LABELS VIEW (Matching Todoist Screenshot) -->
+    <div id="filtersView" class="view-content hidden">
+      <h1 class="view-main-title">Filters &amp; Labels</h1>
+
+      <!-- My Filters Section -->
+      <div class="filters-group-section">
+        <div class="filters-section-header" id="toggleMyFiltersBtn">
+          <div class="filters-header-left">
+            <span class="filters-chevron" id="myFiltersChevron">⌵</span>
+            <div class="filters-avatar-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            </div>
+            <span class="filters-title-text">My Filters</span>
+            <span class="filters-used-tag" id="filtersUsedTag">USED: 2/3</span>
+          </div>
+          <button class="section-add-btn" id="addFilterBtn" title="Add filter">+</button>
+        </div>
+        <div class="filters-items-container" id="myFiltersContainer">
+          <div class="filter-row-item" data-filter="assigned">
+            <div class="filter-row-left">
+              <svg class="teardrop-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+              <span class="filter-row-label">Assigned to me</span>
+            </div>
+            <span class="filter-row-count" id="countAssigned"></span>
+          </div>
+          <div class="filter-row-item" data-filter="priority1">
+            <div class="filter-row-left">
+              <svg class="teardrop-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+              <span class="filter-row-label">Priority 1</span>
+            </div>
+            <span class="filter-row-count" id="countPriority1"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Labels Section -->
+      <div class="filters-group-section">
+        <div class="filters-section-header" id="toggleLabelsBtn">
+          <div class="filters-header-left">
+            <span class="filters-chevron" id="labelsChevron">⌵</span>
+            <span class="filters-title-text">Labels</span>
+          </div>
+          <button class="section-add-btn" id="addLabelBtn" title="Add label">+</button>
+        </div>
+        <div class="filters-items-container" id="labelsContainer">
+          <!-- Populated dynamically matching screenshot -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TASK EDIT PANEL -->
+    <div id="taskEditOverlay" class="task-edit-overlay hidden"></div>
+    <div id="taskEditPanel" class="task-edit-panel hidden">
+      <div class="task-edit-header">
+        <div class="task-edit-header-proj">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+          <select id="taskEditProject" class="task-edit-proj-select"></select>
+        </div>
+        <button id="taskEditClose" class="task-edit-close" title="Close">✕</button>
+      </div>
+
+      <div class="task-edit-body">
+        <div class="task-edit-title-row">
+          <button id="taskEditCheck" class="task-check" data-priority="4" title="Toggle completion"></button>
+          <input id="taskEditTitle" class="task-edit-title-input" type="text" placeholder="Task name" />
+        </div>
+
+        <div class="task-edit-field">
+          <textarea id="taskEditNotes" class="task-edit-notes" placeholder="Description" rows="3"></textarea>
+        </div>
+
+        <div class="task-edit-meta-grid">
+          <div class="task-edit-meta-item">
+            <label class="task-edit-meta-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span>Due date</span>
+            </label>
+            <input id="taskEditDue" class="task-edit-input" type="datetime-local" />
+          </div>
+
+          <div class="task-edit-meta-item">
+            <label class="task-edit-meta-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <span>Priority</span>
+            </label>
+            <select id="taskEditPriority" class="task-edit-select">
+              <option value="1">🔴 Priority 1</option>
+              <option value="2">🟠 Priority 2</option>
+              <option value="3">🔵 Priority 3</option>
+              <option value="4" selected>⚪ Priority 4 (None)</option>
+            </select>
+          </div>
+
+          <div class="task-edit-meta-item">
+            <label class="task-edit-meta-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+              <span>Labels</span>
+            </label>
+            <input id="taskEditTags" class="task-edit-input" type="text" placeholder="e.g. read, Homework" />
+          </div>
+
+          <div class="task-edit-meta-item">
+            <label class="task-edit-meta-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              <span>Repeat</span>
+            </label>
+            <select id="taskEditRecurrence" class="task-edit-select">
+              <option value="">Doesn't repeat</option>
+              <option value="daily">Every day (Daily)</option>
+              <option value="weekday">Every weekday</option>
+              <option value="weekly">Every week</option>
+              <option value="biweekly">Every 2 weeks (Biweekly)</option>
+              <option value="monthly">Every month</option>
+              <option value="yearly">Every year</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-edit-footer">
+        <button id="taskEditDelete" class="btn-danger-ghost">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          <span>Delete</span>
+        </button>
+        <div class="task-edit-footer-right">
+          <button id="taskEditCancel" class="btn-ghost">Cancel</button>
+          <button id="taskEditSave" class="btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
-<!-- SEARCH MODAL -->
+<!-- SEARCH / COMMAND PALETTE MODAL (Matching Todoist Screenshot) -->
 <div id="searchModal" class="modal-overlay hidden">
   <div class="modal-card search-card">
     <div class="search-input-wrap">
-      <svg class="search-modal-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" id="searchInput" placeholder="Search tasks, projects, tags..." autocomplete="off" />
-      <button id="closeSearchModal" class="close-btn">✕</button>
+      <svg class="search-modal-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="searchInput" placeholder="Search or type a command..." autocomplete="off" />
+      <div class="cmd-k-badge">
+        <kbd>⌘</kbd><kbd>K</kbd>
+      </div>
     </div>
     <div id="searchResults" class="search-results-list"></div>
   </div>

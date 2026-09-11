@@ -6,11 +6,22 @@ let tasks = [];
 let currentView = "upcoming"; // Default to Upcoming view like the screenshot!
 let currentProject = null;
 let currentTag = null;
+let currentFilter = null;
+let recentViews = ["Upcoming", "Inbox", "Today"];
+let customLabels = ["read", "Exams/Tests", "Homework", "Hobby"];
+let isMyFiltersCollapsed = false;
+let isLabelsCollapsed = false;
+let editingTaskId = null;
 let selectedWeekStart = getMonday(new Date(2026, 8, 10)); // Anchor to Sep 10, 2026 (or current date)
 let isOverdueCollapsed = false;
 let collapsedCalendarDays = {};
 let showCalendarEvents = localStorage.getItem("tasks_show_calendar") !== "false";
 let showCompletedTasks = false;
+
+function recordRecentView(name) {
+  if (!name) return;
+  recentViews = [name, ...recentViews.filter(v => v.toLowerCase() !== name.toLowerCase())].slice(0, 5);
+}
 
 const $ = (id) => document.getElementById(id);
 
@@ -687,6 +698,9 @@ document.querySelectorAll(".nav-item[data-view]").forEach(btn => {
     currentView = btn.dataset.view;
     currentProject = null;
     currentTag = null;
+    currentFilter = null;
+    const label = btn.querySelector(".nav-label")?.textContent || currentView;
+    recordRecentView(label);
     render();
   });
 });
@@ -696,7 +710,7 @@ document.querySelectorAll(".nav-item[data-view]").forEach(btn => {
 // ============================================================
 function render() {
   document.querySelectorAll(".nav-item[data-view]").forEach(b =>
-    b.classList.toggle("active", b.dataset.view === currentView && !currentProject && !currentTag));
+    b.classList.toggle("active", b.dataset.view === currentView && !currentProject && !currentTag && !currentFilter));
 
   // Today & Inbox count badges
   const todayCount = tasks.filter(t => !t.completed && (isToday(t.due_at) || isOverdue(t.due_at))).length;
@@ -714,7 +728,14 @@ function render() {
     btn.className = "nav-item project-item" + (currentProject === p ? " active" : "");
     const color = projColors[idx % projColors.length];
     btn.innerHTML = `<span class="project-dot" style="background:${color}"></span><span class="nav-label">${p}</span>`;
-    btn.addEventListener("click", () => { currentProject = p; currentTag = null; currentView = "project"; render(); });
+    btn.addEventListener("click", () => {
+      currentProject = p;
+      currentTag = null;
+      currentFilter = null;
+      currentView = "project";
+      recordRecentView(p);
+      render();
+    });
     projectList.appendChild(btn);
   });
 
@@ -725,7 +746,14 @@ function render() {
     const btn = document.createElement("button");
     btn.className = "nav-item project-item" + (currentTag === tag ? " active" : "");
     btn.innerHTML = `<span class="nav-label">@${tag}</span>`;
-    btn.addEventListener("click", () => { currentTag = tag; currentProject = null; currentView = "tag"; render(); });
+    btn.addEventListener("click", () => {
+      currentTag = tag;
+      currentProject = null;
+      currentFilter = null;
+      currentView = "tag";
+      recordRecentView("@" + tag);
+      render();
+    });
     tagList.appendChild(btn);
   });
 
@@ -738,32 +766,123 @@ function render() {
   $("displayBtn").classList.toggle("hidden", isReporting);
   $("exportBtn").classList.toggle("hidden", !isReporting);
 
+  const allViewElements = ["upcomingView", "standardTaskView", "settingsView", "reportingView", "filtersView"];
+  allViewElements.forEach(id => {
+    const el = $(id);
+    if (el) el.classList.add("hidden");
+  });
+
   if (currentView === "upcoming") {
     $("upcomingView").classList.remove("hidden");
-    $("standardTaskView").classList.add("hidden");
-    $("settingsView").classList.add("hidden");
-    $("reportingView").classList.add("hidden");
     renderUpcomingView();
   } else if (currentView === "settings") {
-    $("upcomingView").classList.add("hidden");
-    $("standardTaskView").classList.add("hidden");
     $("settingsView").classList.remove("hidden");
-    $("reportingView").classList.add("hidden");
     renderSettings();
   } else if (currentView === "reporting") {
-    $("upcomingView").classList.add("hidden");
-    $("standardTaskView").classList.add("hidden");
-    $("settingsView").classList.add("hidden");
     $("reportingView").classList.remove("hidden");
     renderReportingView();
+  } else if (currentView === "filters") {
+    $("filtersView").classList.remove("hidden");
+    renderFiltersView();
   } else {
-    $("upcomingView").classList.add("hidden");
     $("standardTaskView").classList.remove("hidden");
-    $("settingsView").classList.add("hidden");
-    $("reportingView").classList.add("hidden");
     renderStandardView();
   }
 }
+
+// ============================================================
+// FILTERS & LABELS VIEW RENDERER (Matching Todoist Screenshot)
+// ============================================================
+function renderFiltersView() {
+  const assignedCount = tasks.filter(t => !t.completed).length;
+  $("countAssigned").textContent = assignedCount > 0 ? assignedCount : "";
+  const p1Count = tasks.filter(t => !t.completed && t.priority === 1).length;
+  $("countPriority1").textContent = p1Count > 0 ? p1Count : "";
+
+  const container = $("labelsContainer");
+  container.innerHTML = "";
+
+  const allTags = [...new Set([...customLabels, ...getTags()])];
+  const tagColorMap = {
+    "read": "#888888",
+    "exams/tests": "#dc4c3e",
+    "homework": "#4caf50",
+    "hobby": "#ff9800"
+  };
+  const fallbackColors = ["#2196f3", "#9c27b0", "#009688", "#e91e63", "#ff5722"];
+
+  allTags.forEach((tag, idx) => {
+    const row = document.createElement("button");
+    row.className = "filter-row-item";
+    const color = tagColorMap[tag.toLowerCase()] || fallbackColors[idx % fallbackColors.length];
+    const count = tasks.filter(t => !t.completed && (t.tags || []).includes(tag)).length;
+
+    row.innerHTML = `
+      <div class="filter-row-left">
+        <svg class="filter-tag-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+        <span class="filter-row-label">${tag}</span>
+      </div>
+      <span class="filter-row-count">${count > 0 ? count : ""}</span>
+    `;
+
+    row.addEventListener("click", () => {
+      currentTag = tag;
+      currentProject = null;
+      currentFilter = null;
+      currentView = "tag";
+      recordRecentView("@" + tag);
+      render();
+    });
+
+    container.appendChild(row);
+  });
+}
+
+document.querySelectorAll(".filter-row-item[data-filter]").forEach(item => {
+  item.addEventListener("click", () => {
+    currentFilter = item.dataset.filter;
+    currentProject = null;
+    currentTag = null;
+    currentView = "standard";
+    recordRecentView(currentFilter === "priority1" ? "Priority 1" : "Assigned to me");
+    render();
+  });
+});
+
+$("toggleMyFiltersBtn").addEventListener("click", (e) => {
+  if (e.target.closest("#addFilterBtn")) return;
+  isMyFiltersCollapsed = !isMyFiltersCollapsed;
+  $("myFiltersChevron").classList.toggle("collapsed", isMyFiltersCollapsed);
+  $("myFiltersContainer").classList.toggle("hidden", isMyFiltersCollapsed);
+});
+
+$("toggleLabelsBtn").addEventListener("click", (e) => {
+  if (e.target.closest("#addLabelBtn")) return;
+  isLabelsCollapsed = !isLabelsCollapsed;
+  $("labelsChevron").classList.toggle("collapsed", isLabelsCollapsed);
+  $("labelsContainer").classList.toggle("hidden", isLabelsCollapsed);
+});
+
+$("addFilterBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const name = prompt("Filter name (e.g. Priority 2, Next 7 days):");
+  if (name) alert(`Filter "${name}" saved to favorites.`);
+});
+
+$("addLabelBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const label = prompt("Enter new label name:");
+  if (label && label.trim()) {
+    const clean = label.trim().replace(/^@/, "");
+    if (!customLabels.includes(clean)) {
+      customLabels.push(clean);
+      renderFiltersView();
+    }
+  }
+});
 
 // ============================================================
 // REPORTING VIEW RENDERER
@@ -1084,6 +1203,8 @@ function openInlineAdd(daySection, targetDate) {
 // ============================================================
 function visibleTasks() {
   let list = tasks.filter(t => showCompletedTasks || !t.completed);
+  if (currentFilter === "assigned") return list;
+  if (currentFilter === "priority1") return list.filter(t => t.priority === 1);
   if (currentTag) return list.filter(t => (t.tags || []).includes(currentTag));
   if (currentProject) return list.filter(t => (t.project || "Inbox") === currentProject);
   if (currentView === "today") return list.filter(t => isToday(t.due_at) || isOverdue(t.due_at));
@@ -1092,10 +1213,14 @@ function visibleTasks() {
 }
 
 function renderStandardView() {
-  $("viewTitle").textContent = currentTag ? `@${currentTag}` : currentProject || (
-    currentView === "today" ? "Today" : currentView === "inbox" ? "Inbox" : "Tasks"
-  );
-  $("viewDate").textContent = currentView === "today" && !currentProject && !currentTag
+  $("viewTitle").textContent = currentFilter
+    ? (currentFilter === "priority1" ? "Priority 1" : "Assigned to me")
+    : currentTag
+    ? `@${currentTag}`
+    : currentProject || (
+      currentView === "today" ? "Today" : currentView === "inbox" ? "Inbox" : "Tasks"
+    );
+  $("viewDate").textContent = currentView === "today" && !currentProject && !currentTag && !currentFilter
     ? new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }) : "";
 
   // Show calendar box on Today view if enabled
@@ -1138,6 +1263,138 @@ function renderStandardView() {
   $("toggleCompleted").textContent = showCompletedTasks ? "Hide completed" : "Show completed";
 }
 
+// ============================================================
+// TASK EDIT PANEL
+// ============================================================
+function openTaskEdit(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  editingTaskId = id;
+
+  // Title & description
+  $("taskEditTitle").value = t.title || "";
+  $("taskEditNotes").value = t.notes || "";
+
+  // Priority
+  $("taskEditPriority").value = String(t.priority || 4);
+
+  // Recurrence
+  $("taskEditRecurrence").value = t.recurrence_rule || "";
+
+  // Tags
+  $("taskEditTags").value = (t.tags || []).join(", ");
+
+  // Due date & time
+  if (t.due_at) {
+    const d = new Date(t.due_at);
+    const pad = n => String(n).padStart(2, "0");
+    $("taskEditDue").value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } else {
+    $("taskEditDue").value = "";
+  }
+
+  // Project selector
+  const projSel = $("taskEditProject");
+  projSel.innerHTML = `<option value="Inbox">Inbox</option>` +
+    getProjects().map(p => `<option value="${p}"${(t.project || "Inbox") === p ? " selected" : ""}>${p}</option>`).join("");
+  projSel.value = t.project || "Inbox";
+
+  // Check button
+  const chk = $("taskEditCheck");
+  chk.className = "task-check" + (t.completed ? " checked" : "");
+  chk.dataset.priority = t.priority || 4;
+
+  // Show
+  $("taskEditPanel").classList.remove("hidden");
+  $("taskEditOverlay").classList.remove("hidden");
+  $("taskEditTitle").focus();
+}
+
+function closeTaskEdit() {
+  $("taskEditPanel").classList.add("hidden");
+  $("taskEditOverlay").classList.add("hidden");
+  editingTaskId = null;
+}
+
+async function saveTaskEdit() {
+  if (!editingTaskId) return;
+  const t = tasks.find(x => x.id === editingTaskId);
+  if (!t) return;
+
+  const newTitle = $("taskEditTitle").value.trim();
+  if (!newTitle) {
+    $("taskEditTitle").focus();
+    return;
+  }
+
+  t.title = newTitle;
+  t.notes = $("taskEditNotes").value.trim();
+  t.priority = parseInt($("taskEditPriority").value, 10) || 4;
+  t.recurrence_rule = $("taskEditRecurrence").value || null;
+  t.project = $("taskEditProject").value || "Inbox";
+  t.tags = $("taskEditTags").value.split(",").map(s => s.trim().replace(/^@/, "")).filter(Boolean);
+
+  const dueVal = $("taskEditDue").value;
+  if (dueVal) {
+    const d = new Date(dueVal);
+    t.due_at = d.toISOString();
+    t.has_time = d.getHours() !== 0 || d.getMinutes() !== 0;
+  } else {
+    t.due_at = null;
+    t.has_time = false;
+  }
+
+  closeTaskEdit();
+  render();
+
+  try {
+    await sb.from("tasks").update({
+      title: t.title,
+      notes: t.notes,
+      priority: t.priority,
+      recurrence_rule: t.recurrence_rule,
+      project: t.project,
+      tags: t.tags,
+      due_at: t.due_at,
+      has_time: t.has_time,
+    }).eq("id", t.id);
+  } catch (err) {
+    console.warn("Failed to update task in Supabase:", err);
+  }
+}
+
+$("taskEditClose").addEventListener("click", closeTaskEdit);
+$("taskEditCancel").addEventListener("click", closeTaskEdit);
+$("taskEditOverlay").addEventListener("click", closeTaskEdit);
+$("taskEditSave").addEventListener("click", saveTaskEdit);
+
+$("taskEditCheck").addEventListener("click", async () => {
+  if (editingTaskId) {
+    await toggleTask(editingTaskId);
+    const t = tasks.find(x => x.id === editingTaskId);
+    if (t) {
+      $("taskEditCheck").className = "task-check" + (t.completed ? " checked" : "");
+    }
+  }
+});
+
+$("taskEditDelete").addEventListener("click", async () => {
+  if (editingTaskId) {
+    const id = editingTaskId;
+    closeTaskEdit();
+    await deleteTask(id);
+  }
+});
+
+$("taskEditTitle").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    saveTaskEdit();
+  } else if (e.key === "Escape") {
+    closeTaskEdit();
+  }
+});
+
 // Single task row renderer (matching Todoist style)
 function taskRow(t) {
   const li = document.createElement("li");
@@ -1146,7 +1403,10 @@ function taskRow(t) {
   const check = document.createElement("button");
   check.className = "task-check" + (t.completed ? " checked" : "");
   check.dataset.priority = t.priority || 4;
-  check.addEventListener("click", () => toggleTask(t.id));
+  check.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleTask(t.id);
+  });
 
   const body = document.createElement("div");
   body.className = "task-body";
@@ -1205,7 +1465,15 @@ function taskRow(t) {
   const del = document.createElement("button");
   del.className = "task-delete";
   del.textContent = "✕";
-  del.addEventListener("click", () => deleteTask(t.id));
+  del.addEventListener("click", (e) => {
+    e.stopPropagation();
+    deleteTask(t.id);
+  });
+
+  li.addEventListener("click", (e) => {
+    if (e.target.closest(".task-check") || e.target.closest(".task-delete")) return;
+    openTaskEdit(t.id);
+  });
 
   li.append(check, body, del);
   return li;
@@ -1469,63 +1737,312 @@ $("menuBtn").addEventListener("click", () => {
 });
 
 // ============================================================
-// SEARCH MODAL
+// SEARCH / COMMAND PALETTE MODAL (Matching Todoist Screenshot)
 // ============================================================
+let searchSelectedIndex = 0;
+let searchCurrentItems = [];
+
 function openSearch() {
   $("searchModal").classList.remove("hidden");
   $("searchInput").value = "";
+  searchSelectedIndex = 0;
   renderSearchResults("");
   $("searchInput").focus();
 }
+
 function closeSearch() {
   $("searchModal").classList.add("hidden");
 }
-function renderSearchResults(query) {
-  const list = $("searchResults");
-  list.innerHTML = "";
-  const q = query.trim().toLowerCase();
-  const results = q.length === 0 ? [] : tasks.filter(t =>
-    t.title.toLowerCase().includes(q) ||
-    (t.project || "").toLowerCase().includes(q) ||
-    (t.tags || []).some(tag => tag.toLowerCase().includes(q))
-  ).slice(0, 20);
 
-  if (results.length === 0 && q.length > 0) {
-    list.innerHTML = `<div style="color:var(--app-text-muted);padding:12px 10px;font-size:13px;">No tasks found for "${query}"</div>`;
-    return;
-  }
-  results.forEach(t => {
-    const item = document.createElement("div");
-    item.className = "search-result-item";
-    const overdue = !t.completed && isOverdue(t.due_at);
-    item.innerHTML = `
-      <div class="search-result-title">${t.title}</div>
-      <div class="search-result-meta">
-        ${t.project && t.project !== "Inbox" ? `<span># ${t.project}</span>` : ""}
-        ${t.due_at ? `<span style="color:${overdue ? "var(--app-primary)" : "var(--app-text-muted)"}">
-          ${isToday(t.due_at) ? "Today" : new Date(t.due_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-        </span>` : ""}
-        ${t.completed ? `<span style="color:#4caf50">✓ Done</span>` : ""}
-      </div>
-    `;
-    item.addEventListener("click", () => {
-      closeSearch();
-      // Navigate to the task's view
-      if (!t.completed) {
-        currentProject = t.project && t.project !== "Inbox" ? t.project : null;
-        currentTag = null;
-        currentView = currentProject ? "project" : (isToday(t.due_at) || isOverdue(t.due_at) ? "today" : "upcoming");
-        render();
-      }
-    });
-    list.appendChild(item);
+function updateSearchSelection() {
+  const items = document.querySelectorAll("#searchResults .search-item");
+  items.forEach((it, idx) => {
+    const isSel = idx === searchSelectedIndex;
+    it.classList.toggle("selected", isSel);
+    if (isSel) {
+      it.scrollIntoView({ block: "nearest" });
+    }
   });
 }
 
+function renderSearchResults(query) {
+  const list = $("searchResults");
+  list.innerHTML = "";
+  searchCurrentItems = [];
+  const q = query.trim().toLowerCase();
+
+  const iconUpcoming = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
+  const iconInbox = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>`;
+  const iconToday = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line><text x="7" y="18" font-size="8" font-weight="bold" fill="currentColor">11</text></svg>`;
+  const iconHome = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`;
+  const iconFilters = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`;
+
+  function addItem({ icon, title, badge, meta, onSelect }) {
+    const item = document.createElement("div");
+    const itemIndex = searchCurrentItems.length;
+    item.className = "search-item" + (itemIndex === searchSelectedIndex ? " selected" : "");
+
+    let metaHtml = "";
+    if (meta) {
+      metaHtml = `<div class="search-result-meta">${meta}</div>`;
+    }
+    let badgeHtml = "";
+    if (badge) {
+      badgeHtml = `<div class="search-badge">${badge}</div>`;
+    }
+
+    item.innerHTML = `
+      <div class="search-item-left">
+        <span class="search-item-icon">${icon}</span>
+        <span class="search-item-title">${title}</span>
+      </div>
+      ${metaHtml || badgeHtml}
+    `;
+
+    const selectAction = () => {
+      closeSearch();
+      onSelect();
+    };
+
+    item.addEventListener("mouseenter", () => {
+      searchSelectedIndex = itemIndex;
+      updateSearchSelection();
+    });
+
+    item.addEventListener("click", selectAction);
+
+    list.appendChild(item);
+    searchCurrentItems.push({ el: item, onSelect: selectAction });
+  }
+
+  function addGroupTitle(text) {
+    const titleEl = document.createElement("div");
+    titleEl.className = "search-group-title";
+    titleEl.textContent = text;
+    list.appendChild(titleEl);
+  }
+
+  if (q.length === 0) {
+    // Recently viewed section
+    addGroupTitle("Recently viewed");
+
+    addItem({
+      icon: iconUpcoming,
+      title: "Upcoming",
+      onSelect: () => {
+        currentView = "upcoming";
+        currentProject = null;
+        currentTag = null;
+        currentFilter = null;
+        recordRecentView("Upcoming");
+        render();
+      }
+    });
+
+    addItem({
+      icon: iconInbox,
+      title: "Inbox",
+      onSelect: () => {
+        currentView = "inbox";
+        currentProject = null;
+        currentTag = null;
+        currentFilter = null;
+        recordRecentView("Inbox");
+        render();
+      }
+    });
+
+    addItem({
+      icon: iconToday,
+      title: "Today",
+      onSelect: () => {
+        currentView = "today";
+        currentProject = null;
+        currentTag = null;
+        currentFilter = null;
+        recordRecentView("Today");
+        render();
+      }
+    });
+
+    // Navigation section
+    addGroupTitle("Navigation");
+
+    addItem({
+      icon: iconHome,
+      title: "Go to home",
+      badge: `<kbd>G</kbd> then <kbd>H</kbd>`,
+      onSelect: () => {
+        currentView = "upcoming";
+        currentProject = null;
+        currentTag = null;
+        currentFilter = null;
+        recordRecentView("Upcoming");
+        render();
+      }
+    });
+
+    addItem({
+      icon: iconInbox,
+      title: "Go to Inbox",
+      badge: `<kbd>G</kbd> then <kbd>i</kbd>`,
+      onSelect: () => {
+        currentView = "inbox";
+        currentProject = null;
+        currentTag = null;
+        currentFilter = null;
+        recordRecentView("Inbox");
+        render();
+      }
+    });
+
+    addItem({
+      icon: iconToday,
+      title: "Go to Today",
+      badge: `<kbd>G</kbd> then <kbd>T</kbd>`,
+      onSelect: () => {
+        currentView = "today";
+        currentProject = null;
+        currentTag = null;
+        currentFilter = null;
+        recordRecentView("Today");
+        render();
+      }
+    });
+
+    addItem({
+      icon: iconUpcoming,
+      title: "Go to Upcoming",
+      badge: `<kbd>G</kbd> then <kbd>U</kbd>`,
+      onSelect: () => {
+        currentView = "upcoming";
+        currentProject = null;
+        currentTag = null;
+        currentFilter = null;
+        recordRecentView("Upcoming");
+        render();
+      }
+    });
+
+    addItem({
+      icon: iconFilters,
+      title: "Go to Filters & Labels",
+      badge: `<kbd>G</kbd> then <kbd>V</kbd>`,
+      onSelect: () => {
+        currentView = "filters";
+        currentProject = null;
+        currentTag = null;
+        currentFilter = null;
+        recordRecentView("Filters & Labels");
+        render();
+      }
+    });
+  } else {
+    // Filter tasks
+    const matchedTasks = tasks.filter(t =>
+      t.title.toLowerCase().includes(q) ||
+      (t.notes || "").toLowerCase().includes(q) ||
+      (t.project || "").toLowerCase().includes(q) ||
+      (t.tags || []).some(tag => tag.toLowerCase().includes(q))
+    ).slice(0, 15);
+
+    // Filter navigation
+    const navOptions = [
+      { key: "home", title: "Go to home", view: "upcoming", icon: iconHome, badge: "<kbd>G</kbd> then <kbd>H</kbd>" },
+      { key: "inbox", title: "Go to Inbox", view: "inbox", icon: iconInbox, badge: "<kbd>G</kbd> then <kbd>i</kbd>" },
+      { key: "today", title: "Go to Today", view: "today", icon: iconToday, badge: "<kbd>G</kbd> then <kbd>T</kbd>" },
+      { key: "upcoming", title: "Go to Upcoming", view: "upcoming", icon: iconUpcoming, badge: "<kbd>G</kbd> then <kbd>U</kbd>" },
+      { key: "filters", title: "Go to Filters & Labels", view: "filters", icon: iconFilters, badge: "<kbd>G</kbd> then <kbd>V</kbd>" },
+      { key: "labels", title: "Go to Filters & Labels", view: "filters", icon: iconFilters, badge: "<kbd>G</kbd> then <kbd>V</kbd>" },
+      { key: "reporting", title: "Go to Reporting", view: "reporting", icon: iconUpcoming, badge: "" },
+      { key: "settings", title: "Go to Settings", view: "settings", icon: iconHome, badge: "" },
+    ];
+    const matchedNav = navOptions.filter(n => n.key.includes(q) || n.title.toLowerCase().includes(q));
+
+    if (matchedTasks.length > 0) {
+      addGroupTitle("Tasks");
+      matchedTasks.forEach(t => {
+        const overdue = !t.completed && isOverdue(t.due_at);
+        let metaParts = [];
+        if (t.project && t.project !== "Inbox") metaParts.push(`<span># ${t.project}</span>`);
+        if (t.due_at) {
+          metaParts.push(`<span style="color:${overdue ? "var(--app-primary)" : "var(--app-text-muted)"}">
+            ${isToday(t.due_at) ? "Today" : new Date(t.due_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+          </span>`);
+        }
+        if (t.completed) metaParts.push(`<span style="color:#4caf50">✓ Done</span>`);
+
+        addItem({
+          icon: `<span class="task-check" data-priority="${t.priority || 4}" style="margin:0;pointer-events:none;"></span>`,
+          title: t.title,
+          meta: metaParts.join(""),
+          onSelect: () => {
+            openTaskEdit(t.id);
+          }
+        });
+      });
+    }
+
+    if (matchedNav.length > 0) {
+      addGroupTitle("Navigation");
+      matchedNav.forEach(n => {
+        addItem({
+          icon: n.icon,
+          title: n.title,
+          badge: n.badge,
+          onSelect: () => {
+            currentView = n.view;
+            currentProject = null;
+            currentTag = null;
+            currentFilter = null;
+            recordRecentView(n.title.replace("Go to ", ""));
+            render();
+          }
+        });
+      });
+    }
+
+    if (matchedTasks.length === 0 && matchedNav.length === 0) {
+      list.innerHTML = `<div style="color:var(--app-text-muted);padding:16px 18px;font-size:13px;">No results found for "${query}"</div>`;
+    }
+  }
+
+  // Ensure index is within bounds
+  if (searchSelectedIndex >= searchCurrentItems.length) {
+    searchSelectedIndex = 0;
+  }
+  updateSearchSelection();
+}
+
 $("searchBtn").addEventListener("click", openSearch);
-$("closeSearchModal").addEventListener("click", closeSearch);
-$("searchInput").addEventListener("input", (e) => renderSearchResults(e.target.value));
-$("searchModal").addEventListener("click", (e) => { if (e.target === $("searchModal")) closeSearch(); });
+$("searchInput").addEventListener("input", (e) => {
+  searchSelectedIndex = 0;
+  renderSearchResults(e.target.value);
+});
+$("searchModal").addEventListener("click", (e) => {
+  if (e.target === $("searchModal")) closeSearch();
+});
+
+$("searchInput").addEventListener("keydown", (e) => {
+  if (searchCurrentItems.length === 0) return;
+
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    searchSelectedIndex = (searchSelectedIndex + 1) % searchCurrentItems.length;
+    updateSearchSelection();
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    searchSelectedIndex = (searchSelectedIndex - 1 + searchCurrentItems.length) % searchCurrentItems.length;
+    updateSearchSelection();
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    if (searchCurrentItems[searchSelectedIndex]) {
+      searchCurrentItems[searchSelectedIndex].onSelect();
+    }
+  } else if (e.key === "Escape") {
+    closeSearch();
+  }
+});
 
 // ============================================================
 // EXPORT BUTTON (Reporting view)
@@ -1551,26 +2068,85 @@ $("exportBtn").addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
-// Keyboard shortcuts: 'q' for quick add, Cmd+K / '/' for search, 'Esc' to close
+// Keyboard shortcuts: 'q' for quick add, Cmd+K / '/' for search, 'Esc' to close, 'G then ...' for navigation
+let lastKeyTime = 0;
+let pendingKeyG = false;
+
 document.addEventListener("keydown", (e) => {
   const tag = document.activeElement.tagName;
-  const inInput = ["INPUT", "TEXTAREA"].includes(tag);
+  const inInput = ["INPUT", "TEXTAREA", "SELECT"].includes(tag);
 
-  if (e.key === "q" && !inInput) {
-    e.preventDefault();
-    $("quickAdd").classList.remove("hidden");
-    $("quickAddInput").focus();
-  }
-  if ((e.key === "/" && !inInput) || ((e.metaKey || e.ctrlKey) && e.key === "k")) {
-    e.preventDefault();
-    openSearch();
-  }
   if (e.key === "Escape") {
     $("quickAdd").classList.add("hidden");
     $("calendarModal").classList.add("hidden");
     $("rescheduleModal").classList.add("hidden");
     $("displayDropdown").classList.add("hidden");
     closeSearch();
+    closeTaskEdit();
+    return;
+  }
+
+  if (inInput) return;
+
+  if (e.key === "q") {
+    e.preventDefault();
+    $("quickAdd").classList.remove("hidden");
+    $("quickAddInput").focus();
+    return;
+  }
+
+  if (e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key === "k")) {
+    e.preventDefault();
+    openSearch();
+    return;
+  }
+
+  // Handle "G then H", "G then I", etc.
+  const now = Date.now();
+  if (e.key.toLowerCase() === "g") {
+    pendingKeyG = true;
+    lastKeyTime = now;
+    return;
+  }
+
+  if (pendingKeyG && now - lastKeyTime < 1200) {
+    pendingKeyG = false;
+    const k = e.key.toLowerCase();
+    if (k === "h" || k === "u") {
+      e.preventDefault();
+      currentView = "upcoming";
+      currentProject = null;
+      currentTag = null;
+      currentFilter = null;
+      recordRecentView("Upcoming");
+      render();
+    } else if (k === "i") {
+      e.preventDefault();
+      currentView = "inbox";
+      currentProject = null;
+      currentTag = null;
+      currentFilter = null;
+      recordRecentView("Inbox");
+      render();
+    } else if (k === "t") {
+      e.preventDefault();
+      currentView = "today";
+      currentProject = null;
+      currentTag = null;
+      currentFilter = null;
+      recordRecentView("Today");
+      render();
+    } else if (k === "v") {
+      e.preventDefault();
+      currentView = "filters";
+      currentProject = null;
+      currentTag = null;
+      currentFilter = null;
+      recordRecentView("Filters & Labels");
+      render();
+    }
+  } else {
+    pendingKeyG = false;
   }
 });
 
