@@ -341,7 +341,6 @@ button, input, select, textarea {
   min-width: 0;
   overflow-y: auto;
   padding: 24px 48px 100px;
-  max-width: 1060px;
 }
 
 .top-action-bar {

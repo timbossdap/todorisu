@@ -1586,8 +1586,6 @@ function openCalendarModal() {
   $("modalTimetableToggle").checked = CalendarManager.isTimetableEnabled();
   renderConnectedFeeds();
 }
-$("calendarBtn").addEventListener("click", openCalendarModal);
-$("openCalendarModalBtn").addEventListener("click", openCalendarModal);
 $("closeCalendarModal").addEventListener("click", () => $("calendarModal").classList.add("hidden"));
 
 $("modalTimetableToggle").addEventListener("change", (e) => {
