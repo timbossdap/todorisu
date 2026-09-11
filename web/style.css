@@ -688,6 +688,19 @@ button, input, select, textarea {
   align-items: center;
   gap: 4px;
 }
+.task-meta-notif {
+  color: var(--app-text-muted);
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.85;
+}
+.task-notif-warning {
+  background: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
 .task-tag-chip {
   background: var(--app-hover);
   color: var(--app-text-secondary);

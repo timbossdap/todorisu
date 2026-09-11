@@ -113,15 +113,7 @@
 
       <div class="profile-dropdown-divider"></div>
 
-      <!-- Try Pro for free -->
-      <button class="profile-menu-item" id="menuItemTryPro">
-        <div class="profile-menu-icon pro-star-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="#ff9800" stroke="#ff9800" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-        </div>
-        <span class="profile-menu-label">Try Pro for free</span>
-      </button>
 
-      <div class="profile-dropdown-divider"></div>
 
       <!-- Sync -->
       <button class="profile-menu-item" id="menuItemSync">
@@ -506,6 +498,29 @@
               <option value="yearly">Every year</option>
             </select>
           </div>
+
+          <div class="task-edit-meta-item">
+            <label class="task-edit-meta-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              <span>Notification</span>
+            </label>
+            <select id="taskEditReminder" class="task-edit-select">
+              <option value="none">No reminder</option>
+              <option value="0">At time of due date</option>
+              <option value="5">5 minutes before</option>
+              <option value="10">10 minutes before</option>
+              <option value="15">15 minutes before</option>
+              <option value="30">30 minutes before</option>
+              <option value="60">1 hour before</option>
+              <option value="120">2 hours before</option>
+              <option value="1440">1 day before</option>
+              <option value="custom">Custom date & time...</option>
+            </select>
+            <input id="taskEditReminderCustom" class="task-edit-input hidden" type="datetime-local" style="margin-top: 4px;" />
+            <div id="taskEditNotifPermissionWarning" class="task-notif-warning hidden" style="font-size: 11px; color: #ff9800; line-height: 1.3; margin-top: 2px;">
+              Notifications not allowed in browser. <button type="button" id="taskEditEnableNotifBtn" style="background: none; border: none; color: #dc4c3e; text-decoration: underline; cursor: pointer; padding: 0; font-size: 11px;">Enable</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -557,10 +572,6 @@
         <button class="settings-tab-btn" data-tab="general">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           <span>General</span>
-        </button>
-        <button class="settings-tab-btn" data-tab="subscription">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-          <span>Subscription</span>
         </button>
         <button class="settings-tab-btn" data-tab="theme">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 0 0 20c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.2-.64-1.67-.4-.46-.64-1.06-.64-1.67 0-1.38 1.12-2.5 2.5-2.5H18c2.21 0 4-1.79 4-4 0-4.42-4.48-8-10-8z"></path></svg>
@@ -708,6 +719,25 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chrono-node@1.4.8/dist/chrono.min.js"></script>
 <script src="theme.js"></script>
-<script src="app.js"></script>
+<!-- Modular Application Scripts -->
+<script src="js/state.js"></script>
+<script src="js/calendar-manager.js"></script>
+<script src="js/date-utils.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/tasks-data.js"></script>
+<script src="js/smart-input.js"></script>
+<script src="js/task-edit.js"></script>
+<script src="js/view-upcoming.js"></script>
+<script src="js/view-standard.js"></script>
+<script src="js/view-filters.js"></script>
+<script src="js/view-reporting.js"></script>
+<script src="js/render-core.js"></script>
+<script src="js/nav-controls.js"></script>
+<script src="js/profile-settings.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/search.js"></script>
+<script src="js/export.js"></script>
+<script src="js/keyboard-shortcuts.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>
