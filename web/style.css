@@ -1322,6 +1322,11 @@ input:checked + .slider:before {
 }
 
 /* ---------- RESPONSIVE ---------- */
+
+/* Mobile bottom nav + FAB: hidden by default (desktop), shown under 780px */
+.mobile-bottom-nav { display: none; }
+.mobile-fab { display: none; }
+
 @media (max-width: 780px) {
   #menuBtn { display: flex !important; }
   .sidebar {
@@ -1330,9 +1335,83 @@ input:checked + .slider:before {
     box-shadow: 2px 0 16px rgba(0,0,0,.6);
   }
   .sidebar.open { transform: translateX(0); }
-  .main { padding: 48px 16px 100px; max-width: 100%; }
+  .main { padding: 48px 16px 128px; max-width: 100%; }
   .calendar-events-grid { grid-template-columns: 1fr; }
   .task-edit-panel { width: 100%; }
+
+  /* Android-style bottom tab bar (Inbox / Today / Upcoming / Browse) */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 55;
+    background: var(--app-sidebar);
+    border-top: 1px solid var(--app-border);
+    padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
+    justify-content: space-around;
+    align-items: center;
+  }
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--app-text-secondary);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 6px;
+    position: relative;
+  }
+  .mobile-nav-item svg { width: 20px; height: 20px; stroke: currentColor; }
+  .mobile-nav-item.active { color: var(--app-primary); }
+  .mobile-nav-dot {
+    position: absolute;
+    top: 2px; right: 26%;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--app-primary);
+  }
+
+  /* Android-style floating action button */
+  .mobile-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    right: 18px;
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    background: var(--app-primary);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 6px 18px rgba(0,0,0,.45);
+    z-index: 56;
+    cursor: pointer;
+  }
+  .mobile-fab:hover { background: var(--app-primary-hover); }
+  .mobile-fab:active { transform: scale(0.96); }
+
+  /* Task list, Android-app style: bigger tap targets, stacked meta lines */
+  .task-row { padding: 14px 4px; gap: 12px; }
+  .task-check { width: 20px; height: 20px; margin-top: 3px; }
+  .task-title { font-size: 15px; line-height: 1.4; }
+  .task-meta { flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 6px; }
+  .task-project-tag svg { display: none; }
+  .task-project-tag { font-size: 12.5px; }
+  .task-tag-chip {
+    background: none;
+    padding: 0;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--tag-color, var(--app-text-secondary));
+  }
+  .task-delete { opacity: 1; }
 }
 
 /* ========== FILTERS & LABELS VIEW (Matching Todoist Screenshot) ========== */

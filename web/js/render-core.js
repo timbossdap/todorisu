@@ -4,6 +4,7 @@
 function render() {
   document.querySelectorAll(".nav-item[data-view]").forEach(b =>
     b.classList.toggle("active", b.dataset.view === currentView && !currentProject && !currentTag && !currentFilter));
+  if (typeof updateMobileNavActive === "function") updateMobileNavActive();
 
   // Today & Inbox count badges
   const todayCount = tasks.filter(t => !t.completed && (isToday(t.due_at) || isOverdue(t.due_at))).length;

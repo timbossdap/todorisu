@@ -41,6 +41,21 @@ function formatDayHeader(date) {
   }
 }
 
+const TAG_COLOR_MAP = {
+  "read": "#9e9e9e",
+  "exams/tests": "#d9704f",
+  "homework": "#4caf50",
+  "hobby": "#e0a458",
+};
+const TAG_COLOR_FALLBACKS = ["#2196f3", "#9c27b0", "#009688", "#e91e63", "#ff5722"];
+function getTagColor(tag) {
+  const key = (tag || "").toLowerCase();
+  if (TAG_COLOR_MAP[key]) return TAG_COLOR_MAP[key];
+  let hash = 0;
+  for (const c of key) hash += c.charCodeAt(0);
+  return TAG_COLOR_FALLBACKS[hash % TAG_COLOR_FALLBACKS.length];
+}
+
 function getProjects() {
   return [...new Set(tasks.map(t => t.project || "Inbox"))].filter(p => p !== "Inbox").sort();
 }

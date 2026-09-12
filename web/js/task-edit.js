@@ -299,6 +299,7 @@ function taskRow(t) {
     const chip = document.createElement("span");
     chip.className = "task-tag-chip";
     chip.textContent = "@" + tag;
+    chip.style.setProperty("--tag-color", getTagColor(tag));
     meta.appendChild(chip);
   });
 
