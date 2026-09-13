@@ -3,7 +3,7 @@
   "short_name": "Tasks",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#DB4C3F",
+  "background_color": "#1e1e1e",
+  "theme_color": "#1A1A1A",
   "icons": []
 }

@@ -10,4 +10,8 @@ object Constants {
 
     const val NOTIF_CHANNEL_ID = "task_reminders"
     const val SYNC_WORK_NAME = "task_sync_work"
+
+    // Persistent "next few tasks" summary notification (channel + fixed id).
+    const val NOTIF_SUMMARY_CHANNEL_ID = "task_summary"
+    const val SUMMARY_NOTIFICATION_ID = 1
 }

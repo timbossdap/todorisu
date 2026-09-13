@@ -57,6 +57,12 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         }
 
         TokenStore.saveScheduledTaskIds(ctx, nowScheduled)
+
+        // Refresh the persistent "next few tasks" notification every time we
+        // sync, so it never goes stale even if the app is closed for days.
+        val upcoming = SupabaseApi.fetchUpcomingTasks(accessToken, userId)
+        NotificationHelper.updateSummaryNotification(ctx, upcoming)
+
         return Result.success()
     }
 

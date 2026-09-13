@@ -128,16 +128,40 @@ if (menuChangelogBtn) {
 }
 
 // Settings Modal Controller
+function updateThemeTabSubtitle() {
+  const sub = $("tabSubTheme");
+  if (!sub || typeof ThemeManager === "undefined") return;
+  const mode = ThemeManager.getPrefs().mode || "system";
+  sub.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
+}
+
 function openSettings(tab = "notifications") {
   closeProfileDropdown();
   const modal = $("settingsModal");
   if (modal) modal.classList.remove("hidden");
+  updateThemeTabSubtitle();
   switchSettingsTab(tab);
+}
+
+// Mobile entry point (gear icon in the Browse drawer): show the settings
+// LIST first, like the Android app, instead of jumping straight into a tab.
+function openSettingsList() {
+  closeProfileDropdown();
+  const modal = $("settingsModal");
+  if (modal) {
+    modal.classList.remove("hidden");
+    modal.querySelector(".settings-modal-card")?.classList.remove("detail-open");
+  }
+  $("settingsBackBtn")?.classList.add("hidden");
+  updateThemeTabSubtitle();
 }
 
 function closeSettings() {
   const modal = $("settingsModal");
-  if (modal) modal.classList.add("hidden");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.querySelector(".settings-modal-card")?.classList.remove("detail-open");
+  }
 }
 
 function switchSettingsTab(tab) {
@@ -146,10 +170,17 @@ function switchSettingsTab(tab) {
     btn.classList.toggle("active", btn.dataset.tab === tab);
   });
 
-  const activeBtn = document.querySelector(`.settings-tab-btn[data-tab="${tab}"] span`);
+  const activeBtn = document.querySelector(`.settings-tab-btn[data-tab="${tab}"] .settings-tab-text > span`);
   const title = activeBtn ? activeBtn.textContent : (tab.charAt(0).toUpperCase() + tab.slice(1));
   const titleEl = $("settingsHeaderTitle");
   if (titleEl) titleEl.textContent = title;
+
+  // On mobile, picking a tab slides from the list into the full-screen
+  // detail view; the back arrow returns to the list.
+  if (window.innerWidth <= 780) {
+    $("settingsModal")?.querySelector(".settings-modal-card")?.classList.add("detail-open");
+    $("settingsBackBtn")?.classList.remove("hidden");
+  }
 
   renderSettingsTabContent(tab);
 }
@@ -160,6 +191,14 @@ document.querySelectorAll(".settings-tab-btn").forEach(btn => {
     switchSettingsTab(btn.dataset.tab);
   });
 });
+
+const settingsBackBtnEl = $("settingsBackBtn");
+if (settingsBackBtnEl) {
+  settingsBackBtnEl.addEventListener("click", () => {
+    $("settingsModal")?.querySelector(".settings-modal-card")?.classList.remove("detail-open");
+    settingsBackBtnEl.classList.add("hidden");
+  });
+}
 
 const closeSettingsModalBtn = $("closeSettingsModal");
 if (closeSettingsModalBtn) {
@@ -172,6 +211,35 @@ if (settingsModalOverlay) {
     if (e.target === settingsModalOverlay) closeSettings();
   });
 }
+
+const mobileSettingsBtnEl = $("mobileSettingsBtn");
+if (mobileSettingsBtnEl) {
+  mobileSettingsBtnEl.addEventListener("click", () => {
+    $("sidebar")?.classList.remove("open");
+    openSettingsList();
+  });
+}
+
+const browseTemplatesBtnEl = $("browseTemplatesBtn");
+if (browseTemplatesBtnEl) {
+  browseTemplatesBtnEl.addEventListener("click", () => {
+    alert("Templates aren't available in this personal build yet - add tasks manually or ask for a project template feature.");
+  });
+}
+
+// Favorites / My Projects collapse chevrons
+function wireCollapseChevron(headerId, chevronId) {
+  const header = $(headerId);
+  const chevron = $(chevronId);
+  if (!header || !chevron) return;
+  chevron.addEventListener("click", (e) => {
+    e.stopPropagation();
+    header.classList.toggle("collapsed");
+    chevron.classList.toggle("collapsed");
+  });
+}
+wireCollapseChevron("favoritesHeader", "favoritesChevron");
+wireCollapseChevron("projectsHeader", "projectsChevron");
 
 const settingsSearchInput = $("settingsSearchInput");
 if (settingsSearchInput) {
@@ -323,6 +391,7 @@ function renderSettingsTabContent(tab) {
     container.querySelectorAll("#modalModeSegmented button").forEach(btn => {
       btn.addEventListener("click", () => {
         ThemeManager.setMode(btn.dataset.mode);
+        updateThemeTabSubtitle();
         renderSettingsTabContent("theme");
       });
     });

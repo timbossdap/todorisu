@@ -129,6 +129,7 @@ button, input, select, textarea {
   position: relative;
 }
 .icon-btn-small:hover { background: var(--app-hover); color: var(--app-text-primary); }
+.mobile-only-btn { display: none; }
 
 /* ---------- Sidebar ---------- */
 .sidebar {
@@ -297,6 +298,15 @@ button, input, select, textarea {
   padding: 0 4px; line-height: 1; border-radius: 4px;
 }
 .section-add-btn:hover { color: var(--app-text-primary); background: var(--app-hover); }
+.section-chevron-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--app-text-muted); padding: 0 2px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.section-chevron-btn:hover { color: var(--app-text-primary); background: var(--app-hover); }
+.section-chevron-btn svg { transition: transform .15s ease; }
+.section-chevron-btn.collapsed svg { transform: rotate(180deg); }
+.collapsible-header.collapsed + .projects { display: none; }
 
 .favorite-icon {
   font-size: 14px;
@@ -1412,6 +1422,54 @@ input:checked + .slider:before {
     color: var(--tag-color, var(--app-text-secondary));
   }
   .task-delete { opacity: 1; }
+
+  /* Top row: show gear (Settings) instead of the desktop collapse icon */
+  .desktop-only-btn { display: none; }
+  .mobile-only-btn { display: flex; }
+
+  /* The bottom tab bar already covers Inbox/Today/Upcoming - don't duplicate
+     them inside the Browse drawer. */
+  .sidebar .views .nav-item[data-view="inbox"],
+  .sidebar .views .nav-item[data-view="today"],
+  .sidebar .views .nav-item[data-view="upcoming"] {
+    display: none;
+  }
+
+  /* Card-style rows for the drawer's utility items (Search, Filters & Labels,
+     Reporting) and the bottom links, matching the Android app look */
+  .sidebar-search .search-item,
+  .sidebar .views .nav-item[data-view="filters"],
+  .sidebar .views .nav-item[data-view="reporting"],
+  .sidebar .project-item,
+  .sidebar-link-btn {
+    background: var(--app-hover);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .sidebar .views { gap: 8px; }
+  .sidebar-link-btn { font-size: 14px; }
+
+  /* Favorites / My Projects section headers with a collapse chevron */
+  .collapsible-header { cursor: pointer; }
+
+  /* ---- Settings: full-screen list -> detail navigation ---- */
+  .settings-modal-card {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  .settings-modal-sidebar {
+    width: 100%;
+  }
+  .settings-search-wrap { display: none; }
+  .settings-sidebar-bottom { display: none; }
+  .settings-modal-content { display: none; }
+  .settings-modal-card.detail-open .settings-modal-sidebar { display: none; }
+  .settings-modal-card.detail-open .settings-modal-content { display: flex; }
+  .settings-back-btn.hidden { display: none !important; }
 }
 
 /* ========== FILTERS & LABELS VIEW (Matching Todoist Screenshot) ========== */
@@ -1911,6 +1969,36 @@ input:checked + .slider:before {
 .settings-tab-btn.active svg {
   stroke: #dc4c3e;
 }
+.settings-tab-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.3;
+  text-align: left;
+}
+.settings-tab-text small {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: #888888;
+}
+.settings-section-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #dc4c3e;
+  padding: 16px 12px 6px;
+}
+.settings-back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888888;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+.settings-back-btn:hover { color: #ffffff; background: #2d2d2d; }
 .settings-sidebar-bottom {
   padding: 12px 14px 0;
   border-top: 1px solid #2e2e2e;

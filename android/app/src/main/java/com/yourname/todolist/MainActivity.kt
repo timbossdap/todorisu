@@ -35,8 +35,13 @@ class MainActivity : Activity() {
         // If we already have a saved session from a previous run, make sure
         // the periodic sync is scheduled (covers the case where the app was
         // reinstalled or data cleared and then the WebView restores login).
+        // Also run an immediate one-time sync so the persistent notification
+        // is up to date as soon as the app is opened, not just every 15 min.
         if (TokenStore.accessToken(this) != null) {
             schedulePeriodicSync()
+            WorkManager.getInstance(applicationContext).enqueue(
+                androidx.work.OneTimeWorkRequestBuilder<SyncWorker>().build()
+            )
         }
     }
 
@@ -76,6 +81,7 @@ class MainActivity : Activity() {
         fun onSignOut() {
             TokenStore.clear(applicationContext)
             WorkManager.getInstance(applicationContext).cancelUniqueWork(Constants.SYNC_WORK_NAME)
+            NotificationHelper.cancelSummaryNotification(applicationContext)
         }
     }
 }
