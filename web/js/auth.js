@@ -33,14 +33,9 @@ async function onSignedIn(session) {
   $("authScreen").classList.add("hidden");
   $("app").classList.remove("hidden");
 
-  const name = currentUser.email ? (currentUser.email.split("@")[0] || "Timothy") : "Timothy";
-  const capitalName = name.charAt(0).toUpperCase() + name.slice(1);
-  const userNameEl = $("userName");
-  if (userNameEl) userNameEl.textContent = capitalName;
-  const userAvatarEl = $("userAvatar");
-  if (userAvatarEl) userAvatarEl.textContent = capitalName.charAt(0);
-  const menuUserNameEl = $("menuUserName");
-  if (menuUserNameEl) menuUserNameEl.textContent = `${capitalName} Ng`;
+  if (typeof applyAvatarDisplay === "function") {
+    applyAvatarDisplay(currentUser);
+  }
 
   if (window.AndroidBridge && window.AndroidBridge.onAuth) {
     window.AndroidBridge.onAuth(session.access_token, session.refresh_token, session.user.id);
