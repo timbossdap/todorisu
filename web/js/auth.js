@@ -55,7 +55,47 @@ if (signOutBtnEl) {
   signOutBtnEl.addEventListener("click", handleSignOut);
 }
 
+// Google / Gmail Sign In
+const authGoogleBtn = $("authGoogleBtn");
+if (authGoogleBtn) {
+  authGoogleBtn.addEventListener("click", async () => {
+    $("authError").textContent = "";
+    authGoogleBtn.disabled = true;
+    try {
+      const redirectUrl = window.location.origin + window.location.pathname;
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent"
+          }
+        }
+      });
+      if (error) {
+        $("authError").textContent = error.message;
+        authGoogleBtn.disabled = false;
+      }
+    } catch (err) {
+      $("authError").textContent = err.message || "Failed to start Google sign-in.";
+      authGoogleBtn.disabled = false;
+    }
+  });
+}
+
 (async () => {
   const { data } = await sb.auth.getSession();
-  if (data.session) onSignedIn(data.session);
+  if (data?.session) {
+    onSignedIn(data.session);
+  }
+
+  // Clean OAuth tokens from URL after Google redirect
+  if (window.location.hash && (window.location.hash.includes("access_token") || window.location.hash.includes("error"))) {
+    setTimeout(() => {
+      try {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      } catch (_) {}
+    }, 500);
+  }
 })();

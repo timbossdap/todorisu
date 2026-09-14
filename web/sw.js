@@ -1,6 +1,7 @@
-const CACHE = "tasks-v5";
+const CACHE = "tasks-v6";
 const FILES = [
   "./index.html",
+  "./outlook-addin.html",
   "./style.css",
   "./config.js",
   "./theme.js",

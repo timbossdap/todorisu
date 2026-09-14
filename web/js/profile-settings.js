@@ -564,85 +564,138 @@ function renderSettingsTabContent(tab) {
     }
   } else if (tab === "integrations") {
     const outlook = CalendarManager.getOutlookConfig();
-    container.innerHTML = `
-      <div class="settings-group-heading" style="margin-top: 0;">Integrations</div>
-      <div class="settings-subtext">Connect Todorisu with external calendars and productivity services.</div>
+    const isGoogleUser = (currentUser?.app_metadata?.provider === "google") || (currentUser?.identities || []).some(i => i.provider === "google");
+    const userEmail = currentUser?.email || "";
 
-      <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;">
-        <!-- Microsoft Outlook Card -->
-        <div style="background: #242424; border: 1px solid ${outlook.connected ? 'rgba(0,120,212,0.4)' : '#333'}; border-radius: 8px; padding: 18px;">
+    container.innerHTML = `
+      <div class="settings-group-heading" style="margin-top: 0;">Integrations & Add-ins</div>
+      <div class="settings-subtext">Turn emails into tasks and synchronize your schedule across Microsoft Outlook, Gmail, and calendars.</div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+        <!-- 1. Microsoft Outlook Add-in (Todoist-style) -->
+        <div style="background: #242424; border: 1px solid rgba(0,120,212,0.4); border-radius: 8px; padding: 18px;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div style="display: flex; gap: 12px; align-items: center;">
-              <svg width="32" height="32" viewBox="0 0 48 48">
+              <svg width="34" height="34" viewBox="0 0 48 48">
                 <path fill="#0078d4" d="M6 9a3 3 0 0 1 3-3h18v36H9a3 3 0 0 1-3-3V9z"/>
                 <path fill="#28a8ea" d="M27 6h12a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H27V6z"/>
                 <circle cx="16.5" cy="24" r="7.5" fill="#fff"/>
                 <path fill="#0078d4" d="M16.5 19a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/>
               </svg>
               <div>
-                <div style="font-weight: 600; font-size: 14px; color: #fff;">Microsoft Outlook Calendar</div>
-                <div style="font-size: 12px; color: #888; margin-top: 2px;">Sync work, school, and personal Outlook events directly into your agenda.</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-weight: 600; font-size: 15px; color: #fff;">Microsoft Outlook Add-in</span>
+                  <span style="background: rgba(0,120,212,0.2); color: #28a8ea; border: 1px solid rgba(0,120,212,0.3); font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Todoist Style</span>
+                </div>
+                <div style="font-size: 12px; color: #aaa; margin-top: 3px;">Turn emails into tasks with one click and manage your agenda directly from the Outlook ribbon.</div>
               </div>
             </div>
-            <button id="integrationsOutlookActionBtn" class="${outlook.connected ? 'btn-secondary' : 'btn-primary'}" style="font-size: 12px; padding: 6px 14px;">
-              ${outlook.connected ? "Manage" : "Connect"}
-            </button>
-          </div>
-          ${outlook.connected ? `
-            <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #303030; display: flex; justify-content: space-between; font-size: 12px; color: #aaa;">
-              <span>Status: <strong style="color: #4caf50;">Connected</strong> (${outlook.eventCount || 0} events)</span>
-              <span>Last synced: ${outlook.lastSynced ? new Date(outlook.lastSynced).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '—'}</span>
+            <div style="display: flex; gap: 8px;">
+              <button id="previewAddinBtn" class="btn-secondary" style="font-size: 12px; padding: 6px 12px;">Preview Add-in</button>
+              <button id="downloadManifestBtn" class="btn-primary" style="background: #0078d4; font-size: 12px; padding: 6px 14px;">Download manifest.xml</button>
             </div>
-          ` : ''}
+          </div>
+
+          <details class="outlook-help-dropdown" style="margin-top: 14px; border-top: 1px solid #333; padding-top: 10px;">
+            <summary>How to install the Todorisu add-in in Microsoft Outlook</summary>
+            <ol>
+              <li>Click <strong>Download manifest.xml</strong> above to save the add-in configuration file.</li>
+              <li>In <strong>Outlook on the web</strong> or <strong>Outlook Desktop (Windows/Mac)</strong>, click <strong>Get Add-ins</strong> on the ribbon (or <strong>Apps</strong> → <strong>Add apps</strong>).</li>
+              <li>Click <strong>My add-ins</strong> on the left, scroll down to <strong>Custom add-ins</strong>, and choose <strong>Add from file...</strong></li>
+              <li>Select your downloaded <code>manifest.xml</code> and click <strong>Install</strong>.</li>
+              <li>Open any email — the <strong>Add to Todorisu</strong> button will appear right on your ribbon!</li>
+            </ol>
+          </details>
         </div>
 
-        <!-- Google Calendar Card -->
-        <div style="background: #242424; border: 1px solid #333; border-radius: 8px; padding: 18px;">
+        <!-- 2. Real Google / Gmail Integration -->
+        <div style="background: #242424; border: 1px solid ${isGoogleUser ? 'rgba(76,175,80,0.4)' : '#333'}; border-radius: 8px; padding: 18px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; gap: 12px; align-items: center;">
               <svg width="32" height="32" viewBox="0 0 48 48">
-                <rect width="40" height="40" x="4" y="4" rx="8" fill="#fff"/>
-                <path fill="#4285F4" d="M34 11H14a3 3 0 0 0-3 3v20a3 3 0 0 0 3 3h20a3 3 0 0 0 3-3V14a3 3 0 0 0-3-3z"/>
-                <path fill="#fff" d="M21 21h6v6h-6z"/>
+                <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.9c-.5 2.8-2.1 5.1-4.4 6.7v5.5h7.1c4.2-3.8 6.5-9.5 6.5-16.2z"/>
+                <path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-7.1-5.5c-2 1.3-4.5 2.1-7.4 2.1-5.7 0-10.5-3.8-12.2-9h-7.3v5.7C7.7 40.9 15.2 46 24 46z"/>
+                <path fill="#FBBC05" d="M11.8 28.3c-.4-1.3-.7-2.7-.7-4.1s.2-2.8.7-4.1v-5.7H4.5C3 17.3 2.2 20.5 2.2 24s.8 6.7 2.3 9.6l7.3-5.3z"/>
+                <path fill="#EA4335" d="M24 10.6c3.2 0 6.1 1.1 8.4 3.3l6.3-6.3C34.9 4.2 29.9 2 24 2 15.2 2 7.7 7.1 4.5 14.4l7.3 5.7c1.7-5.2 6.5-9.5 12.2-9.5z"/>
               </svg>
               <div>
-                <div style="font-weight: 600; font-size: 14px; color: #fff;">Google Calendar</div>
-                <div style="font-size: 12px; color: #888; margin-top: 2px;">Subscribe to Google Calendar via secret iCal address.</div>
+                <div style="font-weight: 600; font-size: 14px; color: #fff;">Google &amp; Gmail Account</div>
+                <div style="font-size: 12px; color: #888; margin-top: 2px;">
+                  ${isGoogleUser ? `Connected as <strong>${escapeHtml(userEmail)}</strong>` : "Log in or connect your Gmail / Google account for 1-click sync."}
+                </div>
               </div>
             </div>
-            <button id="integrationsGCalBtn" class="btn-secondary" style="font-size: 12px; padding: 6px 14px;">Add Feed</button>
+            <button id="integrationsGoogleActionBtn" class="${isGoogleUser ? 'btn-secondary' : 'btn-primary'}" style="font-size: 12px; padding: 6px 14px;">
+              ${isGoogleUser ? "Connected ✓" : "Sign in with Google"}
+            </button>
           </div>
         </div>
 
-        <!-- Apple Calendar Card -->
+        <!-- 3. Microsoft Outlook Calendar Feed -->
         <div style="background: #242424; border: 1px solid #333; border-radius: 8px; padding: 18px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; gap: 12px; align-items: center;">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff">
-                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0078d4" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
               </svg>
               <div>
-                <div style="font-weight: 600; font-size: 14px; color: #fff;">Apple Calendar / Webcal</div>
-                <div style="font-size: 12px; color: #888; margin-top: 2px;">Sync iCloud or Webcal subscriptions.</div>
+                <div style="font-weight: 600; font-size: 14px; color: #fff;">Outlook Calendar ICS Sync</div>
+                <div style="font-size: 12px; color: #888; margin-top: 2px;">Sync meetings and classes into Upcoming &amp; Today views.</div>
               </div>
             </div>
-            <button id="integrationsAppleCalBtn" class="btn-secondary" style="font-size: 12px; padding: 6px 14px;">Add Feed</button>
+            <button id="integrationsOutlookCalActionBtn" class="btn-secondary" style="font-size: 12px; padding: 6px 14px;">
+              ${outlook.connected ? "Configure Sync" : "Connect Calendar"}
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Google Calendar & Apple Calendar Feeds -->
+        <div style="background: #242424; border: 1px solid #333; border-radius: 8px; padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <div>
+                <div style="font-weight: 600; font-size: 14px; color: #fff;">External iCal / Webcal Feeds</div>
+                <div style="font-size: 12px; color: #888; margin-top: 2px;">Subscribe to Google Calendar or Apple Calendar ICS feeds.</div>
+              </div>
+            </div>
+            <button id="integrationsOtherCalBtn" class="btn-secondary" style="font-size: 12px; padding: 6px 14px;">Add Feed</button>
           </div>
         </div>
       </div>
     `;
 
-    $("integrationsOutlookActionBtn")?.addEventListener("click", () => {
+    $("downloadManifestBtn")?.addEventListener("click", () => {
+      downloadOutlookManifest();
+    });
+
+    $("previewAddinBtn")?.addEventListener("click", () => {
+      window.open("outlook-addin.html", "_blank", "width=380,height=620");
+    });
+
+    $("integrationsGoogleActionBtn")?.addEventListener("click", async () => {
+      if (isGoogleUser) {
+        alert(`You are signed in with Google (${userEmail}).`);
+      } else {
+        const redirectUrl = window.location.origin + window.location.pathname;
+        await sb.auth.signInWithOAuth({
+          provider: "google",
+          options: { redirectTo: redirectUrl, queryParams: { access_type: "offline", prompt: "consent" } }
+        });
+      }
+    });
+
+    $("integrationsOutlookCalActionBtn")?.addEventListener("click", () => {
       switchSettingsTab("calendars");
     });
-    $("integrationsGCalBtn")?.addEventListener("click", () => {
+
+    $("integrationsOtherCalBtn")?.addEventListener("click", () => {
       closeSettings();
       if (typeof openCalendarModal === "function") openCalendarModal();
     });
-    $("integrationsAppleCalBtn")?.addEventListener("click", () => {
-      closeSettings();
-      if (typeof openCalendarModal === "function") openCalendarModal();
-    });
+
   } else if (tab === "account") {
     renderAccountTab(container);
   } else if (tab === "general") {
@@ -757,6 +810,115 @@ const PROVIDER_ICONS = {
   apple: `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M16.2 1c.1 1.1-.3 2.2-1 3-.7.8-1.9 1.5-3 1.4-.1-1.1.4-2.2 1-2.9.8-.9 2-1.5 3-1.5zM19.7 17.2c-.5 1.1-.7 1.6-1.4 2.6-1 1.4-2.3 3.1-4 3.1-1.5 0-1.9-1-3.9-1s-2.5 1-4 1c-1.6 0-2.9-1.5-3.9-2.9C.5 17.4-.6 13 .9 10c.7-1.5 2.1-2.5 3.5-2.5 1.5 0 2.5 1 3.7 1 1.2 0 2-1 3.9-1 1.3 0 2.7.7 3.7 1.9-3.3 1.8-2.8 6.4.5 7.8z"/></svg>`
 };
 
+// Function to dynamically generate and download Outlook Add-in manifest XML
+function downloadOutlookManifest() {
+  const origin = window.location.origin || "https://todorisu.app";
+  const taskpaneUrl = `${origin}/outlook-addin.html`;
+  const manifestXml = `<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
+  xsi:type="MailApp">
+  <Id>b29f0e15-7762-42da-9118-8d59132194d2</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Todorisu</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="Todorisu for Outlook"/>
+  <Description DefaultValue="Todoist-style task manager for Microsoft Outlook. Turn emails into tasks, schedule follow-ups, and manage your agenda right inside your inbox."/>
+  <IconUrl DefaultValue="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2705.png"/>
+  <HighResolutionIconUrl DefaultValue="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2705.png"/>
+  <SupportUrl DefaultValue="${origin}"/>
+  <AppDomains>
+    <AppDomain>https://krhdqranidmepepyuxti.supabase.co</AppDomain>
+    <AppDomain>https://cdn.jsdelivr.net</AppDomain>
+    <AppDomain>${origin}</AppDomain>
+  </AppDomains>
+  <Hosts>
+    <Host Name="Mailbox"/>
+  </Hosts>
+  <Requirements>
+    <Sets>
+      <Set Name="Mailbox" MinVersion="1.1"/>
+    </Sets>
+  </Requirements>
+  <FormSettings>
+    <Form xsi:type="ItemRead">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="${taskpaneUrl}"/>
+        <RequestedHeight>450</RequestedHeight>
+      </DesktopSettings>
+    </Form>
+  </FormSettings>
+  <Permissions>ReadWriteItem</Permissions>
+  <Rule xsi:type="RuleCollection" Mode="Or">
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
+    <Rule xsi:type="ItemIs" ItemType="Appointment" FormType="Read"/>
+  </Rule>
+  <DisableEntityHighlighting>false</DisableEntityHighlighting>
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="MailHost">
+        <DesktopFormFactor>
+          <ExtensionPoint xsi:type="MessageReadCommandSurface">
+            <OfficeTab id="TabDefault">
+              <Group id="todorisuGroup">
+                <Label resid="groupLabel"/>
+                <Control xsi:type="Button" id="todorisuAddBtn">
+                  <Label resid="btnLabel"/>
+                  <Supertip>
+                    <Title resid="btnTitle"/>
+                    <Description resid="btnDesc"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="icon16"/>
+                    <bt:Image size="32" resid="icon32"/>
+                    <bt:Image size="80" resid="icon80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="taskpaneUrl"/>
+                    <SupportsPinning>true</SupportsPinning>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="icon16" DefaultValue="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2705.png"/>
+        <bt:Image id="icon32" DefaultValue="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2705.png"/>
+        <bt:Image id="icon80" DefaultValue="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2705.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="taskpaneUrl" DefaultValue="${taskpaneUrl}"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="groupLabel" DefaultValue="Todorisu"/>
+        <bt:String id="btnLabel" DefaultValue="Add to Todorisu"/>
+        <bt:String id="btnTitle" DefaultValue="Todorisu Task Manager"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="btnDesc" DefaultValue="Add this email as a task in Todorisu and manage your agenda without leaving Outlook."/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>`;
+
+  const blob = new Blob([manifestXml], { type: "application/xml" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "manifest.xml";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function getUserIdentities() {
   return (currentUser && currentUser.identities) || [];
 }
@@ -768,17 +930,18 @@ function findIdentity(provider) {
 function accountDisplayName() {
   const meta = (currentUser && currentUser.user_metadata) || {};
   if (meta.full_name) return meta.full_name;
+  if (meta.name) return meta.name;
   const email = currentUser?.email || "timothy@example.com";
   const name = email.split("@")[0] || "Timothy";
   const capitalName = name.charAt(0).toUpperCase() + name.slice(1);
-  return `${capitalName} Ng`;
+  return `${capitalName}`;
 }
 
-// Keep the sidebar/dropdown avatar in sync with photo + name changes made in Account settings.
+// Keep the sidebar/dropdown avatar in sync with photo + name changes made in Account settings or Google OAuth.
 function applyAvatarDisplay(user) {
   const meta = (user && user.user_metadata) || {};
-  const avatarUrl = meta.avatar_url || null;
-  const displayName = meta.full_name || accountDisplayName();
+  const avatarUrl = meta.avatar_url || meta.picture || null;
+  const displayName = meta.full_name || meta.name || accountDisplayName();
   const initial = displayName.charAt(0).toUpperCase();
 
   const userAvatarEl = $("userAvatar");

@@ -102,6 +102,53 @@ button, input, select, textarea {
 }
 .auth-error { color: #ff8c82; font-size: 13px; min-height: 18px; margin-top: 10px; }
 
+/* Real Google / Gmail Auth Button */
+.google-auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  background: #ffffff;
+  color: #1f1f1f;
+  border: 1px solid #dadce0;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+.google-auth-btn:hover {
+  background: #f8f9fa;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.google-auth-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 14px 0 16px;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--app-border);
+}
+.auth-divider span {
+  padding: 0 10px;
+  font-size: 11px;
+  color: var(--app-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
 /* ---------- Layout ---------- */
 .app { display: flex; height: 100vh; position: relative; overflow: hidden; }
 
