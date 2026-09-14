@@ -168,11 +168,62 @@ $("taskEditCheck").addEventListener("click", async () => {
   }
 });
 
+// Recurring Task Deletion Confirmation Dialog
+let pendingDeleteTask = null;
+let pendingDeleteOnDone = null;
+
+function promptDeleteRecurring(task, onDone) {
+  pendingDeleteTask = task;
+  pendingDeleteOnDone = onDone;
+  const modal = $("deleteRecurringModal");
+  const titleEl = $("deleteRecurringTaskTitle");
+  if (titleEl) titleEl.textContent = task.title || "Task";
+  if (modal) modal.classList.remove("hidden");
+}
+
+function closeDeleteRecurringModal() {
+  const modal = $("deleteRecurringModal");
+  if (modal) modal.classList.add("hidden");
+  pendingDeleteTask = null;
+  pendingDeleteOnDone = null;
+}
+
+$("closeDeleteRecurringModal")?.addEventListener("click", closeDeleteRecurringModal);
+$("deleteRecurringCancelBtn")?.addEventListener("click", closeDeleteRecurringModal);
+$("deleteRecurringModal")?.addEventListener("click", (e) => {
+  if (e.target === $("deleteRecurringModal")) closeDeleteRecurringModal();
+});
+
+$("deleteRecurringThisOnlyBtn")?.addEventListener("click", async () => {
+  if (pendingDeleteTask) {
+    const task = pendingDeleteTask;
+    const cb = pendingDeleteOnDone;
+    closeDeleteRecurringModal();
+    await deleteTaskOccurrence(task.id);
+    if (typeof cb === "function") cb();
+  }
+});
+
+$("deleteRecurringAllBtn")?.addEventListener("click", async () => {
+  if (pendingDeleteTask) {
+    const task = pendingDeleteTask;
+    const cb = pendingDeleteOnDone;
+    closeDeleteRecurringModal();
+    await deleteTaskSeries(task.id);
+    if (typeof cb === "function") cb();
+  }
+});
+
 $("taskEditDelete").addEventListener("click", async () => {
   if (editingTaskId) {
     const id = editingTaskId;
-    closeTaskEdit();
-    await deleteTask(id);
+    const t = tasks.find(x => x.id === id);
+    if (t && t.recurrence_rule) {
+      promptDeleteRecurring(t, () => closeTaskEdit());
+    } else {
+      closeTaskEdit();
+      await deleteTask(id);
+    }
   }
 });
 
@@ -310,7 +361,11 @@ function taskRow(t) {
   del.textContent = "✕";
   del.addEventListener("click", (e) => {
     e.stopPropagation();
-    deleteTask(t.id);
+    if (t.recurrence_rule) {
+      promptDeleteRecurring(t);
+    } else {
+      deleteTask(t.id);
+    }
   });
 
   li.addEventListener("click", (e) => {

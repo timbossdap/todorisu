@@ -413,50 +413,236 @@ function renderSettingsTabContent(tab) {
     }
   } else if (tab === "calendars") {
     const timetableEnabled = CalendarManager.isTimetableEnabled();
-    const host = window.location.host || "todorisu.app";
+    const outlook = CalendarManager.getOutlookConfig();
+    const lastSyncFormatted = outlook.lastSynced
+      ? new Date(outlook.lastSynced).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+      : "Never";
+
     container.innerHTML = `
       <div class="settings-group-heading" style="margin-top: 0;">Calendar & Timetable</div>
-      <div class="settings-subtext">View tasks on a visual timetable and synchronize with external calendar apps.</div>
+      <div class="settings-subtext">Synchronize external calendars like Microsoft Outlook to view events alongside your tasks.</div>
 
-      <div class="setting-switch-row" style="border-bottom: 1px solid #282828; padding-bottom: 16px;">
+      <!-- Outlook Calendar Section -->
+      <div class="outlook-calendar-card" style="margin-top: 16px;">
+        <div class="outlook-card-header">
+          <div class="outlook-brand">
+            <svg class="outlook-logo-svg" width="28" height="28" viewBox="0 0 48 48">
+              <path fill="#0078d4" d="M6 9a3 3 0 0 1 3-3h18v36H9a3 3 0 0 1-3-3V9z"/>
+              <path fill="#28a8ea" d="M27 6h12a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H27V6z"/>
+              <circle cx="16.5" cy="24" r="7.5" fill="#fff"/>
+              <path fill="#0078d4" d="M16.5 19a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/>
+            </svg>
+            <div>
+              <div class="outlook-brand-title">Microsoft Outlook Calendar</div>
+              <div class="outlook-brand-sub">${outlook.connected ? "Active synchronization" : "Connect your Outlook or Microsoft 365 calendar"}</div>
+            </div>
+          </div>
+          <span class="outlook-status-badge ${outlook.connected ? outlook.syncStatus : 'disconnected'}">
+            ${outlook.connected ? (outlook.syncStatus === "syncing" ? "Syncing..." : outlook.syncStatus === "error" ? "Error" : "Connected") : "Disconnected"}
+          </span>
+        </div>
+
+        ${outlook.connected ? `
+          <div class="outlook-connected-details" style="display:block;">
+            <div class="outlook-info-row">
+              <span class="outlook-info-label">Status:</span>
+              <span class="outlook-info-val" style="color: #4caf50;">● Connected</span>
+            </div>
+            <div class="outlook-info-row">
+              <span class="outlook-info-label">Last synced:</span>
+              <span class="outlook-info-val">${lastSyncFormatted}</span>
+            </div>
+            <div class="outlook-info-row">
+              <span class="outlook-info-label">Events found:</span>
+              <span class="outlook-info-val">${outlook.eventCount || 0} events</span>
+            </div>
+            <div class="outlook-connected-actions">
+              <button id="settingsOutlookSyncBtn" class="btn-primary-sm">Sync Now</button>
+              <button id="settingsOutlookDisconnectBtn" class="btn-danger-ghost-sm">Disconnect</button>
+            </div>
+          </div>
+        ` : `
+          <div class="outlook-connect-form" style="margin-top: 10px;">
+            <div class="input-with-button">
+              <input type="url" id="settingsOutlookUrlInput" placeholder="Paste Outlook ICS link (https://outlook... or webcal://...)" style="font-size: 12px;" />
+              <button id="settingsOutlookConnectBtn" class="btn-primary">Connect</button>
+            </div>
+            <details class="outlook-help-dropdown">
+              <summary>How to get your Outlook calendar link</summary>
+              <ol>
+                <li>Open Outlook on the web (outlook.office.com or outlook.live.com).</li>
+                <li>Go to <strong>Settings (⚙️) → Calendar → Shared calendars</strong>.</li>
+                <li>Under <strong>Publish a calendar</strong>, choose your calendar and set permission to <em>Can view all details</em>.</li>
+                <li>Click <strong>Publish</strong>, copy the <strong>ICS</strong> link, and paste it here.</li>
+              </ol>
+            </details>
+          </div>
+        `}
+      </div>
+
+      <div class="setting-switch-row" style="border-top: 1px solid #282828; padding-top: 16px; margin-top: 20px;">
         <div>
-          <div class="setting-switch-label">Timetable View</div>
-          <div class="settings-subtext" style="margin: 4px 0 0;">Display scheduled tasks in visual timetable time blocks.</div>
+          <div class="setting-switch-label">Calendar Events in Views</div>
+          <div class="settings-subtext" style="margin: 4px 0 0;">Display scheduled events and meetings in Upcoming and Today views.</div>
         </div>
         <label class="switch">
-          <input type="checkbox" id="modalTimetableToggle" ${timetableEnabled ? "checked" : ""}>
+          <input type="checkbox" id="settingsTimetableToggle" ${timetableEnabled ? "checked" : ""}>
           <span class="slider"></span>
         </label>
       </div>
 
-      <div style="margin-top: 24px;">
-        <div style="font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 6px;">iCalendar Feed URL</div>
-        <div class="settings-subtext" style="margin-bottom: 12px;">Subscribe to this feed in Apple Calendar, Google Calendar, or Outlook.</div>
-        <div style="display: flex; gap: 8px; max-width: 500px;">
-          <input type="text" id="icalFeedInput" readonly value="webcal://${host}/feed.ics" style="flex: 1; background: #262626; border: 1px solid #383838; border-radius: 6px; padding: 8px 12px; color: #ccc; font-size: 12px;" />
-          <button class="btn btn-secondary" id="copyIcalFeedBtn">Copy</button>
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #282828;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <div style="font-size: 13px; font-weight: 600; color: #fff;">Additional Calendar Feeds</div>
+          <button id="settingsOpenCalModalBtn" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;">Manage Feeds</button>
         </div>
+        <div class="settings-subtext">Add custom Google Calendar or Apple Calendar ICS feeds.</div>
       </div>
     `;
 
-    const toggle = $("modalTimetableToggle");
-    if (toggle) {
-      toggle.addEventListener("change", (e) => {
+    // Wire Outlook buttons in Settings
+    const sConnectBtn = $("settingsOutlookConnectBtn");
+    const sUrlInput = $("settingsOutlookUrlInput");
+    if (sConnectBtn && sUrlInput) {
+      sConnectBtn.addEventListener("click", async () => {
+        const val = sUrlInput.value.trim();
+        if (!val) { alert("Please paste an Outlook ICS URL."); return; }
+        sConnectBtn.disabled = true;
+        sConnectBtn.textContent = "Connecting...";
+        try {
+          const events = await CalendarManager.connectOutlook(val);
+          alert(`Outlook Calendar connected! Synced ${events.length} events.`);
+          renderSettingsTabContent("calendars");
+        } catch (err) {
+          alert("Connection error: " + (err.message || "Failed to sync Outlook."));
+          sConnectBtn.disabled = false;
+          sConnectBtn.textContent = "Connect";
+        }
+      });
+    }
+
+    const sSyncBtn = $("settingsOutlookSyncBtn");
+    if (sSyncBtn) {
+      sSyncBtn.addEventListener("click", async () => {
+        sSyncBtn.disabled = true;
+        sSyncBtn.textContent = "Syncing...";
+        try {
+          const events = await CalendarManager.syncOutlook();
+          alert(`Outlook synced! ${events.length} events updated.`);
+          renderSettingsTabContent("calendars");
+        } catch (err) {
+          alert("Sync error: " + err.message);
+          sSyncBtn.disabled = false;
+          sSyncBtn.textContent = "Sync Now";
+        }
+      });
+    }
+
+    const sDisconnectBtn = $("settingsOutlookDisconnectBtn");
+    if (sDisconnectBtn) {
+      sDisconnectBtn.addEventListener("click", () => {
+        if (confirm("Disconnect Outlook Calendar?")) {
+          CalendarManager.disconnectOutlook();
+          renderSettingsTabContent("calendars");
+        }
+      });
+    }
+
+    const sTimetableToggle = $("settingsTimetableToggle");
+    if (sTimetableToggle) {
+      sTimetableToggle.addEventListener("change", (e) => {
         CalendarManager.setTimetableEnabled(e.target.checked);
       });
     }
 
-    const copyBtn = $("copyIcalFeedBtn");
-    if (copyBtn) {
-      copyBtn.addEventListener("click", () => {
-        const input = $("icalFeedInput");
-        if (input) {
-          navigator.clipboard?.writeText(input.value);
-          copyBtn.textContent = "Copied!";
-          setTimeout(() => { copyBtn.textContent = "Copy"; }, 1500);
-        }
+    const sOpenCalModalBtn = $("settingsOpenCalModalBtn");
+    if (sOpenCalModalBtn) {
+      sOpenCalModalBtn.addEventListener("click", () => {
+        closeSettings();
+        if (typeof openCalendarModal === "function") openCalendarModal();
       });
     }
+  } else if (tab === "integrations") {
+    const outlook = CalendarManager.getOutlookConfig();
+    container.innerHTML = `
+      <div class="settings-group-heading" style="margin-top: 0;">Integrations</div>
+      <div class="settings-subtext">Connect Todorisu with external calendars and productivity services.</div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;">
+        <!-- Microsoft Outlook Card -->
+        <div style="background: #242424; border: 1px solid ${outlook.connected ? 'rgba(0,120,212,0.4)' : '#333'}; border-radius: 8px; padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <svg width="32" height="32" viewBox="0 0 48 48">
+                <path fill="#0078d4" d="M6 9a3 3 0 0 1 3-3h18v36H9a3 3 0 0 1-3-3V9z"/>
+                <path fill="#28a8ea" d="M27 6h12a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H27V6z"/>
+                <circle cx="16.5" cy="24" r="7.5" fill="#fff"/>
+                <path fill="#0078d4" d="M16.5 19a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/>
+              </svg>
+              <div>
+                <div style="font-weight: 600; font-size: 14px; color: #fff;">Microsoft Outlook Calendar</div>
+                <div style="font-size: 12px; color: #888; margin-top: 2px;">Sync work, school, and personal Outlook events directly into your agenda.</div>
+              </div>
+            </div>
+            <button id="integrationsOutlookActionBtn" class="${outlook.connected ? 'btn-secondary' : 'btn-primary'}" style="font-size: 12px; padding: 6px 14px;">
+              ${outlook.connected ? "Manage" : "Connect"}
+            </button>
+          </div>
+          ${outlook.connected ? `
+            <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #303030; display: flex; justify-content: space-between; font-size: 12px; color: #aaa;">
+              <span>Status: <strong style="color: #4caf50;">Connected</strong> (${outlook.eventCount || 0} events)</span>
+              <span>Last synced: ${outlook.lastSynced ? new Date(outlook.lastSynced).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '—'}</span>
+            </div>
+          ` : ''}
+        </div>
+
+        <!-- Google Calendar Card -->
+        <div style="background: #242424; border: 1px solid #333; border-radius: 8px; padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <svg width="32" height="32" viewBox="0 0 48 48">
+                <rect width="40" height="40" x="4" y="4" rx="8" fill="#fff"/>
+                <path fill="#4285F4" d="M34 11H14a3 3 0 0 0-3 3v20a3 3 0 0 0 3 3h20a3 3 0 0 0 3-3V14a3 3 0 0 0-3-3z"/>
+                <path fill="#fff" d="M21 21h6v6h-6z"/>
+              </svg>
+              <div>
+                <div style="font-weight: 600; font-size: 14px; color: #fff;">Google Calendar</div>
+                <div style="font-size: 12px; color: #888; margin-top: 2px;">Subscribe to Google Calendar via secret iCal address.</div>
+              </div>
+            </div>
+            <button id="integrationsGCalBtn" class="btn-secondary" style="font-size: 12px; padding: 6px 14px;">Add Feed</button>
+          </div>
+        </div>
+
+        <!-- Apple Calendar Card -->
+        <div style="background: #242424; border: 1px solid #333; border-radius: 8px; padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff">
+                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+              </svg>
+              <div>
+                <div style="font-weight: 600; font-size: 14px; color: #fff;">Apple Calendar / Webcal</div>
+                <div style="font-size: 12px; color: #888; margin-top: 2px;">Sync iCloud or Webcal subscriptions.</div>
+              </div>
+            </div>
+            <button id="integrationsAppleCalBtn" class="btn-secondary" style="font-size: 12px; padding: 6px 14px;">Add Feed</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    $("integrationsOutlookActionBtn")?.addEventListener("click", () => {
+      switchSettingsTab("calendars");
+    });
+    $("integrationsGCalBtn")?.addEventListener("click", () => {
+      closeSettings();
+      if (typeof openCalendarModal === "function") openCalendarModal();
+    });
+    $("integrationsAppleCalBtn")?.addEventListener("click", () => {
+      closeSettings();
+      if (typeof openCalendarModal === "function") openCalendarModal();
+    });
   } else if (tab === "account") {
     renderAccountTab(container);
   } else if (tab === "general") {

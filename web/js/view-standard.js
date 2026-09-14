@@ -36,8 +36,9 @@ function renderStandardView() {
           ` : `
             <div class="calendar-event-item">
               <span class="event-stripe ${evt.stripe || 'red'}"></span>
+              ${evt.isOutlook ? `<span class="outlook-tag">Outlook</span>` : ''}
               ${evt.time ? `<span class="event-time">${evt.time}</span>` : ''}
-              <span class="event-summary">${evt.title}</span>
+              <span class="event-summary" title="${evt.location ? `${evt.title} (${evt.location})` : evt.title}">${evt.title}</span>
             </div>
           `).join("")}
         </div>

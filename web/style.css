@@ -1248,6 +1248,218 @@ button, input, select, textarea {
 }
 .feed-delete-btn:hover { color: #ff8c82; }
 
+/* Microsoft Outlook Calendar Integration Styles */
+.outlook-calendar-card {
+  background: rgba(0, 120, 212, 0.06);
+  border: 1px solid rgba(0, 120, 212, 0.25);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 18px;
+}
+.outlook-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.outlook-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.outlook-logo-svg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.outlook-brand-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+.outlook-brand-sub {
+  font-size: 11px;
+  color: var(--app-text-muted);
+}
+.outlook-status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--app-text-muted);
+}
+.outlook-status-badge.connected {
+  background: rgba(46, 125, 50, 0.2);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+.outlook-status-badge.syncing {
+  background: rgba(0, 120, 212, 0.2);
+  color: #28a8ea;
+}
+.outlook-status-badge.error {
+  background: rgba(220, 76, 62, 0.2);
+  color: #ff8c82;
+}
+.outlook-connected-details {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.outlook-info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.outlook-info-label {
+  color: var(--app-text-secondary);
+}
+.outlook-info-val {
+  font-weight: 500;
+  color: var(--app-text-primary);
+}
+.outlook-connected-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--app-border);
+}
+.btn-primary-sm {
+  background: #0078d4;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-primary-sm:hover { opacity: 0.9; }
+.btn-danger-ghost-sm {
+  background: transparent;
+  color: #dc4c3e;
+  border: 1px solid rgba(220, 76, 62, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-danger-ghost-sm:hover { background: rgba(220, 76, 62, 0.1); }
+.outlook-help-dropdown {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+.outlook-help-dropdown summary {
+  cursor: pointer;
+  color: #0078d4;
+  font-weight: 500;
+  user-select: none;
+}
+.outlook-help-dropdown summary:hover { text-decoration: underline; }
+.outlook-help-dropdown ol {
+  margin: 8px 0 0 16px;
+  padding: 0;
+  line-height: 1.5;
+  color: var(--app-text-secondary);
+}
+.outlook-help-dropdown li {
+  margin-bottom: 4px;
+}
+
+/* Event stripe for Outlook */
+.event-stripe.outlook { background: #0078d4; }
+.calendar-event-item .outlook-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #0078d4;
+  margin-right: 4px;
+}
+
+/* Delete Recurring Task Options */
+.delete-recurring-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.delete-recurring-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+.delete-recurring-btn:hover {
+  border-color: var(--app-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+.delete-recurring-btn.danger:hover {
+  border-color: #dc4c3e;
+  background: rgba(220, 76, 62, 0.08);
+}
+.delete-opt-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+}
+.delete-recurring-btn.danger .delete-opt-title {
+  color: #dc4c3e;
+}
+.delete-opt-desc {
+  font-size: 11px;
+  color: var(--app-text-muted);
+  margin-top: 3px;
+}
+
+/* Reporting Empty State */
+.reporting-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+.reporting-empty-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(46, 125, 50, 0.15);
+  color: #4caf50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.reporting-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-primary);
+  margin-bottom: 6px;
+}
+.reporting-empty-sub {
+  font-size: 13px;
+  color: var(--app-text-secondary);
+  max-width: 380px;
+  line-height: 1.4;
+}
+
 /* Reschedule options */
 .reschedule-options {
   display: flex;

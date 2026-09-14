@@ -86,6 +86,9 @@ $("displayManageCalendar").addEventListener("click", () => {
 function openCalendarModal() {
   $("calendarModal").classList.remove("hidden");
   $("modalTimetableToggle").checked = CalendarManager.isTimetableEnabled();
+  if (typeof CalendarManager.updateOutlookUI === "function") {
+    CalendarManager.updateOutlookUI();
+  }
   renderConnectedFeeds();
 }
 $("closeCalendarModal").addEventListener("click", () => $("calendarModal").classList.add("hidden"));

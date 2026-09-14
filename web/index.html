@@ -310,23 +310,22 @@
           <svg class="chevron-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
         <button class="filter-pill" id="reportingProjectFilter">
-          <span># All projects</span>
+          <span id="reportingProjectLabel"># All projects</span>
           <svg class="chevron-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
-        <button class="filter-pill">
+        <button class="filter-pill" id="reportingEveryoneFilter">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           <span>Everyone</span>
           <svg class="chevron-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
-        <div class="filter-pill active-pill">
+        <div class="filter-pill active-pill" id="reportingCompletedStatusPill">
           <span class="pill-check-icon">✓</span>
-          <span>Completed tasks</span>
+          <span id="reportingCompletedCountText">Completed tasks</span>
           <span class="status-dot"></span>
-          <span class="clear-pill">✕</span>
         </div>
-        <button class="filter-pill">
+        <button class="filter-pill" id="reportingDateFilter">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span>Any date</span>
+          <span id="reportingDateLabel">Any date</span>
           <svg class="chevron-svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
       </div>
@@ -705,23 +704,77 @@
       <button id="closeCalendarModal" class="close-btn">✕</button>
     </div>
     <div class="modal-body">
-      <p class="modal-hint">Sync your school schedule, Google Calendar, Outlook, or Canvas feeds to see classes and events side by side with your tasks.</p>
+      <!-- Microsoft Outlook Calendar Integration -->
+      <div class="outlook-calendar-card">
+        <div class="outlook-card-header">
+          <div class="outlook-brand">
+            <svg class="outlook-logo-svg" width="24" height="24" viewBox="0 0 48 48">
+              <path fill="#0078d4" d="M6 9a3 3 0 0 1 3-3h18v36H9a3 3 0 0 1-3-3V9z"/>
+              <path fill="#28a8ea" d="M27 6h12a3 3 0 0 1 3 3v30a3 3 0 0 1-3 3H27V6z"/>
+              <circle cx="16.5" cy="24" r="7.5" fill="#fff"/>
+              <path fill="#0078d4" d="M16.5 19a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/>
+            </svg>
+            <div>
+              <div class="outlook-brand-title">Microsoft Outlook Calendar</div>
+              <div class="outlook-brand-sub" id="outlookSyncStatusText">Not connected</div>
+            </div>
+          </div>
+          <span class="outlook-status-badge" id="outlookStatusBadge">Disconnected</span>
+        </div>
 
-      <div class="form-group">
-        <label>School Timetable (Demo schedule)</label>
+        <div id="outlookConnectedDetails" class="outlook-connected-details hidden">
+          <div class="outlook-info-row">
+            <span class="outlook-info-label">Calendar:</span>
+            <span class="outlook-info-val" id="outlookCalendarNameText">Outlook Calendar</span>
+          </div>
+          <div class="outlook-info-row">
+            <span class="outlook-info-label">Last synced:</span>
+            <span class="outlook-info-val" id="outlookLastSyncText">—</span>
+          </div>
+          <div class="outlook-info-row">
+            <span class="outlook-info-label">Events found:</span>
+            <span class="outlook-info-val" id="outlookEventsCountText">0</span>
+          </div>
+          <div class="outlook-connected-actions">
+            <button id="outlookSyncNowBtn" class="btn-primary-sm">Sync Now</button>
+            <button id="outlookDisconnectBtn" class="btn-danger-ghost-sm">Disconnect</button>
+          </div>
+        </div>
+
+        <div id="outlookConnectForm" class="outlook-connect-form">
+          <p class="modal-hint" style="margin-bottom: 8px;">Connect your Outlook.com or Microsoft 365 work/school calendar to sync meetings and classes into Todorisu.</p>
+          <div class="input-with-button">
+            <input type="url" id="outlookFeedUrl" placeholder="https://outlook.office365.com/.../reachcalendar.ics or webcal://..." />
+            <button id="connectOutlookBtn" class="btn-primary">Connect</button>
+          </div>
+          <details class="outlook-help-dropdown">
+            <summary>How to find your Outlook calendar ICS link</summary>
+            <ol>
+              <li>Open <strong>Outlook on the web</strong> (outlook.office.com or outlook.live.com).</li>
+              <li>Click the gear icon (<strong>Settings</strong>) in the top right.</li>
+              <li>Navigate to <strong>Calendar</strong> → <strong>Shared calendars</strong>.</li>
+              <li>Under <strong>Publish a calendar</strong>, select your calendar, set permissions to <em>Can view all details</em>, and click <strong>Publish</strong>.</li>
+              <li>Copy the <strong>ICS link</strong> and paste it above.</li>
+            </ol>
+          </details>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 20px;">
+        <label>Display Calendar Events</label>
         <div class="toggle-row">
-          <span>Display timetable classes in Upcoming & Today</span>
+          <span>Show events in Upcoming & Today views</span>
           <input type="checkbox" id="modalTimetableToggle" checked />
         </div>
       </div>
 
       <div class="form-group">
-        <label>Add iCal / Webcal feed URL (.ics)</label>
+        <label>Other iCal / Webcal feed URLs (.ics)</label>
         <div class="input-with-button">
           <input type="url" id="calendarFeedUrl" placeholder="webcal://... or https://.../calendar.ics" />
-          <button id="addFeedBtn" class="btn-primary">Add Feed</button>
+          <button id="addFeedBtn" class="btn-secondary">Add Feed</button>
         </div>
-        <span class="field-hint">Supports Google Calendar secret address in iCal format, Canvas LMS calendar URL, Outlook, and Apple Calendar feeds.</span>
+        <span class="field-hint">Supports Google Calendar secret address (.ics), Apple Calendar, and Canvas LMS.</span>
       </div>
 
       <div class="form-group">
@@ -730,7 +783,7 @@
       </div>
 
       <div class="form-group">
-        <label>Connected Feeds</label>
+        <label>Connected Custom Feeds</label>
         <ul id="connectedFeedsList" class="feeds-list"></ul>
       </div>
     </div>
@@ -759,6 +812,32 @@
           <span>Next Week (Monday)</span>
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE RECURRING TASK CONFIRMATION MODAL -->
+<div id="deleteRecurringModal" class="modal-overlay hidden">
+  <div class="modal-card modal-card-small">
+    <div class="modal-header">
+      <h2>Delete recurring task?</h2>
+      <button id="closeDeleteRecurringModal" class="close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-hint">"<strong id="deleteRecurringTaskTitle">Task</strong>" is a repeating task. Which tasks do you want to delete?</p>
+      <div class="delete-recurring-options">
+        <button id="deleteRecurringThisOnlyBtn" class="delete-recurring-btn">
+          <div class="delete-opt-title">Delete this task only</div>
+          <div class="delete-opt-desc">Keep future occurrences on schedule</div>
+        </button>
+        <button id="deleteRecurringAllBtn" class="delete-recurring-btn danger">
+          <div class="delete-opt-title">Delete all tasks in the future</div>
+          <div class="delete-opt-desc">Permanently remove the repeating series</div>
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer" style="display: flex; justify-content: flex-end; margin-top: 14px;">
+      <button id="deleteRecurringCancelBtn" class="btn-ghost">Cancel</button>
     </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-const CACHE = "tasks-v4";
+const CACHE = "tasks-v5";
 const FILES = [
   "./index.html",
   "./style.css",

@@ -7,23 +7,6 @@ async function loadTasks() {
     tasks = data;
     if (typeof scheduleAllWebNotifications === "function") scheduleAllWebNotifications();
   }
-
-  // If user has no tasks yet, seed the sample overdue task matching the screenshot!
-  if (tasks.length === 0 && currentUser) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(9, 0, 0, 0);
-
-    await addTask({
-      title: "Biweekly thursday number 1 uniform",
-      project: "Inbox",
-      due_at: yesterday.toISOString(),
-      has_time: false,
-      priority: 4,
-      recurrence_rule: "biweekly",
-      tags: [],
-    });
-  }
 }
 
 async function addTask({ title, project, due_at, has_time, priority, recurrence_rule, tags: taskTags }) {
@@ -64,13 +47,47 @@ async function addTask({ title, project, due_at, has_time, priority, recurrence_
 async function toggleTask(id) {
   const t = tasks.find(t => t.id === id);
   if (!t) return;
-  if (!t.completed && t.recurrence_rule && t.due_at) {
-    const next = nextOccurrence(t.recurrence_rule, t.due_at);
+
+  // If completing a recurring task, record a completed occurrence for Reporting,
+  // then advance the recurring series to its next occurrence.
+  if (!t.completed && t.recurrence_rule) {
+    const fromIso = t.due_at || new Date().toISOString();
+    const next = nextOccurrence(t.recurrence_rule, fromIso);
+
+    const completionInstance = {
+      user_id: currentUser ? currentUser.id : "guest",
+      title: t.title,
+      notes: t.notes || "",
+      project: t.project || "Inbox",
+      priority: t.priority || 4,
+      has_time: !!t.has_time,
+      due_at: t.due_at || new Date().toISOString(),
+      tags: t.tags || [],
+      recurrence_rule: null,
+      completed: true,
+      completed_at: new Date().toISOString()
+    };
+
     t.due_at = next.toISOString();
+    if (typeof scheduleWebNotification === "function") scheduleWebNotification(t);
     render();
-    await sb.from("tasks").update({ due_at: t.due_at }).eq("id", id);
+
+    try {
+      const { data } = await sb.from("tasks").insert(completionInstance).select();
+      if (data && data[0]) {
+        tasks.push(data[0]);
+      } else {
+        tasks.push({ ...completionInstance, id: "task_" + Date.now() });
+      }
+      await sb.from("tasks").update({ due_at: t.due_at }).eq("id", id);
+    } catch (_) {
+      tasks.push({ ...completionInstance, id: "task_" + Date.now() });
+      await sb.from("tasks").update({ due_at: t.due_at }).eq("id", id);
+    }
+    render();
     return;
   }
+
   t.completed = !t.completed;
   t.completed_at = t.completed ? new Date().toISOString() : null;
   if (typeof scheduleWebNotification === "function") scheduleWebNotification(t);
@@ -90,6 +107,27 @@ async function deleteTask(id) {
   tasks = tasks.filter(t => t.id !== id);
   render();
   await sb.from("tasks").delete().eq("id", id);
+}
+
+// Delete only the current occurrence of a repeating task (advances to next occurrence)
+async function deleteTaskOccurrence(id) {
+  const t = tasks.find(t => t.id === id);
+  if (!t) return;
+  if (t.recurrence_rule) {
+    const fromIso = t.due_at || new Date().toISOString();
+    const next = nextOccurrence(t.recurrence_rule, fromIso);
+    t.due_at = next.toISOString();
+    if (typeof scheduleWebNotification === "function") scheduleWebNotification(t);
+    render();
+    await sb.from("tasks").update({ due_at: t.due_at }).eq("id", id);
+  } else {
+    await deleteTask(id);
+  }
+}
+
+// Delete the entire repeating series permanently
+async function deleteTaskSeries(id) {
+  await deleteTask(id);
 }
 
 function nextOccurrence(rule, fromIso) {

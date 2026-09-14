@@ -109,8 +109,9 @@ function renderUpcomingView() {
             const stripeClass = evt.stripe || "red";
             row.innerHTML = `
               <span class="event-stripe ${stripeClass}"></span>
+              ${evt.isOutlook ? `<span class="outlook-tag">Outlook</span>` : ''}
               ${evt.time ? `<span class="event-time">${evt.time}</span>` : ''}
-              <span class="event-summary">${evt.title}</span>
+              <span class="event-summary" title="${evt.location ? `${evt.title} (${evt.location})` : evt.title}">${evt.title}</span>
             `;
             eventsGrid.appendChild(row);
           }
