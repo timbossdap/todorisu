@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Todorisu Idle — Task Tycoon</title>
+  <title>Todorisu Idle — Task Tycoon Pro</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐿️</text></svg>">
   <style>
     :root {
-      --bg: #0d0f14;
-      --bg-panel: #161922;
-      --bg-card: #1f2330;
-      --bg-card-hover: #262c3d;
-      --bg-card-active: #1a1e2b;
-      --border: #2c3245;
-      --border-highlight: #455070;
-      --text: #f0f2f8;
-      --text-muted: #8e99b2;
+      --bg: #090b10;
+      --bg-panel: #12151f;
+      --bg-card: #181d2a;
+      --bg-card-hover: #22293b;
+      --bg-card-active: #151924;
+      --border: #252c3f;
+      --border-highlight: #3e4968;
+      --text: #e2e8f0;
+      --text-muted: #7e8ba7;
       --primary: #dc4c3e;
       --primary-glow: rgba(220, 76, 62, 0.4);
       --gold: #f59e0b;
@@ -27,6 +27,11 @@
       --purple: #8b5cf6;
       --purple-glow: rgba(139, 92, 246, 0.4);
       --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.5);
+      --rarity-common: #94a3b8;
+      --rarity-rare: #3b82f6;
+      --rarity-epic: #a855f7;
+      --rarity-legendary: #f59e0b;
       --radius: 12px;
       --radius-sm: 8px;
     }
@@ -44,8 +49,7 @@
       background-color: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      overflow-x: hidden;
-      overflow-y: hidden;
+      overflow: hidden;
       position: relative;
     }
 
@@ -72,24 +76,25 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 20px;
-      background: rgba(22, 25, 34, 0.85);
-      backdrop-filter: blur(12px);
+      padding: 8px 18px;
+      background: rgba(18, 21, 31, 0.9);
+      backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border);
-      gap: 16px;
+      gap: 12px;
+      flex-shrink: 0;
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 10px;
-      min-width: 180px;
+      min-width: 170px;
     }
 
     .brand-icon {
       font-size: 26px;
       filter: drop-shadow(0 2px 8px var(--primary-glow));
-      animation: floatIcon 3s ease-in-out infinite;
+      animation: floatIcon 3.5s ease-in-out infinite;
     }
 
     @keyframes floatIcon {
@@ -98,10 +103,10 @@
     }
 
     .brand-title {
-      font-size: 17px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 800;
       letter-spacing: -0.3px;
-      background: linear-gradient(135deg, #fff 30%, #fca5a5 100%);
+      background: linear-gradient(135deg, #ffffff 40%, #fca5a5 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -111,28 +116,41 @@
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .company-lvl-badge {
+      background: rgba(220, 76, 62, 0.2);
+      color: #fca5a5;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(220, 76, 62, 0.4);
     }
 
     .header-stats {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
     .stat-pill {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      padding: 6px 14px;
-      border-radius: 24px;
+      padding: 5px 12px;
+      border-radius: 20px;
       font-size: 13px;
     }
 
     .stat-pill .icon {
-      font-size: 15px;
+      font-size: 14px;
     }
 
     .stat-pill .val {
@@ -163,20 +181,20 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .icon-btn {
       background: var(--bg-card);
       border: 1px solid var(--border);
       color: var(--text);
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 15px;
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -187,39 +205,177 @@
       transform: translateY(-1px);
     }
 
+    /* Emergency Alert Banner */
+    #emergencyBanner {
+      display: none;
+      background: linear-gradient(90deg, #b91c1c 0%, #dc2626 50%, #991b1b 100%);
+      color: #fff;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #f87171;
+      animation: alertPulse 1.2s infinite alternate;
+      z-index: 10;
+    }
+
+    @keyframes alertPulse {
+      from { filter: brightness(1); }
+      to { filter: brightness(1.2); }
+    }
+
+    .alert-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-resolve-btn {
+      background: #fff;
+      color: #b91c1c;
+      border: none;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    /* Interactive Office Visualizer Stage */
+    .office-stage-wrap {
+      background: linear-gradient(180deg, rgba(14, 18, 27, 0.95) 0%, rgba(9, 11, 16, 0.98) 100%);
+      border-bottom: 1px solid var(--border);
+      height: 95px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+
+    .office-floor {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      position: relative;
+    }
+
+    .office-floor::-webkit-scrollbar {
+      display: none;
+    }
+
+    .office-station {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      min-width: 68px;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .office-station:hover {
+      transform: scale(1.1) translateY(-2px);
+    }
+
+    .station-avatar {
+      font-size: 28px;
+      position: relative;
+      animation: workerBob 2s ease-in-out infinite;
+    }
+
+    @keyframes workerBob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .station-bubble {
+      position: absolute;
+      top: -22px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid var(--border-highlight);
+      color: #cbd5e1;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      transform: translateY(4px);
+    }
+
+    .office-station:hover .station-bubble {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .station-lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+      text-align: center;
+    }
+
+    .station-count {
+      font-size: 9px;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
     /* Main Content Area */
     .game-body {
       flex: 1;
       display: grid;
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: 370px 1fr;
       overflow: hidden;
+      min-height: 0;
     }
 
-    /* Left: Clicker Pane */
+    /* Left: Clicker & Active Controls Pane */
     .clicker-pane {
-      background: rgba(22, 25, 34, 0.6);
+      background: rgba(18, 21, 31, 0.5);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 24px 20px;
+      padding: 16px 18px;
       position: relative;
-      overflow: hidden;
+      overflow-y: auto;
+      gap: 14px;
     }
 
+    .clicker-pane::-webkit-scrollbar {
+      width: 6px;
+    }
+    .clicker-pane::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    /* Frenzy Meter */
     .frenzy-meter-wrap {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
 
     .frenzy-header {
       display: flex;
       justify-content: space-between;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.6px;
@@ -232,35 +388,34 @@
 
     .frenzy-bar-bg {
       width: 100%;
-      height: 10px;
-      background: #11141c;
+      height: 9px;
+      background: #090c13;
       border-radius: 5px;
       overflow: hidden;
       border: 1px solid var(--border);
-      position: relative;
     }
 
     .frenzy-bar-fill {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
-      transition: width 0.1s linear;
-      box-shadow: 0 0 10px rgba(236, 72, 153, 0.6);
+      transition: width 0.08s linear;
+      box-shadow: 0 0 8px rgba(236, 72, 153, 0.6);
     }
 
+    /* Big Tactile Clicker */
     .clicker-center {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
-      margin: auto 0;
+      margin: 6px 0;
     }
 
     .aura-ring {
       position: absolute;
-      width: 260px;
-      height: 260px;
+      width: 230px;
+      height: 230px;
       border-radius: 50%;
       background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
       pointer-events: none;
@@ -269,16 +424,16 @@
     }
 
     @keyframes pulseAura {
-      0%, 100% { transform: scale(0.9); opacity: 0.4; }
-      50% { transform: scale(1.15); opacity: 0.8; }
+      0%, 100% { transform: scale(0.92); opacity: 0.35; }
+      50% { transform: scale(1.12); opacity: 0.75; }
     }
 
     .click-target-btn {
-      width: 200px;
-      height: 200px;
+      width: 180px;
+      height: 180px;
       border-radius: 50%;
-      border: 4px solid rgba(255, 255, 255, 0.15);
-      background: radial-gradient(circle at 35% 35%, #e25547 0%, #b82d20 50%, #7d1a10 100%);
+      border: 4px solid rgba(255, 255, 255, 0.16);
+      background: radial-gradient(circle at 35% 35%, #e04a3c 0%, #b82d20 50%, #7d1a10 100%);
       cursor: pointer;
       position: relative;
       z-index: 2;
@@ -287,22 +442,22 @@
       align-items: center;
       justify-content: center;
       color: white;
-      box-shadow: 0 12px 32px rgba(184, 45, 32, 0.4), inset 0 3px 6px rgba(255, 255, 255, 0.4), inset 0 -6px 12px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 10px 28px rgba(184, 45, 32, 0.4), inset 0 3px 6px rgba(255, 255, 255, 0.35), inset 0 -6px 12px rgba(0, 0, 0, 0.4);
       transition: transform 0.08s cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 0.08s;
       outline: none;
     }
 
     .click-target-btn:hover {
-      box-shadow: 0 16px 40px rgba(220, 76, 62, 0.6), inset 0 3px 8px rgba(255, 255, 255, 0.5), inset 0 -6px 12px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 14px 34px rgba(220, 76, 62, 0.6), inset 0 3px 8px rgba(255, 255, 255, 0.45);
     }
 
     .click-target-btn:active {
-      transform: scale(0.93) translateY(4px);
-      box-shadow: 0 4px 16px rgba(184, 45, 32, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+      transform: scale(0.93) translateY(3px);
+      box-shadow: 0 4px 14px rgba(184, 45, 32, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.5);
     }
 
     .click-btn-icon {
-      font-size: 58px;
+      font-size: 52px;
       filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
       pointer-events: none;
       transition: transform 0.1s;
@@ -313,7 +468,7 @@
     }
 
     .click-btn-text {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -321,22 +476,118 @@
       pointer-events: none;
     }
 
+    /* Active Abilities Bar */
+    .active-abilities-bar {
+      width: 100%;
+      display: flex;
+      gap: 8px;
+    }
+
+    .ability-btn {
+      flex: 1;
+      background: linear-gradient(135deg, #1e2538 0%, #151a28 100%);
+      border: 1px solid var(--border-highlight);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.15s;
+    }
+
+    .ability-btn:hover:not(:disabled) {
+      border-color: var(--cyan);
+      box-shadow: 0 4px 12px var(--cyan-glow);
+      transform: translateY(-1px);
+    }
+
+    .ability-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .ability-btn.ready {
+      border-color: var(--cyan);
+      animation: readyPulse 2s infinite;
+    }
+
+    @keyframes readyPulse {
+      0%, 100% { box-shadow: 0 0 4px var(--cyan-glow); }
+      50% { box-shadow: 0 0 12px var(--cyan-glow); }
+    }
+
+    /* Quick Artifact Loadout Widget */
+    .artifact-quickbar {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .quickbar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .quickbar-slots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .equipped-slot {
+      flex: 1;
+      height: 44px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .equipped-slot.filled {
+      border-style: solid;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .equipped-slot.filled:hover {
+      transform: scale(1.05);
+    }
+
+    /* Click Metrics Card */
     .click-info-card {
       width: 100%;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .click-info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-muted);
     }
 
@@ -348,17 +599,17 @@
     /* Floating Click Particles */
     .particle-number {
       position: absolute;
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 900;
       color: #34d399;
       text-shadow: 0 0 10px rgba(52, 211, 153, 0.8), 0 2px 4px rgba(0,0,0,0.8);
       pointer-events: none;
       z-index: 100;
-      animation: floatUp 0.9s cubic-bezier(0.1, 0.7, 0.1, 1) forwards;
+      animation: floatUp 0.85s cubic-bezier(0.1, 0.7, 0.1, 1) forwards;
     }
 
     .particle-number.crit {
-      font-size: 28px;
+      font-size: 26px;
       color: #fbbf24;
       text-shadow: 0 0 15px rgba(251, 191, 36, 0.9), 0 2px 6px rgba(0,0,0,0.9);
     }
@@ -369,20 +620,20 @@
         transform: translate(-50%, -50%) scale(0.8) translateY(0) rotate(0deg);
       }
       20% {
-        transform: translate(-50%, -50%) scale(1.2) translateY(-15px) rotate(var(--rot, 0deg));
+        transform: translate(-50%, -50%) scale(1.2) translateY(-12px) rotate(var(--rot, 0deg));
       }
       100% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.9) translateY(-90px) rotate(var(--rot, 0deg));
+        transform: translate(-50%, -50%) scale(0.9) translateY(-85px) rotate(var(--rot, 0deg));
       }
     }
 
     /* Golden Acorn Random Event */
     .golden-acorn-event {
-      position: absolute;
+      position: fixed;
       font-size: 42px;
       cursor: pointer;
-      z-index: 50;
+      z-index: 200;
       animation: goldenWobble 1.2s ease-in-out infinite, goldenGlow 1s alternate infinite;
       filter: drop-shadow(0 0 15px #f59e0b);
       transition: transform 0.2s;
@@ -394,12 +645,12 @@
 
     @keyframes goldenWobble {
       0%, 100% { transform: translateY(0) rotate(-6deg); }
-      50% { transform: translateY(-12px) rotate(6deg); }
+      50% { transform: translateY(-10px) rotate(6deg); }
     }
 
     @keyframes goldenGlow {
-      from { filter: drop-shadow(0 0 12px #f59e0b); }
-      to { filter: drop-shadow(0 0 24px #fbbf24) drop-shadow(0 0 36px #ef4444); }
+      from { filter: drop-shadow(0 0 10px #f59e0b); }
+      to { filter: drop-shadow(0 0 24px #fbbf24) drop-shadow(0 0 32px #ef4444); }
     }
 
     /* Right: Tabs & Management Pane */
@@ -408,29 +659,38 @@
       flex-direction: column;
       background: var(--bg);
       overflow: hidden;
+      min-height: 0;
     }
 
     .nav-tabs {
       display: flex;
       align-items: center;
-      gap: 4px;
-      padding: 12px 20px 0 20px;
+      gap: 2px;
+      padding: 10px 18px 0 18px;
       border-bottom: 1px solid var(--border);
-      background: rgba(22, 25, 34, 0.4);
+      background: rgba(18, 21, 31, 0.4);
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+      display: none;
     }
 
     .tab-btn {
       background: transparent;
       border: none;
       border-bottom: 2px solid transparent;
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: 600;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      white-space: nowrap;
       transition: all 0.2s;
     }
 
@@ -445,7 +705,7 @@
 
     .tab-badge {
       font-size: 10px;
-      padding: 2px 6px;
+      padding: 1px 6px;
       border-radius: 10px;
       background: var(--border);
       color: var(--text-muted);
@@ -457,19 +717,20 @@
       color: #fff;
     }
 
-    /* Multiplier Controls */
+    /* Subheader Action Bar */
     .tab-action-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 20px;
-      background: rgba(22, 25, 34, 0.2);
+      padding: 10px 18px;
+      background: rgba(18, 21, 31, 0.25);
       border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
     .section-headline {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -489,10 +750,10 @@
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
+      padding: 3px 9px;
+      border-radius: 5px;
       cursor: pointer;
       transition: all 0.15s;
     }
@@ -506,7 +767,8 @@
     .tab-scroll-container {
       flex: 1;
       overflow-y: auto;
-      padding: 16px 20px;
+      padding: 14px 18px;
+      min-height: 0;
     }
 
     .tab-scroll-container::-webkit-scrollbar {
@@ -526,11 +788,11 @@
       display: block;
     }
 
-    /* Generators List */
+    /* Generators Grid */
     .generators-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 10px;
     }
 
     .gen-card {
@@ -551,7 +813,12 @@
     }
 
     .gen-card.cant-afford {
-      opacity: 0.75;
+      opacity: 0.72;
+    }
+
+    .gen-card.locked {
+      opacity: 0.45;
+      filter: grayscale(0.8);
     }
 
     .gen-left {
@@ -563,11 +830,11 @@
     }
 
     .gen-icon {
-      font-size: 32px;
+      font-size: 30px;
       width: 48px;
       height: 48px;
       border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -590,7 +857,7 @@
     }
 
     .gen-name {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       color: #fff;
       white-space: nowrap;
@@ -601,9 +868,9 @@
     .gen-count-badge {
       background: var(--border);
       color: var(--cyan);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      padding: 1px 8px;
+      padding: 1px 7px;
       border-radius: 10px;
     }
 
@@ -623,11 +890,10 @@
     .gen-progress-bar-wrap {
       width: 100%;
       height: 4px;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.06);
       border-radius: 2px;
       margin-top: 4px;
       overflow: hidden;
-      position: relative;
     }
 
     .gen-progress-bar-fill {
@@ -649,8 +915,8 @@
       color: #fff;
       border: none;
       border-radius: var(--radius-sm);
-      padding: 8px 18px;
-      font-size: 14px;
+      padding: 8px 16px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -671,8 +937,8 @@
     }
 
     .buy-btn:disabled {
-      background: #2a3040;
-      color: #64748b;
+      background: #1f2533;
+      color: #55627a;
       box-shadow: none;
       cursor: not-allowed;
     }
@@ -681,18 +947,18 @@
     .upgrades-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 12px;
+      gap: 10px;
     }
 
     .upgrade-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       position: relative;
       transition: all 0.2s;
     }
@@ -703,7 +969,7 @@
     }
 
     .upgrade-card.purchased {
-      opacity: 0.55;
+      opacity: 0.5;
       border-color: rgba(16, 185, 129, 0.3);
       background: rgba(16, 185, 129, 0.03);
     }
@@ -711,15 +977,15 @@
     .upgrade-top {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
+      gap: 10px;
     }
 
     .upgrade-icon {
-      font-size: 26px;
-      width: 44px;
-      height: 44px;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
       border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.04);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -731,14 +997,14 @@
     }
 
     .upgrade-name {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: #fff;
       margin-bottom: 2px;
     }
 
     .upgrade-desc {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
       line-height: 1.4;
     }
@@ -748,16 +1014,220 @@
       align-items: center;
       justify-content: space-between;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
-      padding-top: 10px;
+      padding-top: 8px;
     }
 
     .upgrade-cost {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--gold);
     }
 
-    /* Rebirth / Ascension Screen */
+    /* Department Strategy View */
+    .departments-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .dept-header-box {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .dept-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .dept-card-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dept-icon {
+      font-size: 28px;
+    }
+
+    .dept-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .dept-level {
+      color: var(--cyan);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .dept-perks {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .dept-alloc-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    /* Artifacts & Inventory View */
+    .inventory-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .artifact-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+
+    .artifact-card.rarity-common { border-color: rgba(148, 163, 184, 0.4); }
+    .artifact-card.rarity-rare { border-color: rgba(59, 130, 246, 0.6); box-shadow: 0 0 10px rgba(59, 130, 246, 0.15); }
+    .artifact-card.rarity-epic { border-color: rgba(168, 85, 247, 0.6); box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); }
+    .artifact-card.rarity-legendary { border-color: rgba(245, 158, 11, 0.8); box-shadow: 0 0 14px rgba(245, 158, 11, 0.25); }
+
+    .artifact-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .artifact-icon {
+      font-size: 28px;
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .artifact-info {
+      flex: 1;
+    }
+
+    .artifact-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .artifact-rarity {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .artifact-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Active Contracts / Bounties View */
+    .contracts-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .contract-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.2s;
+    }
+
+    .contract-card.completed {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .contract-left {
+      flex: 1;
+    }
+
+    .contract-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .contract-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .contract-progress-wrap {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .contract-progress-fill {
+      height: 100%;
+      background: var(--green);
+      transition: width 0.2s;
+    }
+
+    .contract-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .contract-reward-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* Rebirth & Ascension View */
     .rebirth-panel {
       display: flex;
       flex-direction: column;
@@ -766,47 +1236,46 @@
 
     .rebirth-hero {
       background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(139, 92, 246, 0.15) 100%);
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      border: 1px solid rgba(245, 158, 11, 0.35);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 22px;
       text-align: center;
       position: relative;
-      overflow: hidden;
     }
 
     .rebirth-hero-title {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
       color: #fff;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .rebirth-hero-desc {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-muted);
       max-width: 600px;
-      margin: 0 auto 20px auto;
+      margin: 0 auto 18px auto;
       line-height: 1.5;
     }
 
     .rebirth-stats-row {
       display: flex;
       justify-content: center;
-      gap: 30px;
-      margin-bottom: 24px;
+      gap: 24px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
     }
 
     .rebirth-stat-box {
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.35);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 10px 20px;
-      min-width: 140px;
+      padding: 10px 18px;
+      min-width: 130px;
     }
 
     .rebirth-stat-box .lbl {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -814,7 +1283,7 @@
     }
 
     .rebirth-stat-box .val {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       color: var(--gold);
     }
@@ -822,9 +1291,9 @@
     .rebirth-launch-btn {
       background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       color: #000;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
-      padding: 14px 36px;
+      padding: 12px 32px;
       border-radius: var(--radius);
       border: none;
       cursor: pointer;
@@ -834,13 +1303,12 @@
 
     .rebirth-launch-btn:hover:not(:disabled) {
       transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 12px 30px var(--gold-glow);
       filter: brightness(1.1);
     }
 
     .rebirth-launch-btn:disabled {
-      background: #2a3040;
-      color: #64748b;
+      background: #1f2533;
+      color: #55627a;
       box-shadow: none;
       cursor: not-allowed;
     }
@@ -848,36 +1316,36 @@
     .prestige-shop-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 14px;
+      gap: 12px;
     }
 
     .prestige-card {
       background: var(--bg-card);
       border: 1px solid rgba(245, 158, 11, 0.25);
       border-radius: var(--radius);
-      padding: 16px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
     /* Achievements */
     .achievements-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
     }
 
     .achieve-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 12px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       gap: 12px;
-      opacity: 0.5;
+      opacity: 0.45;
     }
 
     .achieve-card.unlocked {
@@ -887,11 +1355,11 @@
     }
 
     .achieve-icon {
-      font-size: 28px;
-      width: 44px;
-      height: 44px;
+      font-size: 26px;
+      width: 42px;
+      height: 42px;
       border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.04);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -932,8 +1400,8 @@
     }
 
     .stats-table td {
-      padding: 12px 16px;
-      font-size: 13px;
+      padding: 10px 16px;
+      font-size: 12px;
     }
 
     .stats-table td:first-child {
@@ -946,6 +1414,79 @@
       color: #fff;
     }
 
+    /* Crisis Minigame Overlay */
+    .crisis-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(185, 28, 28, 0.3);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .crisis-overlay.active {
+      display: flex;
+    }
+
+    .crisis-hud {
+      background: rgba(18, 21, 31, 0.95);
+      border: 2px solid #ef4444;
+      border-radius: var(--radius);
+      padding: 16px 28px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(239, 68, 68, 0.6);
+      margin-bottom: 20px;
+    }
+
+    .crisis-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: #ef4444;
+      letter-spacing: 1px;
+    }
+
+    .crisis-timer {
+      font-size: 15px;
+      color: #fff;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .crisis-bug-node {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ef4444 0%, #991b1b 100%);
+      border: 2px solid #fecaca;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      animation: bugShake 0.2s infinite;
+      transition: transform 0.1s;
+    }
+
+    .crisis-bug-node:active {
+      transform: scale(0.85);
+    }
+
+    @keyframes bugShake {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(-2px, 2px) rotate(-5deg); }
+      50% { transform: translate(2px, -2px) rotate(5deg); }
+      75% { transform: translate(-2px, -1px) rotate(-3deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
     /* Modals */
     .modal-overlay {
       position: fixed;
@@ -953,7 +1494,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
@@ -973,10 +1514,10 @@
       background: var(--bg-panel);
       border: 1px solid var(--border-highlight);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 22px;
       max-width: 480px;
       width: 90%;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
       transform: scale(0.95);
       transition: transform 0.2s;
     }
@@ -986,52 +1527,40 @@
     }
 
     .modal-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       color: #fff;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .modal-body {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-muted);
       line-height: 1.6;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .modal-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 8px;
     }
 
     .modal-btn {
-      padding: 8px 18px;
+      padding: 7px 16px;
       border-radius: var(--radius-sm);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       border: none;
     }
 
-    .modal-btn.primary {
-      background: var(--primary);
-      color: #fff;
-    }
-
-    .modal-btn.gold {
-      background: var(--gold);
-      color: #000;
-    }
-
-    .modal-btn.secondary {
-      background: var(--bg-card);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
+    .modal-btn.primary { background: var(--primary); color: #fff; }
+    .modal-btn.gold { background: var(--gold); color: #000; }
+    .modal-btn.secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
 
     /* Toast Notifications */
     #toastContainer {
@@ -1046,16 +1575,16 @@
     }
 
     .toast-msg {
-      background: rgba(22, 25, 34, 0.95);
+      background: rgba(18, 21, 31, 0.96);
       border: 1px solid var(--border-highlight);
       border-radius: var(--radius-sm);
-      padding: 10px 16px;
+      padding: 9px 14px;
       color: #fff;
-      font-size: 13px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      font-size: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       animation: slideInToast 0.3s ease forwards;
     }
 
@@ -1080,22 +1609,25 @@
         <div class="brand-icon">🐿️</div>
         <div>
           <div class="brand-title">Todorisu Idle</div>
-          <div class="brand-subtitle">Task Tycoon</div>
+          <div class="brand-subtitle">
+            <span>Tycoon Pro</span>
+            <span class="company-lvl-badge" id="companyLvlBadge">Tier 1: Garage Startup</span>
+          </div>
         </div>
       </div>
 
       <div class="header-stats">
-        <div class="stat-pill money-pill" title="Current Balance">
+        <div class="stat-pill money-pill" title="Company Treasury">
           <span class="icon">💰</span>
           <span class="val" id="statMoney">$0</span>
         </div>
 
-        <div class="stat-pill rate-pill" title="Income Per Second">
+        <div class="stat-pill rate-pill" title="Idle Generation Rate">
           <span class="icon">⚡</span>
           <span class="val" id="statRate">$0 /s</span>
         </div>
 
-        <div class="stat-pill prestige-pill" title="Golden Acorns (Prestige Currency)">
+        <div class="stat-pill prestige-pill" title="Golden Acorns (Permanent IPO Currency)">
           <span class="icon">🌰</span>
           <span class="val" id="statAcorns">0</span>
         </div>
@@ -1103,16 +1635,32 @@
 
       <div class="header-actions">
         <button id="soundToggleBtn" class="icon-btn" title="Toggle Sound">🔊</button>
-        <button id="saveBtn" class="icon-btn" title="Save Game">💾</button>
+        <button id="saveBtn" class="icon-btn" title="Save Progress">💾</button>
         <button id="resetDataBtn" class="icon-btn" title="Settings / Reset" style="color: #ef4444;">⚙️</button>
       </div>
     </header>
 
-    <!-- Game Body -->
+    <!-- Emergency Crisis Alert Banner -->
+    <div id="emergencyBanner">
+      <div class="alert-left">
+        <span>🚨</span>
+        <span id="emergencyBannerMsg">SEV-1 SERVER INCIDENT DETECTED! Productivity degraded!</span>
+      </div>
+      <button class="alert-resolve-btn" id="emergencyResolveBtn">DEBUG NOW</button>
+    </div>
+
+    <!-- Office Headquarters Stage -->
+    <div class="office-stage-wrap">
+      <div class="office-floor" id="officeFloor">
+        <!-- Injected dynamically based on owned workstations -->
+      </div>
+    </div>
+
+    <!-- Main Game Body -->
     <div class="game-body">
-      <!-- Left Column: Clicker Zone -->
+      <!-- Left Column: Big Clicker & Active Play -->
       <section class="clicker-pane" id="clickerPane">
-        <!-- Frenzy Combo Bar -->
+        <!-- Focus Flow Frenzy Bar -->
         <div class="frenzy-meter-wrap">
           <div class="frenzy-header" id="frenzyHeader">
             <span>🔥 Focus Flow</span>
@@ -1123,13 +1671,34 @@
           </div>
         </div>
 
-        <!-- Big Clicker -->
+        <!-- Big Clicker Target -->
         <div class="clicker-center">
           <div class="aura-ring" id="auraRing"></div>
           <button class="click-target-btn" id="taskClickerBtn" aria-label="Complete Task">
             <span class="click-btn-icon">✓</span>
             <span class="click-btn-text">Crush Task</span>
           </button>
+        </div>
+
+        <!-- Active Ability: Hackathon Rush -->
+        <div class="active-abilities-bar">
+          <button class="ability-btn ready" id="hackathonBtn" title="Activate 30s Hackathon (5x Speed)">
+            <span>🚀 Hackathon</span>
+            <span style="font-size: 10px; opacity: 0.8;" id="hackathonCooldownText">READY</span>
+          </button>
+        </div>
+
+        <!-- Equipped Artifacts Loadout -->
+        <div class="artifact-quickbar">
+          <div class="quickbar-header">
+            <span>Equipped Gear</span>
+            <span id="equippedCountLabel" style="color: var(--cyan);">0/3</span>
+          </div>
+          <div class="quickbar-slots" id="quickbarSlots">
+            <div class="equipped-slot" data-slot="0">🔒</div>
+            <div class="equipped-slot" data-slot="1">🔒</div>
+            <div class="equipped-slot" data-slot="2">🔒</div>
+          </div>
         </div>
 
         <!-- Click Metrics -->
@@ -1140,7 +1709,7 @@
           </div>
           <div class="click-info-row">
             <span>Critical Strike</span>
-            <span id="statCritChance">5% (10x)</span>
+            <span id="statCritChance">5% (8x)</span>
           </div>
           <div class="click-info-row">
             <span>Prestige Multiplier</span>
@@ -1149,32 +1718,44 @@
         </div>
       </section>
 
-      <!-- Right Column: Tabs & Upgrades -->
+      <!-- Right Column: Navigation Tabs & Upgrades -->
       <section class="management-pane">
         <nav class="nav-tabs">
           <button class="tab-btn active" data-tab="generators">
             <span>🏢 Workplaces</span>
-            <span class="tab-badge" id="badgeGen">10</span>
+            <span class="tab-badge" id="badgeGen">12</span>
           </button>
           <button class="tab-btn" data-tab="upgrades">
-            <span>⚡ Upgrades</span>
+            <span>⚡ Research</span>
             <span class="tab-badge" id="badgeUpgrades">0</span>
           </button>
+          <button class="tab-btn" data-tab="departments">
+            <span>💼 Strategy</span>
+            <span class="tab-badge" id="badgeStrategy" style="background: var(--cyan); color: #000;">0 pts</span>
+          </button>
+          <button class="tab-btn" data-tab="inventory">
+            <span>🎒 Inventory</span>
+            <span class="tab-badge" id="badgeArtifacts">0</span>
+          </button>
+          <button class="tab-btn" data-tab="contracts">
+            <span>📜 Contracts</span>
+            <span class="tab-badge" id="badgeContracts" style="background: var(--green); color: #000;">3</span>
+          </button>
           <button class="tab-btn" data-tab="rebirth">
-            <span>🚀 Rebirth / IPO</span>
+            <span>🚀 IPO / Rebirth</span>
             <span class="tab-badge" id="badgeRebirth" style="background: var(--gold); color: #000;">+0</span>
           </button>
           <button class="tab-btn" data-tab="achievements">
             <span>🏆 Trophies</span>
           </button>
           <button class="tab-btn" data-tab="stats">
-            <span>📊 Statistics</span>
+            <span>📊 Metrics</span>
           </button>
         </nav>
 
-        <!-- Multiplier / Subheader Bar (visible in generators tab) -->
+        <!-- Subheader Bar (visible in workplaces tab) -->
         <div class="tab-action-bar" id="generatorSubBar">
-          <span class="section-headline">Automated Task Production</span>
+          <span class="section-headline">Corporate Infrastructure</span>
           <div class="multiplier-selector">
             <button class="mult-btn active" data-mult="1">1x</button>
             <button class="mult-btn" data-mult="10">10x</button>
@@ -1185,24 +1766,60 @@
         </div>
 
         <div class="tab-scroll-container">
-          <!-- 1. Generators Tab -->
+          <!-- 1. Workplaces Tab -->
           <div class="tab-content-panel active" id="tab-generators">
             <div class="generators-grid" id="generatorsList"></div>
           </div>
 
-          <!-- 2. Upgrades Tab -->
+          <!-- 2. Research Upgrades Tab -->
           <div class="tab-content-panel" id="tab-upgrades">
             <div class="upgrades-grid" id="upgradesList"></div>
           </div>
 
-          <!-- 3. Rebirth Tab -->
+          <!-- 3. Departments / Strategy Tab -->
+          <div class="tab-content-panel" id="tab-departments">
+            <div class="departments-panel">
+              <div class="dept-header-box">
+                <div>
+                  <div style="font-size: 16px; font-weight: 800; color: #fff;">Department Resource Allocation</div>
+                  <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                    Allocate Management Points earned from level progression to specialize your firm.
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Available Points</div>
+                  <div style="font-size: 20px; font-weight: 800; color: var(--cyan);" id="strategyPointsVal">0</div>
+                </div>
+              </div>
+
+              <div class="dept-grid" id="departmentsList"></div>
+            </div>
+          </div>
+
+          <!-- 4. Inventory / Artifacts Tab -->
+          <div class="tab-content-panel" id="tab-inventory">
+            <div class="inventory-panel">
+              <div class="section-headline">Equip up to 3 Artifacts found during operations:</div>
+              <div class="inventory-grid" id="inventoryList"></div>
+            </div>
+          </div>
+
+          <!-- 5. Contracts Tab -->
+          <div class="tab-content-panel" id="tab-contracts">
+            <div class="contracts-panel">
+              <div class="section-headline">Active Venture Bounties:</div>
+              <div id="contractsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+          </div>
+
+          <!-- 6. Rebirth / IPO Tab -->
           <div class="tab-content-panel" id="tab-rebirth">
             <div class="rebirth-panel">
               <div class="rebirth-hero">
                 <div class="rebirth-hero-title">Launch Company IPO & Ascend</div>
                 <div class="rebirth-hero-desc">
-                  Reset your current balance, workplaces, and regular upgrades to cash out as an elite Venture Capitalist.
-                  You will earn <strong>Golden Acorns 🌰</strong> which permanently grant <strong>+5% total income & click power each</strong> and unlock exclusive corporate perks!
+                  Reset your current liquid funds, workplaces, and standard research to become an Angel Venture Capitalist.
+                  Each <strong>Golden Acorn 🌰</strong> permanently provides <strong>+5% global revenue boost</strong> and funds your permanent Corporate Ascension Tree!
                 </div>
 
                 <div class="rebirth-stats-row">
@@ -1211,45 +1828,46 @@
                     <div class="val" id="rebirthLifetime">$0</div>
                   </div>
                   <div class="rebirth-stat-box">
-                    <div class="lbl">Available Acorns</div>
+                    <div class="lbl">Banked Acorns</div>
                     <div class="val" id="rebirthAvailable">0 🌰</div>
                   </div>
                   <div class="rebirth-stat-box">
-                    <div class="lbl">Gain Upon IPO</div>
+                    <div class="lbl">Gain on Rebirth</div>
                     <div class="val" id="rebirthPending" style="color: var(--green);">+0 🌰</div>
                   </div>
                 </div>
 
                 <button class="rebirth-launch-btn" id="rebirthBtn" disabled>
-                  🚀 Cash Out & Rebirth (+0 Acorns)
+                  🚀 Launch IPO (+0 Acorns)
                 </button>
                 <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px;">
-                  Requires at least $1,000,000 lifetime earnings to qualify for an IPO.
+                  Requires at least $10,000,000 lifetime earnings to qualify for an initial public offering.
                 </div>
               </div>
 
-              <div class="section-headline" style="margin: 10px 0;">Venture Capitalist Perks (Permanent Tree)</div>
+              <div class="section-headline" style="margin: 10px 0;">Permanent Venture Tree</div>
               <div class="prestige-shop-grid" id="prestigeShopList"></div>
             </div>
           </div>
 
-          <!-- 4. Achievements Tab -->
+          <!-- 7. Achievements Tab -->
           <div class="tab-content-panel" id="tab-achievements">
             <div class="achievements-grid" id="achievementsList"></div>
           </div>
 
-          <!-- 5. Statistics Tab -->
+          <!-- 8. Statistics Tab -->
           <div class="tab-content-panel" id="tab-stats">
             <table class="stats-table">
               <tbody>
-                <tr><td>Time Played</td><td id="statTimePlayed">0m 0s</td></tr>
-                <tr><td>Total Manual Clicks</td><td id="statTotalClicks">0</td></tr>
-                <tr><td>Total Earned via Clicks</td><td id="statTotalClickCash">$0</td></tr>
-                <tr><td>Highest $/sec Record</td><td id="statPeakRate">$0 /s</td></tr>
+                <tr><td>Company Playtime</td><td id="statTimePlayed">0m 0s</td></tr>
+                <tr><td>Total Manual Task Clicks</td><td id="statTotalClicks">0</td></tr>
+                <tr><td>Manual Click Treasury Earned</td><td id="statTotalClickCash">$0</td></tr>
+                <tr><td>Peak Generation Record</td><td id="statPeakRate">$0 /s</td></tr>
+                <tr><td>Outages & Crises Resolved</td><td id="statCrisesResolved">0</td></tr>
+                <tr><td>Contracts Completed</td><td id="statContractsDone">0</td></tr>
                 <tr><td>Total Times Rebirthed</td><td id="statRebirths">0</td></tr>
-                <tr><td>Total Golden Acorns Found</td><td id="statGoldenAcornsFound">0</td></tr>
+                <tr><td>Golden Acorns Harvested</td><td id="statGoldenAcornsFound">0</td></tr>
                 <tr><td>Lifetime Earnings</td><td id="statTotalEarned">$0</td></tr>
-                <tr><td>Save Version</td><td>v1.0 (Todorisu Tycoon)</td></tr>
               </tbody>
             </table>
           </div>
@@ -1258,12 +1876,21 @@
     </div>
   </div>
 
+  <!-- Server Crisis Minigame Overlay -->
+  <div class="crisis-overlay" id="crisisOverlay">
+    <div class="crisis-hud">
+      <div class="crisis-title">🚨 SERVER MELTDOWN IN PROGRESS!</div>
+      <div class="crisis-timer" id="crisisTimer">Tap 5 corrupted bugs to restore stability: 8s remaining!</div>
+    </div>
+    <div id="crisisBugField" style="position: absolute; width: 100%; height: 100%; pointer-events: auto;"></div>
+  </div>
+
   <!-- Offline Progress Modal -->
   <div class="modal-overlay" id="offlineModal">
     <div class="modal-box">
-      <div class="modal-title">☕ Welcome Back, Hustler!</div>
+      <div class="modal-title">☕ Welcome Back, CEO!</div>
       <div class="modal-body" id="offlineModalMsg">
-        While you were offline, your automated task force continued working tirelessly.
+        While you were offline, your automated infrastructure continued production.
       </div>
       <div class="modal-actions">
         <button class="modal-btn gold" id="offlineClaimBtn">Claim Earnings</button>
@@ -1274,23 +1901,22 @@
   <!-- Rebirth Confirmation Modal -->
   <div class="modal-overlay" id="rebirthConfirmModal">
     <div class="modal-box">
-      <div class="modal-title">🚀 Launch Company IPO?</div>
+      <div class="modal-title">🚀 Launch IPO & Cash Out?</div>
       <div class="modal-body" id="rebirthModalMsg">
-        Are you sure? This will liquidate your current money and workplaces, but you will ascend with permanent Golden Acorns that boost all future revenue!
+        Are you sure? This will liquidate workplaces and current treasury, but you will ascend with permanent Golden Acorns!
       </div>
       <div class="modal-actions">
         <button class="modal-btn secondary" id="rebirthCancelBtn">Cancel</button>
-        <button class="modal-btn gold" id="rebirthDoBtn">Confirm Rebirth</button>
+        <button class="modal-btn gold" id="rebirthDoBtn">Confirm IPO</button>
       </div>
     </div>
   </div>
 
-  <!-- Settings / Wipe Modal -->
+  <!-- Settings / Reset Modal -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-box">
       <div class="modal-title">⚙️ Game Management</div>
       <div class="modal-body">
-        <p style="margin-bottom: 12px;">Manage your idle game save data:</p>
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <button class="modal-btn secondary" id="exportSaveBtn" style="text-align: left;">📋 Export Save (Copy to Clipboard)</button>
           <button class="modal-btn secondary" id="importSaveBtn" style="text-align: left;">📥 Import Save Code</button>
@@ -1303,14 +1929,14 @@
     </div>
   </div>
 
-  <!-- Floating Toast Notifications -->
+  <!-- Toast Notification Container -->
   <div id="toastContainer"></div>
 
   <script>
     /* =========================================================
-       AUDIO ENGINE (Zero external dependencies via Web Audio API)
+       AUDIO SYNTHESIS ENGINE (Web Audio API)
        ========================================================= */
-    class SoundEngine {
+    class AudioEngine {
       constructor() {
         this.ctx = null;
         this.muted = localStorage.getItem("todorisu_idle_muted") === "true";
@@ -1331,14 +1957,14 @@
         this.init();
         if (!this.ctx) return;
         try {
+          const now = this.ctx.currentTime;
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
           osc.type = crit ? "triangle" : "sine";
-          const now = this.ctx.currentTime;
-          const freq = crit ? 880 + Math.random() * 120 : 350 + Math.random() * 60;
+          const freq = crit ? 900 + Math.random() * 200 : 380 + Math.random() * 70;
           osc.frequency.setValueAtTime(freq, now);
-          osc.frequency.exponentialRampToValueAtTime(freq * (crit ? 1.5 : 0.6), now + 0.08);
-          gain.gain.setValueAtTime(crit ? 0.25 : 0.12, now);
+          osc.frequency.exponentialRampToValueAtTime(freq * (crit ? 1.6 : 0.6), now + 0.08);
+          gain.gain.setValueAtTime(crit ? 0.22 : 0.12, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
@@ -1353,18 +1979,17 @@
         if (!this.ctx) return;
         try {
           const now = this.ctx.currentTime;
-          const notes = [523.25, 659.25];
-          notes.forEach((freq, idx) => {
+          [523.25, 659.25].forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = "sine";
-            osc.frequency.setValueAtTime(freq, now + idx * 0.05);
-            gain.gain.setValueAtTime(0.12, now + idx * 0.05);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.1);
+            osc.frequency.setValueAtTime(freq, now + idx * 0.04);
+            gain.gain.setValueAtTime(0.12, now + idx * 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.1);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
-            osc.start(now + idx * 0.05);
-            osc.stop(now + idx * 0.05 + 0.12);
+            osc.start(now + idx * 0.04);
+            osc.stop(now + idx * 0.04 + 0.11);
           });
         } catch (e) {}
       }
@@ -1375,19 +2000,39 @@
         if (!this.ctx) return;
         try {
           const now = this.ctx.currentTime;
-          const notes = [440, 554.37, 659.25, 880];
-          notes.forEach((freq, idx) => {
+          [440, 554.37, 659.25, 880].forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = "triangle";
-            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-            gain.gain.setValueAtTime(0.18, now + idx * 0.08);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+            osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+            gain.gain.setValueAtTime(0.15, now + idx * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.22);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
-            osc.start(now + idx * 0.08);
-            osc.stop(now + idx * 0.08 + 0.26);
+            osc.start(now + idx * 0.07);
+            osc.stop(now + idx * 0.07 + 0.24);
           });
+        } catch (e) {}
+      }
+
+      playSiren() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(350, now);
+          osc.frequency.linearRampToValueAtTime(700, now + 0.2);
+          osc.frequency.linearRampToValueAtTime(350, now + 0.4);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.48);
         } catch (e) {}
       }
 
@@ -1397,18 +2042,17 @@
         if (!this.ctx) return;
         try {
           const now = this.ctx.currentTime;
-          const notes = [587.33, 739.99, 880, 1174.66];
-          notes.forEach((freq, idx) => {
+          [587.33, 739.99, 880, 1174.66].forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.type = "sine";
-            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
-            gain.gain.setValueAtTime(0.2, now + idx * 0.06);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.3);
+            osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+            gain.gain.setValueAtTime(0.18, now + idx * 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.28);
             osc.connect(gain);
             gain.connect(this.ctx.destination);
-            osc.start(now + idx * 0.06);
-            osc.stop(now + idx * 0.06 + 0.32);
+            osc.start(now + idx * 0.05);
+            osc.stop(now + idx * 0.05 + 0.3);
           });
         } catch (e) {}
       }
@@ -1420,7 +2064,7 @@
       }
     }
 
-    const sound = new SoundEngine();
+    const sound = new AudioEngine();
 
     /* =========================================================
        NUMBER FORMATTER
@@ -1436,79 +2080,85 @@
         return "$" + (showDec && num >= 1 && num < 100 ? num.toFixed(1) : Math.floor(num).toLocaleString());
       }
       const exp = Math.floor(Math.log10(num) / 3);
-      if (exp >= SUFFIXES.length) {
-        return "$" + num.toExponential(2);
-      }
+      if (exp >= SUFFIXES.length) return "$" + num.toExponential(2);
       const scaled = num / Math.pow(10, exp * 3);
       return "$" + scaled.toFixed(scaled >= 100 ? 1 : 2) + " " + SUFFIXES[exp];
     }
 
-    function formatNumber(num) {
-      if (num < 1000) return Math.floor(num).toString();
-      const exp = Math.floor(Math.log10(num) / 3);
-      if (exp >= SUFFIXES.length) return num.toExponential(2);
-      const scaled = num / Math.pow(10, exp * 3);
-      return scaled.toFixed(scaled >= 100 ? 1 : 2) + " " + SUFFIXES[exp];
-    }
-
     /* =========================================================
-       GAME CONFIGURATION & DEFINITIONS
+       GAME CATALOGS & DEFINITIONS
        ========================================================= */
     const GENERATORS_DATA = [
-      { id: "gen_intern", name: "Intern Coffee Runner", icon: "☕", baseCost: 15, baseRate: 0.8, desc: "Runs for lattes, accidentally completes low-priority tasks." },
-      { id: "gen_keyboard", name: "Mechanical Keyboard", icon: "⌨️", baseCost: 110, baseRate: 6.0, desc: "Clicky tactile switches that boost typing output by 400%." },
-      { id: "gen_cron", name: "Smart Script & Cron Job", icon: "⚙️", baseCost: 850, baseRate: 40.0, desc: "Automated bash scripts clearing backlogs while everyone sleeps." },
-      { id: "gen_developer", name: "Senior Full-Stack Dev", icon: "💻", baseCost: 6500, baseRate: 280.0, desc: "Drinks yerba mate and converts legacy spaghetti into profit." },
-      { id: "gen_copilot", name: "AI Agent Swarm", icon: "🤖", baseCost: 55000, baseRate: 2100.0, desc: "Generates 100 features a minute and auto-resolves merge conflicts." },
-      { id: "gen_scrum", name: "Agile Scrum Engine", icon: "🔄", baseCost: 480000, baseRate: 16000.0, desc: "Continuous delivery pipeline deploying at relativistic speed." },
-      { id: "gen_vc", name: "Silicon Valley VC Fund", icon: "📈", baseCost: 4200000, baseRate: 125000.0, desc: "Injects seed funding and turns completed todos into equity." },
-      { id: "gen_quantum", name: "Quantum Task Server", icon: "⚛️", baseCost: 38000000, baseRate: 1050000.0, desc: "Solves todo items across multiple parallel timelines at once." },
-      { id: "gen_orbital", name: "Orbital Data Colony", icon: "🛰️", baseCost: 340000000, baseRate: 8800000.0, desc: "Zero-gravity supercomputing satellite operating at near-absolute zero." },
-      { id: "gen_multiverse", name: "Multiverse Holding Corp", icon: "🌌", baseCost: 3200000000, baseRate: 75000000.0, desc: "Acquires reality itself and automates todos across all dimensions." }
+      { id: "gen_intern", name: "Intern Coffee Runner", icon: "☕", baseCost: 25, baseRate: 0.6, unlockAt: 0, desc: "Runs for lattes, accidentally completes low-priority tasks.", bubble: "Need espresso! ☕" },
+      { id: "gen_keyboard", name: "Mechanical Keyboard", icon: "⌨️", baseCost: 180, baseRate: 4.5, unlockAt: 100, desc: "Clicky tactile switches that boost typing output by 400%.", bubble: "Click-clack-clack!" },
+      { id: "gen_cron", name: "Smart Bash Cron Scripts", icon: "⚙️", baseCost: 1400, baseRate: 32.0, unlockAt: 800, desc: "Automated bash scripts clearing backlogs while everyone sleeps.", bubble: "Cron job running..." },
+      { id: "gen_developer", name: "Senior Full-Stack Dev", icon: "💻", baseCost: 12500, baseRate: 240.0, unlockAt: 7000, desc: "Drinks yerba mate and converts legacy spaghetti into profit.", bubble: "Refactoring DB..." },
+      { id: "gen_copilot", name: "AI Agent Swarm", icon: "🤖", baseCost: 110000, baseRate: 1850.0, unlockAt: 60000, desc: "Generates 100 features a minute and auto-resolves merge conflicts.", bubble: "Synthesizing code..." },
+      { id: "gen_scrum", name: "Agile Continuous Pipeline", icon: "🔄", baseCost: 950000, baseRate: 14200.0, unlockAt: 500000, desc: "Continuous delivery pipeline deploying at relativistic speed.", bubble: "Deploying to prod!" },
+      { id: "gen_vc", name: "Silicon Valley VC Fund", icon: "📈", baseCost: 8500000, baseRate: 110000.0, unlockAt: 4500000, desc: "Injects seed funding and turns completed todos into equity.", bubble: "Pivoting to AI 🚀" },
+      { id: "gen_quantum", name: "Quantum Task Server", icon: "⚛️", baseCost: 85000000, baseRate: 920000.0, unlockAt: 45000000, desc: "Solves todo items across multiple parallel timelines at once.", bubble: "Qubits aligned." },
+      { id: "gen_orbital", name: "Orbital Data Colony", icon: "🛰️", baseCost: 900000000, baseRate: 7800000.0, unlockAt: 450000000, desc: "Zero-gravity supercomputing satellite operating at near-absolute zero.", bubble: "Solar beams locked." },
+      { id: "gen_dyson", name: "Dyson Sphere Core", icon: "☀️", baseCost: 11000000000, baseRate: 68000000.0, unlockAt: 5000000000, desc: "Harvests solar energy directly into compute power for cosmic productivity.", bubble: "Power at 100%!" },
+      { id: "gen_multiverse", name: "Multiverse Holding Corp", icon: "🌌", baseCost: 160000000000, baseRate: 620000000.0, unlockAt: 80000000000, desc: "Acquires reality itself and automates todos across all dimensions.", bubble: "Timeline merged." },
+      { id: "gen_reality", name: "Omnipresent Reality Engine", icon: "🔮", baseCost: 2500000000000, baseRate: 5800000000.0, unlockAt: 1200000000000, desc: "Tasks complete themselves before anyone even writes them down.", bubble: "Destiny fulfilled." }
     ];
 
     const UPGRADES_DATA = [
-      // Click Upgrades
-      { id: "up_click_1", name: "Ergonomic Grip", icon: "🖱️", cost: 100, type: "click_mult", val: 2, desc: "Double manual click efficiency (+100%)." },
-      { id: "up_click_2", name: "Cherry MX Switches", icon: "⌨️", cost: 1200, type: "click_mult", val: 2, desc: "Crisp click actuation doubles click power again." },
-      { id: "up_click_synergy_1", name: "Macro Scripting", icon: "📜", cost: 10000, type: "click_synergy", val: 0.01, desc: "Each manual click yields +1% of your total idle $/s!" },
-      { id: "up_crit_1", name: "Laser Precision", icon: "🎯", cost: 35000, type: "crit_chance", val: 0.05, desc: "+5% Critical Strike chance on clicks (10x payout)." },
-      { id: "up_click_synergy_2", name: "Neural Link Clicker", icon: "🧠", cost: 250000, type: "click_synergy", val: 0.02, desc: "Each click yields an additional +2% of idle $/s." },
-      { id: "up_crit_2", name: "Overclocked Reflexes", icon: "⚡", cost: 2000000, type: "crit_mult", val: 2.5, desc: "Critical clicks deal 25x normal damage instead of 10x!" },
+      // Click Research
+      { id: "up_click_1", name: "Ergonomic Grip", icon: "🖱️", cost: 150, type: "click_mult", val: 2, desc: "Double manual click efficiency (+100%)." },
+      { id: "up_click_2", name: "Cherry MX Blues", icon: "⌨️", cost: 2200, type: "click_mult", val: 2, desc: "Crisp click actuation doubles click power again." },
+      { id: "up_click_synergy_1", name: "Macro Scripting", icon: "📜", cost: 25000, type: "click_synergy", val: 0.015, desc: "Each manual click yields +1.5% of your total idle $/s!" },
+      { id: "up_crit_1", name: "Laser Optics", icon: "🎯", cost: 85000, type: "crit_chance", val: 0.05, desc: "+5% Critical Strike chance on clicks." },
+      { id: "up_click_synergy_2", name: "Neural Link Clicker", icon: "🧠", cost: 750000, type: "click_synergy", val: 0.025, desc: "Each click yields an additional +2.5% of idle $/s." },
+      { id: "up_crit_2", name: "Overclocked Reflexes", icon: "⚡", cost: 6000000, type: "crit_mult", val: 2.5, desc: "Critical clicks deal 20x normal damage!" },
 
-      // Generator Specific Upgrades
-      { id: "up_gen_intern_1", name: "Triple Espresso Shots", icon: "☕", cost: 500, type: "gen_mult", target: "gen_intern", val: 2, desc: "Interns run at double speed (2x $/s)." },
-      { id: "up_gen_kb_1", name: "PBT Dye-Sub Keycaps", icon: "🔤", cost: 3500, type: "gen_mult", target: "gen_keyboard", val: 2, desc: "Mechanical Keyboards output 2x cash." },
-      { id: "up_gen_cron_1", name: "StackOverflow VIP", icon: "💡", cost: 25000, type: "gen_mult", target: "gen_cron", val: 2, desc: "Cron Scripts run bug-free (2x $/s)." },
-      { id: "up_gen_dev_1", name: "Standing Desks", icon: "🧘", cost: 180000, type: "gen_mult", target: "gen_developer", val: 2, desc: "Senior Devs focus 2x better (2x $/s)." },
-      { id: "up_gen_copilot_1", name: "Few-Shot Fine-Tuning", icon: "🤖", cost: 1500000, type: "gen_mult", target: "gen_copilot", val: 2, desc: "AI Agent swarm doubles task throughput." },
-      { id: "up_gen_scrum_1", name: "Continuous Refactoring", icon: "🔄", cost: 12000000, type: "gen_mult", target: "gen_scrum", val: 2, desc: "Agile Scrum Engines generate 2x revenue." },
-      { id: "up_gen_vc_1", name: "Series B Megaround", icon: "💎", cost: 95000000, type: "gen_mult", target: "gen_vc", val: 2, desc: "VC Funds deliver 2x passive return." },
-      { id: "up_gen_quantum_1", name: "Entangled Qubits", icon: "🌌", cost: 800000000, type: "gen_mult", target: "gen_quantum", val: 2, desc: "Quantum Servers output 2x cash." },
+      // Generator Specific Research
+      { id: "up_gen_intern_1", name: "Artisanal Cold Brew", icon: "☕", cost: 800, type: "gen_mult", target: "gen_intern", val: 2, desc: "Interns run at double speed (2x $/s)." },
+      { id: "up_gen_kb_1", name: "PBT Dye-Sub Keycaps", icon: "🔤", cost: 5500, type: "gen_mult", target: "gen_keyboard", val: 2, desc: "Mechanical Keyboards output 2x cash." },
+      { id: "up_gen_cron_1", name: "Dockerized Containers", icon: "🐳", cost: 45000, type: "gen_mult", target: "gen_cron", val: 2, desc: "Cron Scripts run 2x more efficiently." },
+      { id: "up_gen_dev_1", name: "Standing Desks & Yerba", icon: "🧘", cost: 420000, type: "gen_mult", target: "gen_developer", val: 2, desc: "Senior Devs focus 2x better (2x $/s)." },
+      { id: "up_gen_copilot_1", name: "Chain-of-Thought AI", icon: "🤖", cost: 3800000, type: "gen_mult", target: "gen_copilot", val: 2, desc: "AI Agent swarm doubles task throughput." },
+      { id: "up_gen_scrum_1", name: "Zero-Downtime Blue-Green", icon: "🔄", cost: 32000000, type: "gen_mult", target: "gen_scrum", val: 2, desc: "Agile CI/CD pipeline deploys at 2x rate." },
+      { id: "up_gen_vc_1", name: "Series B Megaround", icon: "💎", cost: 280000000, type: "gen_mult", target: "gen_vc", val: 2, desc: "VC Funds deliver 2x passive return." },
+      { id: "up_gen_quantum_1", name: "Superconducting Cavities", icon: "⚛️", cost: 2500000000, type: "gen_mult", target: "gen_quantum", val: 2, desc: "Quantum Servers output 2x cash." },
+      { id: "up_gen_orbital_1", name: "Zero-G Liquid Helium", icon: "🛰️", cost: 25000000000, type: "gen_mult", target: "gen_orbital", val: 2, desc: "Orbital colonies deliver 2x passive compute." },
 
       // Global Buffs
-      { id: "up_global_1", name: "Productivity Music Playlist", icon: "🎧", cost: 8000, type: "global_mult", val: 1.25, desc: "+25% to ALL idle generators." },
-      { id: "up_global_2", name: "Clean Microservice Architecture", icon: "📐", cost: 500000, type: "global_mult", val: 1.5, desc: "+50% to ALL idle generators." },
-      { id: "up_global_3", name: "Quantum Internet Fiber", icon: "🌐", cost: 50000000, type: "global_mult", val: 1.75, desc: "+75% to ALL idle generators." }
+      { id: "up_global_1", name: "Lofi Beats to Code To", icon: "🎧", cost: 15000, type: "global_mult", val: 1.25, desc: "+25% to ALL idle generators." },
+      { id: "up_global_2", name: "Microservice Decoupling", icon: "📐", cost: 1500000, type: "global_mult", val: 1.4, desc: "+40% to ALL idle generators." },
+      { id: "up_global_3", name: "Quantum Terabit Backbone", icon: "🌐", cost: 120000000, type: "global_mult", val: 1.6, desc: "+60% to ALL idle generators." }
+    ];
+
+    const ARTIFACTS_DATA = [
+      { id: "art_coffee", name: "Cold Brew Concentrate", icon: "☕", rarity: "common", desc: "+30% Intern productivity & +10% click speed." },
+      { id: "art_duck", name: "Rubber Debug Duck", icon: "🦆", rarity: "common", desc: "+25% Senior Dev output & +2% crit chance." },
+      { id: "art_glasses", name: "Anti-Blue Light Lenses", icon: "👓", rarity: "rare", desc: "+15% Critical Strike chance on clicks." },
+      { id: "art_switches", name: "Lubed Holy Panda Switches", icon: "⌨️", rarity: "rare", desc: "+75% Click value & +10% Hackathon duration." },
+      { id: "art_radar", name: "Golden Acorn Radar", icon: "📡", rarity: "epic", desc: "Golden Acorns spawn 40% faster and grant 50% more cash." },
+      { id: "art_server", name: "Cryo Server Rack", icon: "❄️", rarity: "epic", desc: "Reduces Server Outage frequency by 50% and grants +35% idle rate." },
+      { id: "art_term_sheet", name: "Sequoia Term Sheet", icon: "📜", rarity: "legendary", desc: "All workplaces cost 15% less & Rebirths award +2 bonus Acorns." },
+      { id: "art_singularity", name: "Pocket Singularity", icon: "🔮", rarity: "legendary", desc: "Multiplies ALL cash generation by 2.2x." }
     ];
 
     const PRESTIGE_UPGRADES_DATA = [
-      { id: "p_touch", name: "Midas Touch", icon: "✨", maxRank: 10, cost: (r) => Math.pow(r + 1, 2) * 2, desc: "+25% click value per rank.", effect: (r) => 1 + r * 0.25 },
-      { id: "p_income", name: "Compound Interest", icon: "📈", maxRank: 10, cost: (r) => Math.pow(r + 1, 2) * 3, desc: "+15% total idle income per rank.", effect: (r) => 1 + r * 0.15 },
-      { id: "p_seed", name: "Angel Seed Fund", icon: "💰", maxRank: 5, cost: (r) => (r + 1) * 5, desc: "Start each rebirth with bonus cash ($1K, $10K, $100K...).", effect: (r) => r === 0 ? 0 : Math.pow(10, r + 2) },
-      { id: "p_luck", name: "Lucky Acorn Magnet", icon: "🧲", maxRank: 5, cost: (r) => (r + 1) * 4, desc: "Golden Acorns spawn 20% faster & pay 30% more per rank.", effect: (r) => 1 + r * 0.2 },
-      { id: "p_offline", name: "24/7 Night Shift", icon: "🌙", maxRank: 5, cost: (r) => (r + 1) * 5, desc: "Increases offline idle production rate by +15% per rank.", effect: (r) => 0.5 + r * 0.15 }
+      { id: "p_touch", name: "Venture Midas Touch", icon: "✨", maxRank: 10, cost: (r) => Math.pow(r + 1, 2) * 2, desc: "+25% click value per rank.", effect: (r) => 1 + r * 0.25 },
+      { id: "p_income", name: "Compound Dividend", icon: "📈", maxRank: 10, cost: (r) => Math.pow(r + 1, 2) * 3, desc: "+15% total idle income per rank.", effect: (r) => 1 + r * 0.15 },
+      { id: "p_seed", name: "Angel Seed Fund", icon: "💰", maxRank: 5, cost: (r) => (r + 1) * 4, desc: "Start runs with initial cash ($5K, $50K, $500K...).", effect: (r) => r === 0 ? 0 : Math.pow(10, r + 3) * 0.5 },
+      { id: "p_luck", name: "Lucky Acorn Magnet", icon: "🧲", maxRank: 5, cost: (r) => (r + 1) * 3, desc: "Golden Acorns spawn 25% faster & pay 35% more.", effect: (r) => 1 + r * 0.25 },
+      { id: "p_hackathon", name: "Hackathon Sponsor", icon: "🚀", maxRank: 5, cost: (r) => (r + 1) * 5, desc: "Hackathon ability cooldown reduced by 30s per rank.", effect: (r) => r * 30 }
     ];
 
     const ACHIEVEMENTS_DATA = [
       { id: "ach_click_1", name: "First Todo Checked", icon: "✔️", desc: "Click the task button 1 time.", check: (s) => s.stats.totalClicks >= 1 },
       { id: "ach_click_100", name: "Fast Fingers", icon: "⚡", desc: "Click 100 times manually.", check: (s) => s.stats.totalClicks >= 100 },
-      { id: "ach_click_1000", name: "Carpal Tunnel Warrior", icon: "🔥", desc: "Click 1,000 times manually.", check: (s) => s.stats.totalClicks >= 1000 },
-      { id: "ach_money_1k", name: "First Grand", icon: "💵", desc: "Earn $1,000 in total.", check: (s) => s.stats.totalEarned >= 1000 },
+      { id: "ach_click_1000", name: "Wrist of Steel", icon: "🔥", desc: "Click 1,000 times manually.", check: (s) => s.stats.totalClicks >= 1000 },
+      { id: "ach_money_10k", name: "Seed Traction", icon: "💵", desc: "Earn $10,000 in total.", check: (s) => s.stats.totalEarned >= 10000 },
       { id: "ach_money_1m", name: "Bootstrapped Millionaire", icon: "💎", desc: "Earn $1,000,000 in total.", check: (s) => s.stats.totalEarned >= 1e6 },
-      { id: "ach_money_1b", name: "Tech Unicorn", icon: "🦄", desc: "Earn $1,000,000,000 in total.", check: (s) => s.stats.totalEarned >= 1e9 },
-      { id: "ach_rebirth_1", name: "Public Offering", icon: "🚀", desc: "Execute your first company Rebirth / IPO.", check: (s) => s.stats.rebirths >= 1 },
-      { id: "ach_golden_1", name: "Lucky Squirrel", icon: "🌰", desc: "Catch a floating Golden Acorn.", check: (s) => s.stats.goldenAcornsFound >= 1 }
+      { id: "ach_money_1b", name: "Unicorn Valuation", icon: "🦄", desc: "Earn $1,000,000,000 in total.", check: (s) => s.stats.totalEarned >= 1e9 },
+      { id: "ach_money_1t", name: "Trillion Dollar Corp", icon: "🪐", desc: "Earn $1,000,000,000,000 in total.", check: (s) => s.stats.totalEarned >= 1e12 },
+      { id: "ach_rebirth_1", name: "Ring the NASDAQ Bell", icon: "🚀", desc: "Complete your first company IPO Rebirth.", check: (s) => s.stats.rebirths >= 1 },
+      { id: "ach_crisis_1", name: "Site Reliability Hero", icon: "🚨", desc: "Resolve a critical server outage.", check: (s) => s.stats.crisesResolved >= 1 },
+      { id: "ach_golden_1", name: "Golden Squirrel", icon: "🌰", desc: "Catch a floating Golden Acorn.", check: (s) => s.stats.goldenAcornsFound >= 1 }
     ];
 
     /* =========================================================
@@ -1519,16 +2169,31 @@
         money: 0,
         prestigeTokens: 0,
         totalPrestigeEarned: 0,
-        generators: {}, // id -> count
-        upgrades: {},   // id -> boolean
-        prestigeRanks: {}, // id -> rank
-        achievements: {},  // id -> boolean
+        strategyPointsTotal: 0,
+        strategyPointsAllocated: {
+          engineering: 0,
+          marketing: 0,
+          finance: 0
+        },
+        equippedArtifacts: [null, null, null],
+        ownedArtifacts: ["art_coffee"], // Start with 1 friendly coffee drop
+        generators: {},
+        upgrades: {},
+        prestigeRanks: {},
+        achievements: {},
+        contracts: [
+          { id: 1, type: "clicks", target: 50, current: 0, reward: 2500, label: "Complete 50 manual tasks" },
+          { id: 2, type: "own_gen", genId: "gen_intern", target: 10, current: 0, reward: 5000, label: "Hire 10 Intern Coffee Runners" },
+          { id: 3, type: "earn", target: 20000, current: 0, reward: 8000, label: "Accumulate $20,000 treasury" }
+        ],
         stats: {
           totalClicks: 0,
           totalClickCash: 0,
           totalEarned: 0,
           peakRate: 0,
           rebirths: 0,
+          crisesResolved: 0,
+          contractsDone: 0,
           goldenAcornsFound: 0,
           playTimeSeconds: 0
         },
@@ -1537,24 +2202,36 @@
     }
 
     /* =========================================================
-       GAME CONTROLLER
+       MAIN GAME CONTROLLER
        ========================================================= */
     class TodorisuIdleGame {
       constructor() {
         this.state = getDefaultState();
         this.buyMultiplier = 1;
         this.activeTab = "generators";
-        
-        // Dynamic gameplay timers
-        this.frenzyValue = 0; // 0 to 100
+
+        // Active Frenzy & Abilities
+        this.frenzyValue = 0;
         this.isFrenzyActive = false;
         this.frenzyDuration = 0;
 
+        this.hackathonCooldown = 0; // cooldown timer
+        this.isHackathonActive = false;
+        this.hackathonDuration = 0;
+
+        // Emergency Crisis System
+        this.crisisActive = false;
+        this.crisisTimer = 0;
+        this.crisisBugsRemaining = 0;
+        this.nextCrisisTimer = 180 + Math.random() * 120; // every 3-5 min
+
+        // Golden Acorn Event
+        this.goldenSpawnTimer = 45 + Math.random() * 30;
+        this.activeGoldenAcorn = null;
+
+        // Lucky Rush multiplier
         this.rushMultiplier = 1;
         this.rushDuration = 0;
-
-        this.goldenSpawnTimer = 35 + Math.random() * 25;
-        this.activeGoldenAcorn = null;
 
         this.lastTickTime = performance.now();
       }
@@ -1580,6 +2257,10 @@
             this.state = {
               ...getDefaultState(),
               ...parsed,
+              strategyPointsAllocated: { ...getDefaultState().strategyPointsAllocated, ...(parsed.strategyPointsAllocated || {}) },
+              equippedArtifacts: parsed.equippedArtifacts || [null, null, null],
+              ownedArtifacts: parsed.ownedArtifacts || ["art_coffee"],
+              contracts: parsed.contracts || getDefaultState().contracts,
               stats: { ...getDefaultState().stats, ...(parsed.stats || {}) },
               generators: parsed.generators || {},
               upgrades: parsed.upgrades || {},
@@ -1595,28 +2276,38 @@
       checkOfflineProgress() {
         const now = Date.now();
         const diffSeconds = (now - this.state.lastSaveTime) / 1000;
-        if (diffSeconds > 8) {
+        if (diffSeconds > 10) {
           const rate = this.calculateIdleRate();
-          const offlineRank = this.state.prestigeRanks["p_offline"] || 0;
-          const efficiency = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_offline").effect(offlineRank);
-          const earned = rate * diffSeconds * efficiency;
-          if (earned > 1) {
+          const offlineEfficiency = 0.5 + (this.state.strategyPointsAllocated.finance * 0.05);
+          const earned = rate * diffSeconds * offlineEfficiency;
+          if (earned > 2) {
             this.state.money += earned;
             this.state.stats.totalEarned += earned;
             const timeStr = diffSeconds > 3600
               ? `${Math.floor(diffSeconds / 3600)}h ${Math.floor((diffSeconds % 3600) / 60)}m`
               : `${Math.floor(diffSeconds / 60)}m ${Math.floor(diffSeconds % 60)}s`;
-            
+
             const msgEl = document.getElementById("offlineModalMsg");
             if (msgEl) {
-              msgEl.innerHTML = `While you were away for <strong>${timeStr}</strong>, your automated team earned <strong style="color: var(--green);">${formatMoney(earned)}</strong>!`;
+              msgEl.innerHTML = `While you were offline for <strong>${timeStr}</strong>, your company accumulated <strong style="color: var(--green);">${formatMoney(earned)}</strong>!`;
               document.getElementById("offlineModal").classList.add("open");
             }
           }
         }
       }
 
-      /* ================= Math & Rates ================= */
+      /* ================= Mathematical Calculations ================= */
+      getCompanyTier() {
+        const earned = this.state.stats.totalEarned;
+        if (earned > 1e12) return "Tier 7: Multiverse Conglomerate";
+        if (earned > 1e9) return "Tier 6: Silicon Unicorn";
+        if (earned > 5e7) return "Tier 5: Pre-IPO Powerhouse";
+        if (earned > 5e6) return "Tier 4: Series B Growth";
+        if (earned > 250000) return "Tier 3: Seed Funded";
+        if (earned > 10000) return "Tier 2: Bootstrapped Team";
+        return "Tier 1: Garage Startup";
+      }
+
       getGeneratorCount(id) {
         return this.state.generators[id] || 0;
       }
@@ -1625,9 +2316,9 @@
         let mult = 1;
         if (count >= 10) mult *= 2;
         if (count >= 25) mult *= 2;
-        if (count >= 50) mult *= 3;
-        if (count >= 100) mult *= 4;
-        if (count >= 200) mult *= 5;
+        if (count >= 50) mult *= 2.5;
+        if (count >= 100) mult *= 3;
+        if (count >= 200) mult *= 4;
         return mult;
       }
 
@@ -1639,30 +2330,61 @@
         return count + 100;
       }
 
+      getGeneratorCost(gen, count) {
+        // Base cost * 1.18^count
+        const r = 1.18;
+        let cost = gen.baseCost * Math.pow(r, count);
+
+        // Finance department discount (up to 20%)
+        const finPts = this.state.strategyPointsAllocated.finance || 0;
+        cost *= Math.max(0.8, 1 - finPts * 0.02);
+
+        // Term sheet artifact discount
+        if (this.isArtifactEquipped("art_term_sheet")) {
+          cost *= 0.85;
+        }
+
+        return cost;
+      }
+
+      isArtifactEquipped(id) {
+        return this.state.equippedArtifacts.includes(id);
+      }
+
       getGeneratorRate(gen) {
         const count = this.getGeneratorCount(gen.id);
         if (count === 0) return 0;
         let rate = gen.baseRate * count * this.getMilestoneMultiplier(count);
 
-        // Check specific upgrades
+        // Specific research upgrades
         UPGRADES_DATA.forEach(u => {
           if (this.state.upgrades[u.id] && u.type === "gen_mult" && u.target === gen.id) {
             rate *= u.val;
           }
         });
 
-        // Global buffs
+        // Global research buffs
         UPGRADES_DATA.forEach(u => {
           if (this.state.upgrades[u.id] && u.type === "global_mult") {
             rate *= u.val;
           }
         });
 
-        // Prestige boost
+        // Engineering Department boost: +8% per point
+        const engPts = this.state.strategyPointsAllocated.engineering || 0;
+        rate *= (1 + engPts * 0.08);
+
+        // Artifact specific boosts
+        if (gen.id === "gen_intern" && this.isArtifactEquipped("art_coffee")) rate *= 1.3;
+        if (gen.id === "gen_developer" && this.isArtifactEquipped("art_duck")) rate *= 1.25;
+        if (this.isArtifactEquipped("art_server")) rate *= 1.35;
+        if (this.isArtifactEquipped("art_singularity")) rate *= 2.2;
+
+        // Prestige Compound Dividend perk
         const prestigeRank = this.state.prestigeRanks["p_income"] || 0;
         rate *= PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_income").effect(prestigeRank);
 
-        // Prestige token multiplier: each token gives +5%
+        // Golden Acorn permanent boost (+5% each)
         const tokenBonus = 1 + (this.state.prestigeTokens * 0.05);
         rate *= tokenBonus;
 
@@ -1675,7 +2397,16 @@
           total += this.getGeneratorRate(g);
         });
 
+        // If crisis is ongoing, 50% penalty!
+        if (this.crisisActive) total *= 0.5;
+
+        // Frenzy bonus
         if (this.isFrenzyActive) total *= 2.5;
+
+        // Hackathon active: 5x speed!
+        if (this.isHackathonActive) total *= 5.0;
+
+        // Golden Rush bonus
         if (this.rushDuration > 0) total *= this.rushMultiplier;
 
         return total;
@@ -1684,16 +2415,16 @@
       calculateClickPower() {
         let base = 1;
         const internCount = this.getGeneratorCount("gen_intern");
-        base += internCount * 0.2;
+        base += internCount * 0.15;
 
-        // Click multiplier upgrades
+        // Click research upgrades
         UPGRADES_DATA.forEach(u => {
           if (this.state.upgrades[u.id] && u.type === "click_mult") {
             base *= u.val;
           }
         });
 
-        // Synergy: add % of idle rate
+        // Synergy upgrades: % of idle $/s added to each click
         const idleRate = this.calculateIdleRate();
         let synergyPct = 0;
         UPGRADES_DATA.forEach(u => {
@@ -1703,15 +2434,24 @@
         });
         base += idleRate * synergyPct;
 
-        // Prestige Midas Touch
+        // Marketing department click bonus: +10% per point
+        const mktPts = this.state.strategyPointsAllocated.marketing || 0;
+        base *= (1 + mktPts * 0.1);
+
+        // Artifact click bonuses
+        if (this.isArtifactEquipped("art_switches")) base *= 1.75;
+        if (this.isArtifactEquipped("art_singularity")) base *= 2.2;
+
+        // Venture Midas Touch prestige perk
         const touchRank = this.state.prestigeRanks["p_touch"] || 0;
         base *= PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_touch").effect(touchRank);
 
-        // Prestige token bonus
+        // Golden Acorn multiplier (+5% each)
         const tokenBonus = 1 + (this.state.prestigeTokens * 0.05);
         base *= tokenBonus;
 
-        if (this.isFrenzyActive) base *= 3;
+        if (this.isFrenzyActive) base *= 3.0;
+        if (this.isHackathonActive) base *= 4.0;
         if (this.rushDuration > 0) base *= this.rushMultiplier;
 
         return Math.max(1, base);
@@ -1724,11 +2464,13 @@
             chance += u.val;
           }
         });
-        return chance;
+        if (this.isArtifactEquipped("art_glasses")) chance += 0.15;
+        if (this.isArtifactEquipped("art_duck")) chance += 0.02;
+        return Math.min(0.75, chance);
       }
 
       getCritMultiplier() {
-        let mult = 10;
+        let mult = 8;
         UPGRADES_DATA.forEach(u => {
           if (this.state.upgrades[u.id] && u.type === "crit_mult") {
             mult = u.val;
@@ -1739,36 +2481,43 @@
 
       getBulkBuyInfo(gen, requestedMult) {
         const count = this.getGeneratorCount(gen.id);
-        const r = 1.15;
+        const r = 1.18;
         const money = this.state.money;
 
         if (requestedMult === "max") {
-          // Solve for maximum N that money can afford:
-          // cost_N = baseCost * r^count * (r^N - 1) / (r - 1) <= money
-          const currentBase = gen.baseCost * Math.pow(r, count);
-          if (money < currentBase) {
-            return { count: 1, cost: currentBase, canAfford: false };
+          let currentCost = this.getGeneratorCost(gen, count);
+          if (money < currentCost) {
+            return { count: 1, cost: currentCost, canAfford: false };
           }
-          const maxN = Math.floor(Math.log(1 + (money * (r - 1)) / currentBase) / Math.log(r));
-          const actualN = Math.max(1, maxN);
-          const totalCost = currentBase * (Math.pow(r, actualN) - 1) / (r - 1);
-          return { count: actualN, cost: totalCost, canAfford: money >= totalCost };
+          let n = 0;
+          let total = 0;
+          while (true) {
+            const nextCost = this.getGeneratorCost(gen, count + n);
+            if (total + nextCost > money || n >= 1000) break;
+            total += nextCost;
+            n++;
+          }
+          return { count: Math.max(1, n), cost: total, canAfford: true };
         }
 
         const N = parseInt(requestedMult, 10) || 1;
-        const currentBase = gen.baseCost * Math.pow(r, count);
-        const totalCost = currentBase * (Math.pow(r, N) - 1) / (r - 1);
+        let totalCost = 0;
+        for (let i = 0; i < N; i++) {
+          totalCost += this.getGeneratorCost(gen, count + i);
+        }
         return { count: N, cost: totalCost, canAfford: money >= totalCost };
       }
 
       calculatePendingRebirthAcorns() {
-        if (this.state.stats.totalEarned < 1000000) return 0;
-        // Formula: floor(12 * sqrt(totalEarned / 1,000,000))
-        const totalPossible = Math.floor(12 * Math.sqrt(this.state.stats.totalEarned / 1000000));
-        return Math.max(0, totalPossible - this.state.totalPrestigeEarned);
+        // High prestige requirement: $10,000,000 lifetime earnings
+        if (this.state.stats.totalEarned < 10000000) return 0;
+        // Formula: floor(6 * (totalEarned / 10,000,000)^0.4)
+        const totalPossible = Math.floor(6 * Math.pow(this.state.stats.totalEarned / 10000000, 0.4));
+        const bonusFromArtifact = this.isArtifactEquipped("art_term_sheet") ? 2 : 0;
+        return Math.max(0, (totalPossible + bonusFromArtifact) - this.state.totalPrestigeEarned);
       }
 
-      /* ================= Core Actions ================= */
+      /* ================= Player Interactions ================= */
       handleClick(e) {
         sound.init();
         const clickPower = this.calculateClickPower();
@@ -1789,38 +2538,137 @@
           this.triggerFrenzy();
         }
 
-        // Spawn float text
+        // Random Artifact Loot Drop! (0.3% chance per click)
+        if (Math.random() < 0.003) {
+          this.rollRandomArtifactDrop();
+        }
+
+        // Progress Contracts
+        this.progressContracts("clicks", 1);
+        this.progressContracts("earn", earned);
+
         this.spawnParticle(e, earned, isCrit);
         this.updateHeaderStats();
-        this.renderUpgrades();
-        this.renderGenerators();
       }
 
       triggerFrenzy() {
         this.isFrenzyActive = true;
-        this.frenzyDuration = 10; // seconds
+        this.frenzyDuration = 10;
         sound.playFanfare();
-        this.showToast("🔥 HYPERFOCUS OVERDRIVE ACTIVATED! 3x Click & 2.5x Idle Income!");
+        this.showToast("🔥 HYPERFOCUS FLOW: 3x Click & 2.5x Idle Speed for 10s!");
         document.getElementById("auraRing").style.background = "radial-gradient(circle, rgba(245, 158, 11, 0.8) 0%, transparent 70%)";
+      }
+
+      triggerHackathon() {
+        if (this.hackathonCooldown > 0 || this.isHackathonActive) return;
+        this.isHackathonActive = true;
+        let duration = 30;
+        if (this.isArtifactEquipped("art_switches")) duration += 5;
+        this.hackathonDuration = duration;
+
+        const pRank = this.state.prestigeRanks["p_hackathon"] || 0;
+        const cdReduction = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_hackathon").effect(pRank);
+        this.hackathonCooldown = Math.max(90, 240 - cdReduction);
+
+        sound.playFanfare();
+        this.showToast("🚀 HACKATHON INITIATED! 5x Production for 30 seconds!");
+      }
+
+      triggerCrisis() {
+        if (this.crisisActive) return;
+        this.crisisActive = true;
+        this.crisisTimer = 9.0;
+        this.crisisBugsRemaining = 5;
+
+        sound.playSiren();
+        document.getElementById("emergencyBanner").style.display = "flex";
+        this.showToast("🚨 CRITICAL BUG DETECTED! Productivity slashed by 50%!");
+      }
+
+      openCrisisOverlay() {
+        const overlay = document.getElementById("crisisOverlay");
+        const bugField = document.getElementById("crisisBugField");
+        bugField.innerHTML = "";
+        overlay.classList.add("active");
+
+        for (let i = 0; i < this.crisisBugsRemaining; i++) {
+          const bug = document.createElement("div");
+          bug.className = "crisis-bug-node";
+          bug.innerHTML = "🐛";
+          bug.style.left = `${10 + Math.random() * 80}%`;
+          bug.style.top = `${20 + Math.random() * 60}%`;
+
+          bug.addEventListener("click", () => {
+            sound.playClick(true);
+            bug.remove();
+            this.crisisBugsRemaining--;
+            document.getElementById("crisisTimer").textContent = `Tap corrupted bugs: ${this.crisisBugsRemaining} left!`;
+            if (this.crisisBugsRemaining <= 0) {
+              this.resolveCrisisSuccess();
+            }
+          });
+
+          bugField.appendChild(bug);
+        }
+      }
+
+      resolveCrisisSuccess() {
+        this.crisisActive = false;
+        document.getElementById("crisisOverlay").classList.remove("active");
+        document.getElementById("emergencyBanner").style.display = "none";
+        this.nextCrisisTimer = 200 + Math.random() * 140;
+
+        sound.playFanfare();
+        const bounty = Math.max(this.calculateIdleRate() * 90, 5000);
+        this.state.money += bounty;
+        this.state.stats.totalEarned += bounty;
+        this.state.stats.crisesResolved += 1;
+
+        // Small chance of rare artifact drop
+        if (Math.random() < 0.35) {
+          this.rollRandomArtifactDrop();
+        }
+
+        this.showToast(`✅ OUTAGE RESOLVED! Incident Bounty: +${formatMoney(bounty)}!`);
+        this.checkAchievements();
+      }
+
+      resolveCrisisFailure() {
+        this.crisisActive = false;
+        document.getElementById("crisisOverlay").classList.remove("active");
+        document.getElementById("emergencyBanner").style.display = "none";
+        this.nextCrisisTimer = 140 + Math.random() * 80;
+        this.showToast("💥 System outage timed out. Production stabilized.");
+      }
+
+      rollRandomArtifactDrop() {
+        const unowned = ARTIFACTS_DATA.filter(a => !this.state.ownedArtifacts.includes(a.id));
+        if (unowned.length === 0) return;
+        const chosen = unowned[Math.floor(Math.random() * unowned.length)];
+        this.state.ownedArtifacts.push(chosen.id);
+
+        sound.playGolden();
+        this.showToast(`🎁 RARE DROP FOUND: ${chosen.name} (${chosen.rarity.toUpperCase()})!`);
+        this.renderInventory();
       }
 
       spawnParticle(e, amount, isCrit) {
         const pane = document.getElementById("clickerPane");
         if (!pane) return;
         const rect = pane.getBoundingClientRect();
-        
+
         let clientX = e ? e.clientX : rect.left + rect.width / 2;
         let clientY = e ? e.clientY : rect.top + rect.height / 2;
 
         const particle = document.createElement("div");
         particle.className = `particle-number ${isCrit ? "crit" : ""}`;
-        particle.style.left = `${clientX - rect.left + (Math.random() * 40 - 20)}px`;
-        particle.style.top = `${clientY - rect.top + (Math.random() * 20 - 10)}px`;
-        particle.style.setProperty("--rot", `${(Math.random() * 30 - 15)}deg`);
+        particle.style.left = `${clientX - rect.left + (Math.random() * 30 - 15)}px`;
+        particle.style.top = `${clientY - rect.top + (Math.random() * 16 - 8)}px`;
+        particle.style.setProperty("--rot", `${(Math.random() * 24 - 12)}deg`);
         particle.textContent = isCrit ? `CRIT! +${formatMoney(amount)}` : `+${formatMoney(amount)}`;
 
         pane.appendChild(particle);
-        setTimeout(() => particle.remove(), 900);
+        setTimeout(() => particle.remove(), 850);
       }
 
       buyGenerator(id) {
@@ -1833,7 +2681,10 @@
         this.state.generators[id] = (this.state.generators[id] || 0) + buyInfo.count;
         sound.playBuy();
 
+        this.progressContracts("own_gen", this.state.generators[id], id);
+
         this.renderGenerators();
+        this.renderOfficeStage();
         this.updateHeaderStats();
         this.checkAchievements();
       }
@@ -1845,7 +2696,7 @@
         this.state.money -= up.cost;
         this.state.upgrades[id] = true;
         sound.playBuy();
-        this.showToast(`⚡ Unlocked: ${up.name}`);
+        this.showToast(`⚡ Research Complete: ${up.name}`);
 
         this.renderUpgrades();
         this.renderGenerators();
@@ -1865,10 +2716,94 @@
         this.state.prestigeTokens -= cost;
         this.state.prestigeRanks[id] = currentRank + 1;
         sound.playBuy();
-        this.showToast(`🌰 Purchased: ${pData.name} Rank ${currentRank + 1}`);
+        this.showToast(`🌰 Venture Perk Upgraded: ${pData.name} Rank ${currentRank + 1}`);
 
         this.renderPrestigeShop();
         this.updateHeaderStats();
+      }
+
+      allocateStrategyPoint(dept) {
+        const totalAllocated = Object.values(this.state.strategyPointsAllocated).reduce((a, b) => a + b, 0);
+        const available = Math.max(0, this.state.strategyPointsTotal - totalAllocated);
+        if (available <= 0) return;
+
+        this.state.strategyPointsAllocated[dept] = (this.state.strategyPointsAllocated[dept] || 0) + 1;
+        sound.playBuy();
+        this.renderDepartments();
+        this.updateHeaderStats();
+      }
+
+      resetStrategyPoints() {
+        this.state.strategyPointsAllocated = { engineering: 0, marketing: 0, finance: 0 };
+        sound.playBuy();
+        this.renderDepartments();
+        this.updateHeaderStats();
+        this.showToast("Strategy points reset.");
+      }
+
+      toggleEquipArtifact(id) {
+        const currentIdx = this.state.equippedArtifacts.indexOf(id);
+        if (currentIdx !== -1) {
+          // Unequip
+          this.state.equippedArtifacts[currentIdx] = null;
+          sound.playBuy();
+          this.renderInventory();
+          this.updateQuickbar();
+          return;
+        }
+
+        // Equip in first free slot
+        const freeSlot = this.state.equippedArtifacts.indexOf(null);
+        if (freeSlot !== -1) {
+          this.state.equippedArtifacts[freeSlot] = id;
+          sound.playBuy();
+          this.renderInventory();
+          this.updateQuickbar();
+        } else {
+          this.showToast("All artifact slots are full! Unequip one first.");
+        }
+      }
+
+      progressContracts(type, amount, extraId = null) {
+        this.state.contracts.forEach(c => {
+          if (c.completed) return;
+          if (c.type === type) {
+            if (type === "own_gen" && c.genId === extraId) {
+              c.current = amount;
+            } else if (type === "clicks") {
+              c.current += amount;
+            } else if (type === "earn") {
+              c.current = this.state.money;
+            }
+
+            if (c.current >= c.target) {
+              c.completed = true;
+              this.showToast(`📜 Contract Completed: ${c.label}! Claim in Contracts tab!`);
+            }
+          }
+        });
+      }
+
+      claimContract(id) {
+        const contract = this.state.contracts.find(c => c.id === id);
+        if (!contract || !contract.completed) return;
+
+        sound.playFanfare();
+        this.state.money += contract.reward;
+        this.state.stats.totalEarned += contract.reward;
+        this.state.stats.contractsDone += 1;
+
+        // Generate replacement contract with higher targets and rewards
+        const nextTarget = Math.round(contract.target * 2.2);
+        const nextReward = Math.round(contract.reward * 2.5);
+        contract.target = nextTarget;
+        contract.current = 0;
+        contract.reward = nextReward;
+        contract.completed = false;
+
+        this.renderContracts();
+        this.updateHeaderStats();
+        this.checkAchievements();
       }
 
       rebirth() {
@@ -1879,7 +2814,7 @@
         this.state.totalPrestigeEarned += pending;
         this.state.stats.rebirths += 1;
 
-        // Reset run progress
+        // Seed capital rank
         const seedFundRank = this.state.prestigeRanks["p_seed"] || 0;
         const seedCash = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_seed").effect(seedFundRank);
 
@@ -1887,7 +2822,6 @@
         this.state.generators = {};
         this.state.upgrades = {};
 
-        // Frenzy reset
         this.frenzyValue = 0;
         this.isFrenzyActive = false;
 
@@ -1897,6 +2831,7 @@
         this.save();
         this.renderGenerators();
         this.renderUpgrades();
+        this.renderOfficeStage();
         this.renderRebirthPanel();
         this.updateHeaderStats();
         this.checkAchievements();
@@ -1909,10 +2844,8 @@
         acorn.innerHTML = "🌰";
 
         const margin = 80;
-        const maxX = window.innerWidth - margin;
-        const maxY = window.innerHeight - margin;
-        const randX = Math.floor(Math.random() * (maxX - margin)) + margin;
-        const randY = Math.floor(Math.random() * (maxY - margin)) + margin;
+        const randX = Math.floor(Math.random() * (window.innerWidth - margin * 2)) + margin;
+        const randY = Math.floor(Math.random() * (window.innerHeight - margin * 2)) + margin;
 
         acorn.style.left = `${randX}px`;
         acorn.style.top = `${randY}px`;
@@ -1926,7 +2859,6 @@
         document.body.appendChild(acorn);
         this.activeGoldenAcorn = acorn;
 
-        // Despawn after 12s if not clicked
         setTimeout(() => {
           if (this.activeGoldenAcorn === acorn) {
             acorn.remove();
@@ -1940,21 +2872,21 @@
         this.state.stats.goldenAcornsFound += 1;
 
         const luckRank = this.state.prestigeRanks["p_luck"] || 0;
-        const luckBonus = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_luck").effect(luckRank);
+        let luckBonus = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_luck").effect(luckRank);
+        if (this.isArtifactEquipped("art_radar")) luckBonus *= 1.5;
 
-        // 50% chance of instant cash burst, 50% chance of 7x rush
-        const isRush = Math.random() > 0.5;
-        if (isRush) {
+        // 50% chance cash influx, 50% chance 7x rush
+        if (Math.random() > 0.5) {
           this.rushMultiplier = 7;
           this.rushDuration = 20 * luckBonus;
-          this.showToast(`🌰 LUCKY ACORN! Productivity Rush: 7x Income for ${Math.round(this.rushDuration)}s!`);
+          this.showToast(`🌰 LUCKY ACORN! 7x Productivity Rush for ${Math.round(this.rushDuration)}s!`);
         } else {
           const idleRate = this.calculateIdleRate();
-          const baseAward = Math.max(idleRate * 60, this.state.money * 0.15, 100);
+          const baseAward = Math.max(idleRate * 75, this.state.money * 0.12, 500);
           const award = baseAward * luckBonus;
           this.state.money += award;
           this.state.stats.totalEarned += award;
-          this.showToast(`🌰 LUCKY ACORN! Cash Influx: +${formatMoney(award)}!`);
+          this.showToast(`🌰 LUCKY ACORN! Treasury Surge: +${formatMoney(award)}!`);
         }
 
         this.updateHeaderStats();
@@ -1963,11 +2895,15 @@
 
       /* ================= UI Rendering ================= */
       initDOM() {
-        // Click button
-        const clickBtn = document.getElementById("taskClickerBtn");
-        clickBtn.addEventListener("click", (e) => this.handleClick(e));
+        document.getElementById("taskClickerBtn").addEventListener("click", (e) => this.handleClick(e));
 
-        // Tabs
+        // Hackathon button
+        document.getElementById("hackathonBtn").addEventListener("click", () => this.triggerHackathon());
+
+        // Emergency banner
+        document.getElementById("emergencyResolveBtn").addEventListener("click", () => this.openCrisisOverlay());
+
+        // Navigation Tabs
         document.querySelectorAll(".tab-btn").forEach(btn => {
           btn.addEventListener("click", () => {
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -1976,8 +2912,7 @@
             const tabName = btn.getAttribute("data-tab");
             this.activeTab = tabName;
             document.getElementById(`tab-${tabName}`).classList.add("active");
-            
-            // Sub-bar toggle
+
             document.getElementById("generatorSubBar").style.display = tabName === "generators" ? "flex" : "none";
           });
         });
@@ -1992,7 +2927,7 @@
           });
         });
 
-        // Header Actions
+        // Header controls
         document.getElementById("soundToggleBtn").addEventListener("click", () => {
           const muted = sound.toggleMute();
           document.getElementById("soundToggleBtn").textContent = muted ? "🔇" : "🔊";
@@ -2002,14 +2937,14 @@
         document.getElementById("saveBtn").addEventListener("click", () => {
           this.save();
           sound.playBuy();
-          this.showToast("💾 Progress saved to local storage!");
+          this.showToast("💾 Progress saved safely!");
         });
 
         // Rebirth UI
         document.getElementById("rebirthBtn").addEventListener("click", () => {
           const pending = this.calculatePendingRebirthAcorns();
           if (pending > 0) {
-            document.getElementById("rebirthModalMsg").innerHTML = `Ascending will cash out your current run and award <strong>+${pending} Golden Acorns 🌰</strong>. You will gain a permanent +${pending * 5}% boost to all future income and unlock powerful venture perks. Proceed?`;
+            document.getElementById("rebirthModalMsg").innerHTML = `Proceeding with the IPO will award <strong>+${pending} Golden Acorns 🌰</strong> (+${pending * 5}% permanent income boost) and unlock new venture perks. Confirm?`;
             document.getElementById("rebirthConfirmModal").classList.add("open");
           }
         });
@@ -2027,7 +2962,7 @@
           sound.playBuy();
         });
 
-        // Settings / Reset Modal
+        // Settings Modal
         document.getElementById("resetDataBtn").addEventListener("click", () => {
           document.getElementById("settingsModal").classList.add("open");
         });
@@ -2035,7 +2970,7 @@
           document.getElementById("settingsModal").classList.remove("open");
         });
         document.getElementById("wipeSaveBtn").addEventListener("click", () => {
-          if (confirm("Are you 100% sure you want to completely erase your save and start fresh?")) {
+          if (confirm("Are you sure you want to completely erase all progress and restart from zero?")) {
             localStorage.removeItem("todorisu_idle_game_data");
             location.reload();
           }
@@ -2044,10 +2979,10 @@
           this.save();
           const str = btoa(JSON.stringify(this.state));
           navigator.clipboard.writeText(str);
-          this.showToast("📋 Save copied to clipboard!");
+          this.showToast("📋 Save export code copied to clipboard!");
         });
         document.getElementById("importSaveBtn").addEventListener("click", () => {
-          const code = prompt("Paste your export code here:");
+          const code = prompt("Paste your export save code:");
           if (code) {
             try {
               const parsed = JSON.parse(atob(code));
@@ -2055,15 +2990,50 @@
               this.save();
               location.reload();
             } catch (err) {
-              alert("Invalid save code!");
+              alert("Invalid save data string!");
             }
           }
         });
 
         this.renderGenerators();
         this.renderUpgrades();
+        this.renderDepartments();
+        this.renderInventory();
+        this.renderContracts();
         this.renderPrestigeShop();
         this.renderAchievements();
+        this.renderOfficeStage();
+        this.updateQuickbar();
+      }
+
+      renderOfficeStage() {
+        const floor = document.getElementById("officeFloor");
+        if (!floor) return;
+
+        let html = "";
+        GENERATORS_DATA.forEach(gen => {
+          const count = this.getGeneratorCount(gen.id);
+          if (count > 0) {
+            html += `
+              <div class="office-station" title="${gen.name} (x${count})">
+                <div class="station-bubble">${gen.bubble}</div>
+                <div class="station-avatar">${gen.icon}</div>
+                <div class="station-lbl">${gen.name.split(" ")[0]}</div>
+                <div class="station-count">x${count}</div>
+              </div>
+            `;
+          }
+        });
+
+        if (!html) {
+          html = `
+            <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+              <span>🏗️</span> Empty Garage: Hire Interns & Equipment in Workplaces to populate your office floor!
+            </div>
+          `;
+        }
+
+        floor.innerHTML = html;
       }
 
       renderGenerators() {
@@ -2078,28 +3048,29 @@
           const nextMile = this.getNextMilestone(count);
           const prevMile = count >= 200 ? 200 : count >= 100 ? 100 : count >= 50 ? 50 : count >= 25 ? 25 : count >= 10 ? 10 : 0;
           const milePct = Math.min(100, Math.max(0, ((count - prevMile) / (nextMile - prevMile)) * 100));
+          const isUnlocked = this.state.stats.totalEarned >= gen.unlockAt;
 
           html += `
-            <div class="gen-card ${!buyInfo.canAfford ? "cant-afford" : ""}">
+            <div class="gen-card ${!buyInfo.canAfford ? "cant-afford" : ""} ${!isUnlocked ? "locked" : ""}">
               <div class="gen-left">
-                <div class="gen-icon">${gen.icon}</div>
+                <div class="gen-icon">${isUnlocked ? gen.icon : "🔒"}</div>
                 <div class="gen-details">
                   <div class="gen-title-row">
-                    <span class="gen-name">${gen.name}</span>
+                    <span class="gen-name">${isUnlocked ? gen.name : "Locked Infrastructure"}</span>
                     <span class="gen-count-badge">lvl ${count}</span>
                   </div>
                   <div class="gen-meta">
                     <span class="gen-rate">+${formatMoney(genRate)} /s</span>
-                    <span style="opacity: 0.6;">Next bonus: ${count}/${nextMile}</span>
+                    <span style="opacity: 0.6;">Bonus: ${count}/${nextMile}</span>
                   </div>
-                  <div class="gen-progress-bar-wrap" title="Milestone Progress: ${count}/${nextMile}">
+                  <div class="gen-progress-bar-wrap" title="Milestone: ${count}/${nextMile}">
                     <div class="gen-progress-bar-fill" style="width: ${milePct}%"></div>
                   </div>
                 </div>
               </div>
               <div class="gen-right">
-                <button class="buy-btn" data-gen-id="${gen.id}" ${!buyInfo.canAfford ? "disabled" : ""}>
-                  Buy +${buyInfo.count} (${formatMoney(buyInfo.cost)})
+                <button class="buy-btn" data-gen-id="${gen.id}" ${(!buyInfo.canAfford || !isUnlocked) ? "disabled" : ""}>
+                  ${isUnlocked ? `Buy +${buyInfo.count} (${formatMoney(buyInfo.cost)})` : `Unlock @ ${formatMoney(gen.unlockAt)}`}
                 </button>
               </div>
             </div>
@@ -2108,7 +3079,6 @@
 
         container.innerHTML = html;
 
-        // Wire event listeners
         container.querySelectorAll(".buy-btn").forEach(btn => {
           btn.addEventListener("click", () => {
             const id = btn.getAttribute("data-gen-id");
@@ -2144,7 +3114,7 @@
                   <button class="buy-btn" data-upgrade-id="${u.id}" ${!canAfford ? "disabled" : ""}>
                     Research
                   </button>
-                ` : `<span style="color: var(--green); font-size: 13px; font-weight: 700;">✓ Active</span>`}
+                ` : `<span style="color: var(--green); font-size: 12px; font-weight: 700;">✓ Active</span>`}
               </div>
             </div>
           `;
@@ -2157,6 +3127,179 @@
           btn.addEventListener("click", () => {
             const id = btn.getAttribute("data-upgrade-id");
             this.buyUpgrade(id);
+          });
+        });
+      }
+
+      renderDepartments() {
+        const container = document.getElementById("departmentsList");
+        if (!container) return;
+
+        const totalAlloc = Object.values(this.state.strategyPointsAllocated).reduce((a, b) => a + b, 0);
+        const avail = Math.max(0, this.state.strategyPointsTotal - totalAlloc);
+        document.getElementById("strategyPointsVal").textContent = avail.toString();
+        document.getElementById("badgeStrategy").textContent = `${avail} pts`;
+
+        const depts = [
+          {
+            id: "engineering",
+            name: "Engineering & Architecture",
+            icon: "🔧",
+            lvl: this.state.strategyPointsAllocated.engineering,
+            perk: `+${this.state.strategyPointsAllocated.engineering * 8}% Idle Output across all tech.`
+          },
+          {
+            id: "marketing",
+            name: "Growth & Marketing",
+            icon: "📢",
+            lvl: this.state.strategyPointsAllocated.marketing,
+            perk: `+${this.state.strategyPointsAllocated.marketing * 10}% Click Power & Golden Acorn Rewards.`
+          },
+          {
+            id: "finance",
+            name: "Finance & Operations",
+            icon: "💼",
+            lvl: this.state.strategyPointsAllocated.finance,
+            perk: `-${this.state.strategyPointsAllocated.finance * 2}% Bulk Building Costs & +5% Offline Efficacy.`
+          }
+        ];
+
+        let html = "";
+        depts.forEach(d => {
+          html += `
+            <div class="dept-card">
+              <div class="dept-card-top">
+                <div class="dept-icon">${d.icon}</div>
+                <div>
+                  <div class="dept-title">${d.name}</div>
+                  <div class="dept-level">Rank ${d.lvl}</div>
+                </div>
+              </div>
+              <div class="dept-perks">${d.perk}</div>
+              <div class="dept-alloc-actions">
+                <button class="buy-btn" data-dept-id="${d.id}" ${avail <= 0 ? "disabled" : ""} style="flex: 1; justify-content: center;">
+                  + Allocate 1 Pt
+                </button>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `
+          <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 8px;">
+            <button class="modal-btn secondary" id="resetStrategyBtn" style="font-size: 12px;">↺ Reallocate All Points</button>
+          </div>
+        `;
+
+        container.innerHTML = html;
+
+        container.querySelectorAll(".buy-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-dept-id");
+            this.allocateStrategyPoint(id);
+          });
+        });
+
+        const resetBtn = document.getElementById("resetStrategyBtn");
+        if (resetBtn) resetBtn.addEventListener("click", () => this.resetStrategyPoints());
+      }
+
+      renderInventory() {
+        const container = document.getElementById("inventoryList");
+        if (!container) return;
+
+        let html = "";
+        ARTIFACTS_DATA.forEach(a => {
+          const isOwned = this.state.ownedArtifacts.includes(a.id);
+          const isEquipped = this.isArtifactEquipped(a.id);
+
+          html += `
+            <div class="artifact-card rarity-${a.rarity}" style="${!isOwned ? "opacity: 0.45; filter: grayscale(0.8);" : ""}">
+              <div class="artifact-top">
+                <div class="artifact-icon">${isOwned ? a.icon : "🔒"}</div>
+                <div class="artifact-info">
+                  <div class="artifact-name">${isOwned ? a.name : "Undiscovered Artifact"}</div>
+                  <div class="artifact-rarity" style="color: var(--rarity-${a.rarity});">${a.rarity}</div>
+                </div>
+              </div>
+              <div class="artifact-desc">${isOwned ? a.desc : "Found during active operations, random drops, or outage debugs."}</div>
+              <div style="margin-top: auto;">
+                ${isOwned ? `
+                  <button class="modal-btn ${isEquipped ? "gold" : "secondary"}" data-art-id="${a.id}" style="width: 100%;">
+                    ${isEquipped ? "✓ Equipped (Click to Unequip)" : "+ Equip to Loadout"}
+                  </button>
+                ` : `<span style="font-size: 11px; color: var(--text-muted);">Locked</span>`}
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+        document.getElementById("badgeArtifacts").textContent = this.state.ownedArtifacts.length;
+
+        container.querySelectorAll(".modal-btn[data-art-id]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-art-id");
+            this.toggleEquipArtifact(id);
+          });
+        });
+
+        this.updateQuickbar();
+      }
+
+      updateQuickbar() {
+        const slots = document.querySelectorAll(".equipped-slot");
+        let count = 0;
+        this.state.equippedArtifacts.forEach((artId, idx) => {
+          const slot = slots[idx];
+          if (!slot) return;
+          if (artId) {
+            count++;
+            const a = ARTIFACTS_DATA.find(x => x.id === artId);
+            slot.className = `equipped-slot filled rarity-${a.rarity}`;
+            slot.textContent = a.icon;
+            slot.title = `${a.name} (${a.desc})`;
+          } else {
+            slot.className = "equipped-slot";
+            slot.textContent = "—";
+            slot.title = "Empty Artifact Slot";
+          }
+        });
+        document.getElementById("equippedCountLabel").textContent = `${count}/3`;
+      }
+
+      renderContracts() {
+        const container = document.getElementById("contractsList");
+        if (!container) return;
+
+        let html = "";
+        this.state.contracts.forEach(c => {
+          const pct = Math.min(100, Math.round((c.current / c.target) * 100));
+          html += `
+            <div class="contract-card ${c.completed ? "completed" : ""}">
+              <div class="contract-left">
+                <div class="contract-title">${c.label}</div>
+                <div class="contract-desc">Progress: ${formatNumber(c.current)} / ${formatNumber(c.target)} (${pct}%)</div>
+                <div class="contract-progress-wrap">
+                  <div class="contract-progress-fill" style="width: ${pct}%;"></div>
+                </div>
+              </div>
+              <div class="contract-right">
+                <div class="contract-reward-label">+${formatMoney(c.reward)}</div>
+                <button class="buy-btn" data-contract-id="${c.id}" ${!c.completed ? "disabled" : ""}>
+                  ${c.completed ? "Claim Reward" : "In Progress"}
+                </button>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+
+        container.querySelectorAll(".buy-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = parseInt(btn.getAttribute("data-contract-id"), 10);
+            this.claimContract(id);
           });
         });
       }
@@ -2177,19 +3320,17 @@
               <div class="upgrade-top">
                 <div class="upgrade-icon">${p.icon}</div>
                 <div class="upgrade-info">
-                  <div class="upgrade-name">${p.name} <span style="color: var(--gold); font-size: 12px;">(Rank ${rank}/${p.maxRank})</span></div>
+                  <div class="upgrade-name">${p.name} <span style="color: var(--gold); font-size: 11px;">(Rank ${rank}/${p.maxRank})</span></div>
                   <div class="upgrade-desc">${p.desc}</div>
                 </div>
               </div>
               <div class="upgrade-bottom">
-                <div class="upgrade-cost" style="color: var(--gold);">
-                  ${isMax ? "MAX RANK" : `${cost} 🌰`}
-                </div>
+                <div class="upgrade-cost" style="color: var(--gold);">${isMax ? "MAX RANK" : `${cost} 🌰`}</div>
                 ${!isMax ? `
                   <button class="buy-btn" data-prestige-id="${p.id}" ${!canAfford ? "disabled" : ""} style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; box-shadow: 0 4px 12px var(--gold-glow);">
                     Upgrade
                   </button>
-                ` : `<span style="color: var(--gold); font-weight: 700;">✓ Maxed</span>`}
+                ` : `<span style="color: var(--gold); font-weight: 700; font-size: 12px;">✓ Maxed</span>`}
               </div>
             </div>
           `;
@@ -2213,7 +3354,7 @@
 
         const btn = document.getElementById("rebirthBtn");
         btn.disabled = pending <= 0;
-        btn.textContent = `🚀 Cash Out & Rebirth (+${pending} Acorns)`;
+        btn.textContent = `🚀 Launch IPO & Ascend (+${pending} Acorns)`;
         document.getElementById("badgeRebirth").textContent = `+${pending}`;
 
         this.renderPrestigeShop();
@@ -2258,22 +3399,30 @@
         const rate = this.calculateIdleRate();
         document.getElementById("statRate").textContent = `${formatMoney(rate)} /s`;
         document.getElementById("statAcorns").textContent = `${this.state.prestigeTokens}`;
+        document.getElementById("companyLvlBadge").textContent = this.getCompanyTier();
 
-        // Left stats
+        // Left pane stats
         document.getElementById("statClickVal").textContent = formatMoney(this.calculateClickPower());
         const critChance = Math.round(this.getCritChance() * 100);
         const critMult = this.getCritMultiplier();
         document.getElementById("statCritChance").textContent = `${critChance}% (${critMult}x)`;
-        
+
         const prestigeBonus = Math.round(this.state.prestigeTokens * 5);
         document.getElementById("statPrestigeMultiplier").textContent = `+${prestigeBonus}%`;
 
-        // Update record
+        // Check Strategy point earnings (1 point every time lifetime hits a power of 10 after $10k)
+        const earned = this.state.stats.totalEarned;
+        const targetTotalPts = earned >= 10000 ? Math.floor(Math.log10(earned / 1000) * 1.5) : 0;
+        if (targetTotalPts > this.state.strategyPointsTotal) {
+          this.state.strategyPointsTotal = targetTotalPts;
+          this.showToast(`💼 Promoted! New Management Strategy Points available!`);
+          this.renderDepartments();
+        }
+
         if (rate > (this.state.stats.peakRate || 0)) {
           this.state.stats.peakRate = rate;
         }
 
-        // Rebirth tab badge
         const pending = this.calculatePendingRebirthAcorns();
         document.getElementById("badgeRebirth").textContent = `+${pending}`;
       }
@@ -2286,6 +3435,8 @@
         document.getElementById("statTotalClicks").textContent = s.totalClicks.toLocaleString();
         document.getElementById("statTotalClickCash").textContent = formatMoney(s.totalClickCash);
         document.getElementById("statPeakRate").textContent = `${formatMoney(s.peakRate || 0)} /s`;
+        document.getElementById("statCrisesResolved").textContent = s.crisesResolved.toString();
+        document.getElementById("statContractsDone").textContent = s.contractsDone.toString();
         document.getElementById("statRebirths").textContent = s.rebirths.toString();
         document.getElementById("statGoldenAcornsFound").textContent = s.goldenAcornsFound.toString();
         document.getElementById("statTotalEarned").textContent = formatMoney(s.totalEarned);
@@ -2315,14 +3466,14 @@
         resize();
 
         const particles = [];
-        for (let i = 0; i < 45; i++) {
+        for (let i = 0; i < 40; i++) {
           particles.push({
             x: Math.random() * window.innerWidth,
             y: Math.random() * window.innerHeight,
             radius: Math.random() * 2 + 0.5,
-            vx: (Math.random() - 0.5) * 0.4,
-            vy: (Math.random() - 0.5) * 0.4,
-            alpha: Math.random() * 0.5 + 0.1
+            vx: (Math.random() - 0.5) * 0.35,
+            vy: (Math.random() - 0.5) * 0.35,
+            alpha: Math.random() * 0.4 + 0.1
           });
         }
 
@@ -2338,7 +3489,7 @@
 
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(142, 153, 178, ${p.alpha})`;
+            ctx.fillStyle = `rgba(126, 139, 167, ${p.alpha})`;
             ctx.fill();
           });
           requestAnimationFrame(render);
@@ -2372,7 +3523,36 @@
                 document.getElementById("auraRing").style.background = "";
               }
             } else {
-              this.frenzyValue = Math.max(0, this.frenzyValue - dt * 6);
+              this.frenzyValue = Math.max(0, this.frenzyValue - dt * 5.5);
+            }
+
+            // Hackathon handling
+            if (this.isHackathonActive) {
+              this.hackathonDuration -= dt;
+              if (this.hackathonDuration <= 0) {
+                this.isHackathonActive = false;
+                this.showToast("Hackathon complete!");
+              }
+            }
+            if (this.hackathonCooldown > 0) {
+              this.hackathonCooldown -= dt;
+            }
+
+            // Update Hackathon UI
+            const hackBtn = document.getElementById("hackathonBtn");
+            const hackText = document.getElementById("hackathonCooldownText");
+            if (this.isHackathonActive) {
+              hackBtn.className = "ability-btn";
+              hackBtn.disabled = true;
+              hackText.textContent = `ACTIVE (${Math.ceil(this.hackathonDuration)}s)`;
+            } else if (this.hackathonCooldown > 0) {
+              hackBtn.className = "ability-btn";
+              hackBtn.disabled = true;
+              hackText.textContent = `${Math.ceil(this.hackathonCooldown)}s`;
+            } else {
+              hackBtn.className = "ability-btn ready";
+              hackBtn.disabled = false;
+              hackText.textContent = "READY";
             }
 
             // Rush handling
@@ -2381,16 +3561,30 @@
               if (this.rushDuration <= 0) this.rushMultiplier = 1;
             }
 
+            // Crisis handling
+            if (this.crisisActive) {
+              this.crisisTimer -= dt;
+              if (this.crisisTimer <= 0) {
+                this.resolveCrisisFailure();
+              }
+            } else {
+              this.nextCrisisTimer -= dt;
+              if (this.nextCrisisTimer <= 0) {
+                this.triggerCrisis();
+              }
+            }
+
             // Golden acorn random spawn
             this.goldenSpawnTimer -= dt;
             if (this.goldenSpawnTimer <= 0) {
               this.spawnGoldenAcorn();
               const luckRank = this.state.prestigeRanks["p_luck"] || 0;
-              const luckBonus = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_luck").effect(luckRank);
-              this.goldenSpawnTimer = (35 + Math.random() * 35) / luckBonus;
+              let luckBonus = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_luck").effect(luckRank);
+              if (this.isArtifactEquipped("art_radar")) luckBonus *= 1.4;
+              this.goldenSpawnTimer = (45 + Math.random() * 35) / luckBonus;
             }
 
-            // Update Frenzy UI
+            // Frenzy Bar update
             const fillPct = this.isFrenzyActive ? (this.frenzyDuration / 10) * 100 : this.frenzyValue;
             document.getElementById("frenzyFill").style.width = `${fillPct}%`;
             const header = document.getElementById("frenzyHeader");
@@ -2410,6 +3604,7 @@
               this.updateHeaderStats();
               if (this.activeTab === "rebirth") this.renderRebirthPanel();
               if (this.activeTab === "stats") this.updateStatsTab();
+              if (this.activeTab === "contracts") this.renderContracts();
               this.checkAchievements();
             }
 
