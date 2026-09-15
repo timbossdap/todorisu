@@ -2085,6 +2085,15 @@
       return "$" + scaled.toFixed(scaled >= 100 ? 1 : 2) + " " + SUFFIXES[exp];
     }
 
+    function formatNumber(num) {
+      if (num === null || num === undefined || isNaN(num)) return "0";
+      if (num < 1000) return Math.floor(num).toLocaleString();
+      const exp = Math.floor(Math.log10(num) / 3);
+      if (exp >= SUFFIXES.length) return num.toExponential(1);
+      const scaled = num / Math.pow(10, exp * 3);
+      return scaled.toFixed(scaled >= 100 ? 0 : 1) + " " + SUFFIXES[exp];
+    }
+
     /* =========================================================
        GAME CATALOGS & DEFINITIONS
        ========================================================= */
@@ -2260,13 +2269,28 @@
               strategyPointsAllocated: { ...getDefaultState().strategyPointsAllocated, ...(parsed.strategyPointsAllocated || {}) },
               equippedArtifacts: parsed.equippedArtifacts || [null, null, null],
               ownedArtifacts: parsed.ownedArtifacts || ["art_coffee"],
-              contracts: parsed.contracts || getDefaultState().contracts,
+              contracts: (parsed.contracts && Array.isArray(parsed.contracts) && parsed.contracts.length > 0)
+                ? parsed.contracts 
+                : getDefaultState().contracts,
               stats: { ...getDefaultState().stats, ...(parsed.stats || {}) },
               generators: parsed.generators || {},
               upgrades: parsed.upgrades || {},
               prestigeRanks: parsed.prestigeRanks || {},
               achievements: parsed.achievements || {}
             };
+
+            // Sync contract progress from loaded state
+            if (this.state.contracts) {
+              this.state.contracts.forEach(c => {
+                if (c.type === "own_gen") {
+                  c.current = this.getGeneratorCount(c.genId);
+                  if (c.current >= c.target) c.completed = true;
+                } else if (c.type === "earn") {
+                  c.current = Math.floor(this.state.money);
+                  if (c.current >= c.target) c.completed = true;
+                }
+              });
+            }
           }
         } catch (e) {
           console.error("Save load error:", e);
@@ -2532,10 +2556,14 @@
 
         sound.playClick(isCrit);
 
-        // Increase Frenzy
-        this.frenzyValue = Math.min(100, this.frenzyValue + 4);
-        if (this.frenzyValue >= 100 && !this.isFrenzyActive) {
-          this.triggerFrenzy();
+        // Increase Frenzy / Overdrive
+        if (this.isFrenzyActive) {
+          this.frenzyDuration = Math.min(12, this.frenzyDuration + 0.25);
+        } else {
+          this.frenzyValue = Math.min(100, this.frenzyValue + 7.5);
+          if (this.frenzyValue >= 100) {
+            this.triggerFrenzy();
+          }
         }
 
         // Random Artifact Loot Drop! (0.3% chance per click)
@@ -2555,8 +2583,9 @@
         this.isFrenzyActive = true;
         this.frenzyDuration = 10;
         sound.playFanfare();
-        this.showToast("🔥 HYPERFOCUS FLOW: 3x Click & 2.5x Idle Speed for 10s!");
-        document.getElementById("auraRing").style.background = "radial-gradient(circle, rgba(245, 158, 11, 0.8) 0%, transparent 70%)";
+        this.showToast("🔥 HYPERFOCUS OVERDRIVE: 3x Click & 2.5x Idle Speed for 10s!");
+        const ring = document.getElementById("auraRing");
+        if (ring) ring.style.background = "radial-gradient(circle, rgba(245, 158, 11, 0.8) 0%, transparent 70%)";
       }
 
       triggerHackathon() {
@@ -2765,23 +2794,32 @@
       }
 
       progressContracts(type, amount, extraId = null) {
+        let changed = false;
         this.state.contracts.forEach(c => {
           if (c.completed) return;
           if (c.type === type) {
             if (type === "own_gen" && c.genId === extraId) {
               c.current = amount;
+              changed = true;
             } else if (type === "clicks") {
               c.current += amount;
+              changed = true;
             } else if (type === "earn") {
-              c.current = this.state.money;
+              c.current = Math.floor(this.state.money);
+              changed = true;
             }
 
             if (c.current >= c.target) {
               c.completed = true;
+              changed = true;
               this.showToast(`📜 Contract Completed: ${c.label}! Claim in Contracts tab!`);
             }
           }
         });
+
+        if (changed && this.activeTab === "contracts") {
+          this.updateContractsUI();
+        }
       }
 
       claimContract(id) {
@@ -2792,14 +2830,16 @@
         this.state.money += contract.reward;
         this.state.stats.totalEarned += contract.reward;
         this.state.stats.contractsDone += 1;
+        this.showToast(`🎉 Contract Claimed! +${formatMoney(contract.reward)} treasury bonus!`);
 
         // Generate replacement contract with higher targets and rewards
         const nextTarget = Math.round(contract.target * 2.2);
-        const nextReward = Math.round(contract.reward * 2.5);
+        const nextReward = Math.round(contract.reward * 2.6);
         contract.target = nextTarget;
-        contract.current = 0;
+        contract.current = (contract.type === "earn") ? Math.floor(this.state.money) : 
+                           (contract.type === "own_gen") ? this.getGeneratorCount(contract.genId) : 0;
         contract.reward = nextReward;
-        contract.completed = false;
+        contract.completed = contract.current >= contract.target;
 
         this.renderContracts();
         this.updateHeaderStats();
@@ -3051,7 +3091,7 @@
           const isUnlocked = this.state.stats.totalEarned >= gen.unlockAt;
 
           html += `
-            <div class="gen-card ${!buyInfo.canAfford ? "cant-afford" : ""} ${!isUnlocked ? "locked" : ""}">
+            <div class="gen-card ${!buyInfo.canAfford ? "cant-afford" : ""} ${!isUnlocked ? "locked" : ""}" data-gen-id="${gen.id}">
               <div class="gen-left">
                 <div class="gen-icon">${isUnlocked ? gen.icon : "🔒"}</div>
                 <div class="gen-details">
@@ -3061,7 +3101,7 @@
                   </div>
                   <div class="gen-meta">
                     <span class="gen-rate">+${formatMoney(genRate)} /s</span>
-                    <span style="opacity: 0.6;">Bonus: ${count}/${nextMile}</span>
+                    <span class="gen-mile-text" style="opacity: 0.6;">Bonus: ${count}/${nextMile}</span>
                   </div>
                   <div class="gen-progress-bar-wrap" title="Milestone: ${count}/${nextMile}">
                     <div class="gen-progress-bar-fill" style="width: ${milePct}%"></div>
@@ -3087,6 +3127,64 @@
         });
       }
 
+      updateGeneratorsUI() {
+        if (this.activeTab !== "generators") return;
+        const container = document.getElementById("generatorsList");
+        if (!container) return;
+
+        let needsFullRerender = false;
+
+        GENERATORS_DATA.forEach(gen => {
+          const card = container.querySelector(`.gen-card[data-gen-id="${gen.id}"]`);
+          const isUnlocked = this.state.stats.totalEarned >= gen.unlockAt;
+
+          if (!card) {
+            needsFullRerender = true;
+            return;
+          }
+
+          if (card.classList.contains("locked") && isUnlocked) {
+            needsFullRerender = true;
+            return;
+          }
+
+          const count = this.getGeneratorCount(gen.id);
+          const buyInfo = this.getBulkBuyInfo(gen, this.buyMultiplier);
+          const genRate = this.getGeneratorRate(gen);
+          const nextMile = this.getNextMilestone(count);
+          const prevMile = count >= 200 ? 200 : count >= 100 ? 100 : count >= 50 ? 50 : count >= 25 ? 25 : count >= 10 ? 10 : 0;
+          const milePct = Math.min(100, Math.max(0, ((count - prevMile) / (nextMile - prevMile)) * 100));
+
+          card.classList.toggle("cant-afford", !buyInfo.canAfford);
+
+          const rateEl = card.querySelector(".gen-rate");
+          if (rateEl) rateEl.textContent = `+${formatMoney(genRate)} /s`;
+
+          const countEl = card.querySelector(".gen-count-badge");
+          if (countEl) countEl.textContent = `lvl ${count}`;
+
+          const mileEl = card.querySelector(".gen-mile-text");
+          if (mileEl) mileEl.textContent = `Bonus: ${count}/${nextMile}`;
+
+          const progressFill = card.querySelector(".gen-progress-bar-fill");
+          if (progressFill) progressFill.style.width = `${milePct}%`;
+
+          const buyBtn = card.querySelector(".buy-btn");
+          if (buyBtn) {
+            buyBtn.disabled = !buyInfo.canAfford || !isUnlocked;
+            if (isUnlocked) {
+              buyBtn.textContent = `Buy +${buyInfo.count} (${formatMoney(buyInfo.cost)})`;
+            } else {
+              buyBtn.textContent = `Unlock @ ${formatMoney(gen.unlockAt)}`;
+            }
+          }
+        });
+
+        if (needsFullRerender) {
+          this.renderGenerators();
+        }
+      }
+
       renderUpgrades() {
         const container = document.getElementById("upgradesList");
         if (!container) return;
@@ -3100,7 +3198,7 @@
           if (!isPurchased) availableCount++;
 
           html += `
-            <div class="upgrade-card ${isPurchased ? "purchased" : ""}">
+            <div class="upgrade-card ${isPurchased ? "purchased" : ""}" data-upgrade-id="${u.id}">
               <div class="upgrade-top">
                 <div class="upgrade-icon">${u.icon}</div>
                 <div class="upgrade-info">
@@ -3121,13 +3219,31 @@
         });
 
         container.innerHTML = html;
-        document.getElementById("badgeUpgrades").textContent = availableCount;
+        document.getElementById("badgeUpgrades").textContent = availableCount.toString();
 
         container.querySelectorAll(".buy-btn").forEach(btn => {
           btn.addEventListener("click", () => {
             const id = btn.getAttribute("data-upgrade-id");
             this.buyUpgrade(id);
           });
+        });
+      }
+
+      updateUpgradesUI() {
+        if (this.activeTab !== "upgrades") return;
+        const container = document.getElementById("upgradesList");
+        if (!container) return;
+
+        UPGRADES_DATA.forEach(u => {
+          if (this.state.upgrades[u.id]) return;
+          const card = container.querySelector(`.upgrade-card[data-upgrade-id="${u.id}"]`);
+          if (!card) return;
+          const canAfford = this.state.money >= u.cost;
+          card.classList.toggle("cant-afford", !canAfford);
+          const buyBtn = card.querySelector(".buy-btn");
+          if (buyBtn) {
+            buyBtn.disabled = !canAfford;
+          }
         });
       }
 
@@ -3302,7 +3418,12 @@
             this.claimContract(id);
           });
         });
-      }
+        }
+  // Update Contracts UI in-place (currently just re-renders)
+  updateContractsUI() {
+    if (this.activeTab !== "contracts") return;
+    this.renderContracts();
+  }
 
       renderPrestigeShop() {
         const container = document.getElementById("prestigeShopList");
@@ -3501,6 +3622,7 @@
       startLoop() {
         let lastSaveTimer = 0;
         let lastUIRefreshTimer = 0;
+let lastGenUIRefreshTimer = 0;
 
         const loop = (timestamp) => {
           const dt = (timestamp - this.lastTickTime) / 1000;
@@ -3597,16 +3719,23 @@
               text.textContent = `${(1 + (this.frenzyValue / 100) * 0.5).toFixed(1)}x`;
             }
 
-            // Periodic UI Updates
-            lastUIRefreshTimer += dt;
-            if (lastUIRefreshTimer >= 0.2) {
-              lastUIRefreshTimer = 0;
-              this.updateHeaderStats();
-              if (this.activeTab === "rebirth") this.renderRebirthPanel();
-              if (this.activeTab === "stats") this.updateStatsTab();
-              if (this.activeTab === "contracts") this.renderContracts();
-              this.checkAchievements();
-            }
+// Periodic UI Updates
+lastUIRefreshTimer += dt;
+if (lastUIRefreshTimer >= 0.2) {
+  lastUIRefreshTimer = 0;
+  this.updateHeaderStats();
+  if (this.activeTab === "rebirth") this.renderRebirthPanel();
+  if (this.activeTab === "stats") this.updateStatsTab();
+  if (this.activeTab === "contracts") this.updateContractsUI();
+  // Contracts UI now updates in-place
+}
+// Generator/Upgrade UI Updates (approx. every 1 s)
+lastGenUIRefreshTimer += dt;
+if (lastGenUIRefreshTimer >= 1.0) {
+  lastGenUIRefreshTimer = 0;
+  if (this.activeTab === "generators") this.updateGeneratorsUI();
+  if (this.activeTab === "upgrades") this.updateUpgradesUI();
+}
 
             // Auto-save every 5s
             lastSaveTimer += dt;
