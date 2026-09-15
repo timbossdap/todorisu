@@ -220,10 +220,32 @@ if (mobileSettingsBtnEl) {
   });
 }
 
+function openIdleGamePopout() {
+  const width = 1020;
+  const height = 760;
+  const screenW = window.screen.availWidth || window.screen.width || 1200;
+  const screenH = window.screen.availHeight || window.screen.height || 800;
+  const left = Math.max(0, Math.round((screenW - width) / 2));
+  const top = Math.max(0, Math.round((screenH - height) / 2));
+  const url = "idle-game.html";
+  const features = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no`;
+
+  try {
+    const popout = window.open(url, "TodorisuIdleTycoon", features);
+    if (!popout || popout.closed || typeof popout.closed === "undefined") {
+      window.open(url, "_blank");
+    } else {
+      popout.focus();
+    }
+  } catch (err) {
+    window.open(url, "_blank");
+  }
+}
+
 const browseTemplatesBtnEl = $("browseTemplatesBtn");
 if (browseTemplatesBtnEl) {
   browseTemplatesBtnEl.addEventListener("click", () => {
-    alert("Templates aren't available in this personal build yet - add tasks manually or ask for a project template feature.");
+    openIdleGamePopout();
   });
 }
 

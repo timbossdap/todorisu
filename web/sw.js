@@ -1,6 +1,7 @@
-const CACHE = "tasks-v6";
+const CACHE = "tasks-v7";
 const FILES = [
   "./index.html",
+  "./idle-game.html",
   "./outlook-addin.html",
   "./style.css",
   "./config.js",
