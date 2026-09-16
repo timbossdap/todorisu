@@ -49,6 +49,7 @@
   "keyToString": {
     "Android App.app.executor": "Run",
     "Gradle.Configure Daemon JVM Criteria.executor": "Run",
+    "Gradle.Upgrade Gradle wrapper.executor": "Run",
     "GradleDaemonJvmCriteriaMigrationNotification.isNotificationDisabled": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -56,6 +57,7 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/ng_tz/.local/src/todorisu/android"
   }

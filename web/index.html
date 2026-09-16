@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
 <title>Tasks</title>
 <link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#1A1A1A" />
@@ -368,7 +368,12 @@
         <div id="smartPreview" class="smart-preview hidden"></div>
         <div class="quick-add-row">
           <select id="quickAddProject"></select>
-          <input id="quickAddDate" type="datetime-local" />
+          <input id="quickAddDate" type="hidden" value="" />
+          <button type="button" id="quickAddDateBtn" class="date-trigger-btn" title="Set due date">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span class="date-trigger-label">Date</span>
+            <span class="date-trigger-clear hidden" title="Clear date">✕</span>
+          </button>
           <select id="quickAddPriority">
             <option value="4">No priority</option>
             <option value="3">Priority 3</option>
@@ -488,7 +493,12 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               <span>Due date</span>
             </label>
-            <input id="taskEditDue" class="task-edit-input" type="datetime-local" />
+            <input id="taskEditDue" type="hidden" value="" />
+            <button type="button" id="taskEditDueBtn" class="date-trigger-btn task-edit-date-btn" title="Set due date">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span class="date-trigger-label">Date</span>
+              <span class="date-trigger-clear hidden" title="Clear date">✕</span>
+            </button>
           </div>
 
           <div class="task-edit-meta-item">
@@ -545,7 +555,12 @@
               <option value="1440">1 day before</option>
               <option value="custom">Custom date & time...</option>
             </select>
-            <input id="taskEditReminderCustom" class="task-edit-input hidden" type="datetime-local" style="margin-top: 4px;" />
+            <input id="taskEditReminderCustom" type="hidden" value="" />
+            <button type="button" id="taskEditReminderCustomBtn" class="date-trigger-btn task-edit-input hidden" title="Pick reminder date & time" style="margin-top: 4px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span class="date-trigger-label">Date</span>
+              <span class="date-trigger-clear hidden" title="Clear date">✕</span>
+            </button>
             <div id="taskEditNotifPermissionWarning" class="task-notif-warning hidden" style="font-size: 11px; color: #ff9800; line-height: 1.3; margin-top: 2px;">
               Notifications not allowed in browser. <button type="button" id="taskEditEnableNotifBtn" style="background: none; border: none; color: #dc4c3e; text-decoration: underline; cursor: pointer; padding: 0; font-size: 11px;">Enable</button>
             </div>
@@ -869,6 +884,7 @@
 <script src="js/date-utils.js"></script>
 <script src="js/notifications.js"></script>
 <script src="js/tasks-data.js"></script>
+<script src="js/date-picker.js"></script>
 <script src="js/smart-input.js"></script>
 <script src="js/task-edit.js"></script>
 <script src="js/view-upcoming.js"></script>

@@ -2726,3 +2726,16 @@ function scheduleWebNotification(task) {
   if (ms <= 0 || ms > 24 * 60 * 60 * 1000) return;
   setTimeout(() => { new Notification(task.title, { body: "Due now", tag: task.id }); }, ms);
 }
+
+// Handle Android WebView viewport resize (keyboard open/close)
+window.addEventListener("resize", () => {
+  const app = document.getElementById("app");
+  if (app) {
+    app.style.height = window.innerHeight + "px";
+    const mainContent = document.getElementById("mainContent");
+    if (mainContent) {
+      mainContent.style.paddingBottom = (window.innerWidth <= 780 ? 80 : 0) + "px";
+    }
+  }
+});
+window.dispatchEvent(new Event("resize"));

@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import androidx.core.app.ActivityCompat
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -28,8 +30,29 @@ class MainActivity : Activity() {
         webView = findViewById(R.id.webView)
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
-        webView.webViewClient = WebViewClient()
+        webView.settings.useWideViewPort = true
+        webView.settings.loadWithOverviewMode = true
+        webView.settings.setSupportZoom(true)
+        webView.settings.setBuiltInZoomControls(true)
+        webView.settings.setDisplayZoomControls(false)
+        webView.settings.setCacheMode(WebSettings.LOAD_DEFAULT)
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String) {
+                super.onPageFinished(view, url)
+                view.loadUrl("javascript:(function() { " +
+                    "var m = document.querySelector('meta[name=viewport]'); " +
+                    "if (m) { m.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0'); } " +
+                    "document.documentElement.style.height = '100%'; " +
+                    "document.body.style.height = '100vh'; " +
+                    "document.body.style.overflow = 'hidden'; " +
+                    "})()")
+            }
+            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                return false
+            }
+        }
         webView.addJavascriptInterface(JsBridge(), "AndroidBridge")
+        webView.settings.setUserAgentString(String.format("Mozilla/5.0 (Linux; Android %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36", Build.VERSION.RELEASE))
         webView.loadUrl(Constants.WEB_APP_URL)
 
         // If we already have a saved session from a previous run, make sure

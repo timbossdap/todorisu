@@ -19,34 +19,50 @@ function openTaskEdit(id) {
   // Tags
   $("taskEditTags").value = (t.tags || []).join(", ");
 
-  // Due date & time
+  // Due date & time (Todoist-style picker value: YYYY-MM-DD or YYYY-MM-DDTHH:mm)
   if (t.due_at) {
     const d = new Date(t.due_at);
-    const pad = n => String(n).padStart(2, "0");
-    $("taskEditDue").value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const hasTime = !!t.has_time;
+    if (!hasTime) d.setHours(0, 0, 0, 0);
+    if (window.DatePicker) {
+      DatePicker.setValue("taskEditDue", DatePicker.formatPickerValue(d, hasTime));
+    } else {
+      const pad = n => String(n).padStart(2, "0");
+      $("taskEditDue").value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
   } else {
-    $("taskEditDue").value = "";
+    if (window.DatePicker) DatePicker.setValue("taskEditDue", "");
+    else $("taskEditDue").value = "";
   }
 
   // Reminder / Notification
   const remSel = $("taskEditReminder");
   const remCustom = $("taskEditReminderCustom");
+  const remCustomBtn = $("taskEditReminderCustomBtn");
   const notifWarn = $("taskEditNotifPermissionWarning");
+  const showCustom = (show) => {
+    if (remCustom) remCustom.classList.toggle("hidden", !show);
+    if (remCustomBtn) remCustomBtn.classList.toggle("hidden", !show);
+  };
   if (remSel) {
     if (t.reminder_at) {
       remSel.value = "custom";
+      showCustom(true);
       if (remCustom) {
-        remCustom.classList.remove("hidden");
         const d = new Date(t.reminder_at);
-        const pad = n => String(n).padStart(2, "0");
-        remCustom.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        if (window.DatePicker) {
+          DatePicker.setValue("taskEditReminderCustom", DatePicker.formatPickerValue(d, true));
+        } else {
+          const pad = n => String(n).padStart(2, "0");
+          remCustom.value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
       }
     } else if (t.reminder_minutes_before !== null && t.reminder_minutes_before !== undefined && t.reminder_minutes_before !== -1 && t.reminder_minutes_before !== "none") {
       remSel.value = String(t.reminder_minutes_before);
-      if (remCustom) remCustom.classList.add("hidden");
+      showCustom(false);
     } else {
       remSel.value = "none";
-      if (remCustom) remCustom.classList.add("hidden");
+      showCustom(false);
     }
 
     if (notifWarn) {
@@ -74,6 +90,7 @@ function openTaskEdit(id) {
 }
 
 function closeTaskEdit() {
+  if (window.DatePicker) DatePicker.close();
   $("taskEditPanel").classList.add("hidden");
   $("taskEditOverlay").classList.add("hidden");
   editingTaskId = null;
@@ -99,9 +116,20 @@ async function saveTaskEdit() {
 
   const dueVal = $("taskEditDue").value;
   if (dueVal) {
-    const d = new Date(dueVal);
-    t.due_at = d.toISOString();
-    t.has_time = d.getHours() !== 0 || d.getMinutes() !== 0;
+    if (window.DatePicker) {
+      const pv = DatePicker.parsePickerValue(dueVal);
+      if (pv.date) {
+        t.due_at = pv.date.toISOString();
+        t.has_time = pv.hasTime;
+      } else {
+        t.due_at = null;
+        t.has_time = false;
+      }
+    } else {
+      const d = new Date(dueVal);
+      t.due_at = d.toISOString();
+      t.has_time = d.getHours() !== 0 || d.getMinutes() !== 0;
+    }
   } else {
     t.due_at = null;
     t.has_time = false;
@@ -114,7 +142,12 @@ async function saveTaskEdit() {
     const val = remSel.value;
     if (val === "custom") {
       t.reminder_minutes_before = null;
-      t.reminder_at = remCustom && remCustom.value ? new Date(remCustom.value).toISOString() : null;
+      if (window.DatePicker) {
+        const pv = DatePicker.parsePickerValue(remCustom && remCustom.value ? remCustom.value : "");
+        t.reminder_at = pv.date ? pv.date.toISOString() : null;
+      } else {
+        t.reminder_at = remCustom && remCustom.value ? new Date(remCustom.value).toISOString() : null;
+      }
     } else if (val === "none") {
       t.reminder_minutes_before = null;
       t.reminder_at = null;
@@ -238,15 +271,30 @@ $("taskEditTitle").addEventListener("keydown", (e) => {
 
 const remSelEl = $("taskEditReminder");
 const remCustomEl = $("taskEditReminderCustom");
+const remCustomBtnEl = $("taskEditReminderCustomBtn");
 const notifWarnEl = $("taskEditNotifPermissionWarning");
 const enableNotifBtnEl = $("taskEditEnableNotifBtn");
+
+// Todoist-style pickers for the edit panel (hidden value + trigger button)
+if (window.DatePicker) {
+  DatePicker.attach("taskEditDue", "taskEditDueBtn", { allowTime: true });
+  DatePicker.attach("taskEditReminderCustom", "taskEditReminderCustomBtn", { allowTime: true });
+}
 
 if (remSelEl) {
   remSelEl.addEventListener("change", async () => {
     const isCustom = remSelEl.value === "custom";
-    if (remCustomEl) {
-      remCustomEl.classList.toggle("hidden", !isCustom);
-      if (isCustom && !remCustomEl.value && $("taskEditDue").value) {
+    if (remCustomEl) remCustomEl.classList.toggle("hidden", !isCustom);
+    if (remCustomBtnEl) remCustomBtnEl.classList.toggle("hidden", !isCustom);
+    if (isCustom && remCustomEl && !remCustomEl.value && $("taskEditDue").value) {
+      if (window.DatePicker) {
+        // Reminders need a time: default to the due date at 09:00 (or its time)
+        const pv = DatePicker.parsePickerValue($("taskEditDue").value);
+        if (pv.date) {
+          if (!pv.hasTime) pv.date.setHours(9, 0, 0, 0);
+          DatePicker.setValue("taskEditReminderCustom", DatePicker.formatPickerValue(pv.date, true));
+        }
+      } else {
         remCustomEl.value = $("taskEditDue").value;
       }
     }

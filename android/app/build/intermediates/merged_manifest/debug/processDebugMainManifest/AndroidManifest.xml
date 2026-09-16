@@ -33,8 +33,9 @@
         android:theme="@style/Theme.Tasks" >
         <activity
             android:name="com.yourname.todolist.MainActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:exported="true" >
+            android:configChanges="orientation|screenSize|keyboard|keyboardHidden|screenLayout|uiMode"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:2:1-35:12
-INJECTED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:2:1-35:12
-INJECTED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:2:1-35:12
-INJECTED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:2:1-35:12
+ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:2:1-36:12
+INJECTED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:2:1-36:12
+INJECTED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:2:1-36:12
+INJECTED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:2:1-36:12
 MERGED from [com.google.android.material:material:1.11.0] /Users/ng_tz/.gradle/caches/9.6.0/transforms/387dacb9930c3185a70a371d8c1bf31d/transformed/material-1.11.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /Users/ng_tz/.gradle/caches/9.6.0/transforms/0cf92849d14ac611652069da97d2c9a4/transformed/appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] /Users/ng_tz/.gradle/caches/9.6.0/transforms/95e82b43891d600b17a9342569250226/transformed/constraintlayout-2.0.1/AndroidManifest.xml:2:1-11:12
@@ -85,8 +85,8 @@ MERGED from [androidx.work:work-runtime:2.9.0] /Users/ng_tz/.gradle/caches/9.6.0
 	android:name
 		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:8:22-65
 application
-ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:10:5-34:19
-INJECTED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:10:5-34:19
+ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:10:5-35:19
+INJECTED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:10:5-35:19
 MERGED from [com.google.android.material:material:1.11.0] /Users/ng_tz/.gradle/caches/9.6.0/transforms/387dacb9930c3185a70a371d8c1bf31d/transformed/material-1.11.0/AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.11.0] /Users/ng_tz/.gradle/caches/9.6.0/transforms/387dacb9930c3185a70a371d8c1bf31d/transformed/material-1.11.0/AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.0.1] /Users/ng_tz/.gradle/caches/9.6.0/transforms/95e82b43891d600b17a9342569250226/transformed/constraintlayout-2.0.1/AndroidManifest.xml:9:5-20
@@ -120,41 +120,43 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/ng_tz/.gradle/caches
 	android:theme
 		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:14:9-43
 activity#com.yourname.todolist.MainActivity
-ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:16:9-24:20
+ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:16:9-25:20
+	android:windowSoftInputMode
+		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:20:13-55
 	android:exported
 		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:18:13-36
 	android:configChanges
-		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:19:13-74
+		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:19:13-103
 	android:name
 		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:17:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:20:13-23:29
+ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:21:13-24:29
 action#android.intent.action.MAIN
-ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:21:17-69
+ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:22:17-69
 	android:name
-		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:21:25-66
+		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:22:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:22:17-77
+ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:23:17-77
 	android:name
-		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:22:27-74
+		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:23:27-74
 receiver#com.yourname.todolist.AlarmReceiver
-ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:26:9-76
+ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:27:9-76
 	android:exported
-		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:26:49-73
+		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:27:49-73
 	android:name
-		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:26:19-48
+		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:27:19-48
 receiver#com.yourname.todolist.BootReceiver
-ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:28:9-32:20
+ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:29:9-33:20
 	android:exported
-		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:28:48-71
+		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:29:48-71
 	android:name
-		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:28:19-47
+		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:29:19-47
 intent-filter#action:name:android.intent.action.BOOT_COMPLETED
-ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:29:13-31:29
+ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:30:13-32:29
 action#android.intent.action.BOOT_COMPLETED
-ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:30:17-79
+ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:31:17-79
 	android:name
-		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:30:25-76
+		ADDED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml:31:25-76
 uses-sdk
 INJECTED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/ng_tz/.local/src/todorisu/android/app/src/main/AndroidManifest.xml

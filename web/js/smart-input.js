@@ -175,9 +175,14 @@ function renderSmartPreview() {
   }
 
   if (parsed.dueDate) {
-    $("quickAddDate").value = toLocalDatetimeString(parsed.dueDate, parsed.hasTime);
+    if (window.DatePicker) {
+      DatePicker.setValue("quickAddDate", DatePicker.formatPickerValue(parsed.dueDate, parsed.hasTime));
+    } else {
+      $("quickAddDate").value = toLocalDatetimeString(parsed.dueDate, parsed.hasTime);
+    }
   } else if (!$("quickAddInput").value.trim()) {
-    $("quickAddDate").value = "";
+    if (window.DatePicker) DatePicker.setValue("quickAddDate", "");
+    else $("quickAddDate").value = "";
   }
 
   if (parsed.recurrence) {

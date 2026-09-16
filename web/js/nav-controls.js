@@ -142,6 +142,7 @@ function renderConnectedFeeds() {
 }
 
 // Quick Add Global Bar
+if (window.DatePicker) DatePicker.attach("quickAddDate", "quickAddDateBtn", { allowTime: true });
 $("quickAddBtn").addEventListener("click", () => {
   $("quickAdd").classList.remove("hidden");
   $("quickAddInput").focus();
@@ -164,10 +165,23 @@ function saveQuickAdd() {
   const manualTags = $("quickAddTags").value.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
   const tags = [...new Set([...(parsed.tags || []), ...manualTags])];
 
-  const due_at = parsed.dueDate
-    ? parsed.dueDate.toISOString()
-    : ($("quickAddDate").value ? new Date($("quickAddDate").value).toISOString() : null);
-  const has_time = parsed.dueDate ? parsed.hasTime : !!$("quickAddDate").value;
+  const manualDateVal = $("quickAddDate").value;
+  let due_at = null, has_time = false;
+  if (parsed.dueDate) {
+    due_at = parsed.dueDate.toISOString();
+    has_time = parsed.hasTime;
+  } else if (manualDateVal) {
+    if (window.DatePicker) {
+      const pv = DatePicker.parsePickerValue(manualDateVal);
+      if (pv.date) {
+        due_at = pv.date.toISOString();
+        has_time = pv.hasTime;
+      }
+    } else {
+      due_at = new Date(manualDateVal).toISOString();
+      has_time = true;
+    }
+  }
 
   addTask({
     title,
@@ -179,7 +193,8 @@ function saveQuickAdd() {
   });
 
   $("quickAddInput").value = "";
-  $("quickAddDate").value = "";
+  if (window.DatePicker) DatePicker.setValue("quickAddDate", "");
+  else $("quickAddDate").value = "";
   $("quickAddTags").value = "";
   $("quickAddRecurrence").value = "";
   $("quickAddPriority").value = "4";
