@@ -1640,13 +1640,15 @@
       </div>
     </header>
 
-    <!-- Emergency Crisis Alert Banner -->
+    <!-- Emergency Crisis & Event Alert Banner -->
     <div id="emergencyBanner">
       <div class="alert-left">
-        <span>🚨</span>
-        <span id="emergencyBannerMsg">SEV-1 SERVER INCIDENT DETECTED! Productivity degraded!</span>
+        <span id="emergencyBannerIcon">🚨</span>
+        <span id="emergencyBannerMsg">SEV-1 SERVER INCIDENT DETECTED! Productivity degraded by 50%!</span>
       </div>
-      <button class="alert-resolve-btn" id="emergencyResolveBtn">DEBUG NOW</button>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button class="alert-resolve-btn" id="emergencyResolveBtn">⚡ QUICK PATCH</button>
+      </div>
     </div>
 
     <!-- Office Headquarters Stage -->
@@ -1680,11 +1682,15 @@
           </button>
         </div>
 
-        <!-- Active Ability: Hackathon Rush -->
+        <!-- Active Abilities Bar -->
         <div class="active-abilities-bar">
           <button class="ability-btn ready" id="hackathonBtn" title="Activate 30s Hackathon (5x Speed)">
             <span>🚀 Hackathon</span>
             <span style="font-size: 10px; opacity: 0.8;" id="hackathonCooldownText">READY</span>
+          </button>
+          <button class="ability-btn ready" id="coffeeBtn" title="Activate 15s Espresso Surge (3x Click Power & +30% Idle Speed)">
+            <span>☕ Coffee Overdrive</span>
+            <span style="font-size: 10px; opacity: 0.8;" id="coffeeCooldownText">READY</span>
           </button>
         </div>
 
@@ -2135,7 +2141,30 @@
       // Global Buffs
       { id: "up_global_1", name: "Lofi Beats to Code To", icon: "🎧", cost: 15000, type: "global_mult", val: 1.25, desc: "+25% to ALL idle generators." },
       { id: "up_global_2", name: "Microservice Decoupling", icon: "📐", cost: 1500000, type: "global_mult", val: 1.4, desc: "+40% to ALL idle generators." },
-      { id: "up_global_3", name: "Quantum Terabit Backbone", icon: "🌐", cost: 120000000, type: "global_mult", val: 1.6, desc: "+60% to ALL idle generators." }
+      { id: "up_global_3", name: "Quantum Terabit Backbone", icon: "🌐", cost: 120000000, type: "global_mult", val: 1.6, desc: "+60% to ALL idle generators." },
+
+      // Tier 2 Click Upgrades
+      { id: "up_click_3", name: "Haptic Feedback Array", icon: "📳", cost: 35000000, type: "click_mult", val: 3, desc: "Triple your manual click power (3x)." },
+      { id: "up_click_4", name: "Direct Neural Interface", icon: "🧠", cost: 5000000000, type: "click_mult", val: 5, desc: "5x click power — thought becomes profit." },
+      { id: "up_crit_3", name: "Probability Engine", icon: "🎲", cost: 500000000, type: "crit_chance", val: 0.08, desc: "+8% additional Critical Strike chance." },
+      { id: "up_crit_4", name: "Chaos Theory Module", icon: "🌀", cost: 50000000000, type: "crit_mult", val: 3, desc: "Criticals now deal 30x base damage!" },
+
+      // Tier 2 Generator Upgrades
+      { id: "up_gen_intern_2", name: "Intern Incubator Program", icon: "🎓", cost: 50000, type: "gen_mult", target: "gen_intern", val: 4, desc: "Interns are trained quarterly: 4x output." },
+      { id: "up_gen_kb_2", name: "Custom Firmware Flash", icon: "💾", cost: 700000, type: "gen_mult", target: "gen_keyboard", val: 4, desc: "Flashed firmware: Keyboards output 4x cash." },
+      { id: "up_gen_cron_2", name: "Kubernetes Orchestration", icon: "☸️", cost: 6000000, type: "gen_mult", target: "gen_cron", val: 4, desc: "K8s orchestration: Cron 4x more efficient." },
+      { id: "up_gen_dev_2", name: "10x Engineer Protocol", icon: "🚀", cost: 60000000, type: "gen_mult", target: "gen_developer", val: 4, desc: "Your devs achieve mythical 10x productivity (4x output)." },
+      { id: "up_gen_copilot_2", name: "AGI Turbo Mode", icon: "🤯", cost: 550000000, type: "gen_mult", target: "gen_copilot", val: 4, desc: "AI agents enter recursive self-improvement (4x)." },
+      { id: "up_gen_scrum_2", name: "Infinite Feedback Loop", icon: "∞", cost: 5000000000, type: "gen_mult", target: "gen_scrum", val: 4, desc: "Pipeline loops back on itself: 4x output." },
+      { id: "up_gen_vc_2", name: "Sovereign Wealth Merger", icon: "🏦", cost: 45000000000, type: "gen_mult", target: "gen_vc", val: 4, desc: "National fund merger: VC returns 4x." },
+      { id: "up_gen_quantum_2", name: "Topological Qubits", icon: "🔬", cost: 400000000000, type: "gen_mult", target: "gen_quantum", val: 4, desc: "Error-resistant qubits: Quantum servers 4x." },
+      { id: "up_gen_dyson_1", name: "Stellar Flux Harvester", icon: "☀️", cost: 5000000000000, type: "gen_mult", target: "gen_dyson", val: 2, desc: "Dyson Sphere harvests stellar flux: 2x output." },
+      { id: "up_gen_multiverse_1", name: "Dimension Compression", icon: "🌌", cost: 80000000000000, type: "gen_mult", target: "gen_multiverse", val: 2, desc: "Compressed realities: Multiverse Corp 2x." },
+
+      // Tier 3 Global Buffs
+      { id: "up_global_4", name: "Dark Matter Compute Grid", icon: "🌑", cost: 15000000000, type: "global_mult", val: 2.0, desc: "+100% (2x) to ALL idle generators." },
+      { id: "up_global_5", name: "Omega Protocol Deployment", icon: "♾️", cost: 2000000000000, type: "global_mult", val: 2.5, desc: "+150% (2.5x) to ALL idle generators." },
+      { id: "up_click_synergy_3", name: "Market Making Algorithm", icon: "📊", cost: 1000000000, type: "click_synergy", val: 0.04, desc: "Each click yields an additional +4% of idle $/s." }
     ];
 
     const ARTIFACTS_DATA = [
@@ -2154,7 +2183,10 @@
       { id: "p_income", name: "Compound Dividend", icon: "📈", maxRank: 10, cost: (r) => Math.pow(r + 1, 2) * 3, desc: "+15% total idle income per rank.", effect: (r) => 1 + r * 0.15 },
       { id: "p_seed", name: "Angel Seed Fund", icon: "💰", maxRank: 5, cost: (r) => (r + 1) * 4, desc: "Start runs with initial cash ($5K, $50K, $500K...).", effect: (r) => r === 0 ? 0 : Math.pow(10, r + 3) * 0.5 },
       { id: "p_luck", name: "Lucky Acorn Magnet", icon: "🧲", maxRank: 5, cost: (r) => (r + 1) * 3, desc: "Golden Acorns spawn 25% faster & pay 35% more.", effect: (r) => 1 + r * 0.25 },
-      { id: "p_hackathon", name: "Hackathon Sponsor", icon: "🚀", maxRank: 5, cost: (r) => (r + 1) * 5, desc: "Hackathon ability cooldown reduced by 30s per rank.", effect: (r) => r * 30 }
+      { id: "p_hackathon", name: "Hackathon Sponsor", icon: "🚀", maxRank: 5, cost: (r) => (r + 1) * 5, desc: "Hackathon ability cooldown reduced by 30s per rank.", effect: (r) => r * 30 },
+      { id: "p_contracts", name: "Contract Synergy", icon: "📑", maxRank: 5, cost: (r) => (r + 1) * 6, desc: "Contract rewards increased by +25% per rank.", effect: (r) => 1 + r * 0.25 },
+      { id: "p_moat", name: "Silicon Moat", icon: "🏰", maxRank: 5, cost: (r) => Math.pow(r + 1, 2) * 8, desc: "Reduces building cost escalation multiplier by 2% per rank.", effect: (r) => 1 - r * 0.02 },
+      { id: "p_frenzy", name: "Flow State Mastery", icon: "⚡", maxRank: 5, cost: (r) => (r + 1) * 5, desc: "Focus Flow frenzy multiplier increased by +0.5x per rank.", effect: (r) => 1 + r * 0.2 }
     ];
 
     const ACHIEVEMENTS_DATA = [
@@ -2167,7 +2199,19 @@
       { id: "ach_money_1t", name: "Trillion Dollar Corp", icon: "🪐", desc: "Earn $1,000,000,000,000 in total.", check: (s) => s.stats.totalEarned >= 1e12 },
       { id: "ach_rebirth_1", name: "Ring the NASDAQ Bell", icon: "🚀", desc: "Complete your first company IPO Rebirth.", check: (s) => s.stats.rebirths >= 1 },
       { id: "ach_crisis_1", name: "Site Reliability Hero", icon: "🚨", desc: "Resolve a critical server outage.", check: (s) => s.stats.crisesResolved >= 1 },
-      { id: "ach_golden_1", name: "Golden Squirrel", icon: "🌰", desc: "Catch a floating Golden Acorn.", check: (s) => s.stats.goldenAcornsFound >= 1 }
+      { id: "ach_golden_1", name: "Golden Squirrel", icon: "🌰", desc: "Catch a floating Golden Acorn.", check: (s) => s.stats.goldenAcornsFound >= 1 },
+      { id: "ach_click_5k", name: "Carpal Tunnel Survivor", icon: "🏅", desc: "Click 5,000 times manually.", check: (s) => s.stats.totalClicks >= 5000 },
+      { id: "ach_click_25k", name: "Keyboard Destroyer", icon: "💀", desc: "Click 25,000 times manually.", check: (s) => s.stats.totalClicks >= 25000 },
+      { id: "ach_contracts_10", name: "Deal Closer", icon: "🤝", desc: "Complete 10 contracts.", check: (s) => s.stats.contractsDone >= 10 },
+      { id: "ach_contracts_50", name: "Serial Contractor", icon: "📋", desc: "Complete 50 contracts.", check: (s) => s.stats.contractsDone >= 50 },
+      { id: "ach_rebirth_3", name: "Triple IPO", icon: "🏛️", desc: "Complete 3 company IPO Rebirths.", check: (s) => s.stats.rebirths >= 3 },
+      { id: "ach_rebirth_10", name: "Serial Founder", icon: "🦁", desc: "Complete 10 company IPO Rebirths.", check: (s) => s.stats.rebirths >= 10 },
+      { id: "ach_money_100t", name: "Post-Scarcity Economy", icon: "🌍", desc: "Earn $100 Trillion total.", check: (s) => s.stats.totalEarned >= 1e14 },
+      { id: "ach_crisis_5", name: "Outage Whisperer", icon: "🛡️", desc: "Resolve 5 server outages.", check: (s) => s.stats.crisesResolved >= 5 },
+      { id: "ach_golden_10", name: "Acorn Hoarder", icon: "🐿️", desc: "Catch 10 Golden Acorns.", check: (s) => s.stats.goldenAcornsFound >= 10 },
+      { id: "ach_market_pivot", name: "Agile Pivot King", icon: "📉", desc: "Survive and pivot through a market crash.", check: (s) => (s.stats.crashesPivoted || 0) >= 1 },
+      { id: "ach_viral_hit", name: "Front Page of Hacker News", icon: "🔥", desc: "Catch a viral product boom.", check: (s) => (s.stats.viralHits || 0) >= 1 },
+      { id: "ach_coffee_fan", name: "Caffeine Fueled", icon: "☕", desc: "Activate Coffee Overdrive 10 times.", check: (s) => (s.stats.coffeesDrank || 0) >= 10 }
     ];
 
     /* =========================================================
@@ -2193,7 +2237,10 @@
         contracts: [
           { id: 1, type: "clicks", target: 50, current: 0, reward: 2500, label: "Complete 50 manual tasks" },
           { id: 2, type: "own_gen", genId: "gen_intern", target: 10, current: 0, reward: 5000, label: "Hire 10 Intern Coffee Runners" },
-          { id: 3, type: "earn", target: 20000, current: 0, reward: 8000, label: "Accumulate $20,000 treasury" }
+          { id: 3, type: "earn", target: 20000, current: 0, reward: 8000, label: "Earn $20,000 from operations" },
+          { id: 4, type: "clicks", target: 200, current: 0, reward: 25000, label: "Complete 200 sprint tasks" },
+          { id: 5, type: "own_gen", genId: "gen_keyboard", target: 5, current: 0, reward: 40000, label: "Deploy 5 Mechanical Keyboards" },
+          { id: 6, type: "earn", target: 500000, current: 0, reward: 150000, label: "Earn $500,000 from operations" }
         ],
         stats: {
           totalClicks: 0,
@@ -2228,11 +2275,24 @@
         this.isHackathonActive = false;
         this.hackathonDuration = 0;
 
-        // Emergency Crisis System
+        // Active Ability: Coffee Overdrive
+        this.coffeeCooldown = 0;
+        this.isCoffeeActive = false;
+        this.coffeeDuration = 0;
+
+        // Emergency Crisis System (Quick-patchable server incidents)
         this.crisisActive = false;
         this.crisisTimer = 0;
         this.crisisBugsRemaining = 0;
-        this.nextCrisisTimer = 180 + Math.random() * 120; // every 3-5 min
+        this.nextCrisisTimer = 120 + Math.random() * 90; // every 2-3.5 min
+
+        // Market Dynamics Events
+        this.marketCrashActive = false;
+        this.marketCrashTimer = 0;
+        this.nextCrashTimer = 180 + Math.random() * 120; // every 3-5 min
+
+        // Viral Product Launch event
+        this.nextViralTimer = 90 + Math.random() * 90; // every 1.5-3 min
 
         // Golden Acorn Event
         this.goldenSpawnTimer = 45 + Math.random() * 30;
@@ -2286,7 +2346,7 @@
                   c.current = this.getGeneratorCount(c.genId);
                   if (c.current >= c.target) c.completed = true;
                 } else if (c.type === "earn") {
-                  c.current = Math.floor(this.state.money);
+                  // Don't re-sync earn contracts from current money - preserve tracked progress
                   if (c.current >= c.target) c.completed = true;
                 }
               });
@@ -2355,8 +2415,12 @@
       }
 
       getGeneratorCost(gen, count) {
-        // Base cost * 1.18^count
-        const r = 1.18;
+        // Base cost * r^count
+        let r = 1.22;
+        const moatRank = this.state.prestigeRanks["p_moat"] || 0;
+        if (moatRank > 0) {
+          r = 1 + (0.22 * PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_moat").effect(moatRank));
+        }
         let cost = gen.baseCost * Math.pow(r, count);
 
         // Finance department discount (up to 20%)
@@ -2424,11 +2488,21 @@
         // If crisis is ongoing, 50% penalty!
         if (this.crisisActive) total *= 0.5;
 
+        // Market Crash debuff: 60% penalty!
+        if (this.marketCrashActive) total *= 0.4;
+
         // Frenzy bonus
-        if (this.isFrenzyActive) total *= 2.5;
+        if (this.isFrenzyActive) {
+          const fRank = this.state.prestigeRanks["p_frenzy"] || 0;
+          const fBonus = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_frenzy").effect(fRank);
+          total *= (2.5 * fBonus);
+        }
 
         // Hackathon active: 5x speed!
         if (this.isHackathonActive) total *= 5.0;
+
+        // Coffee Overdrive active: +35% idle speed
+        if (this.isCoffeeActive) total *= 1.35;
 
         // Golden Rush bonus
         if (this.rushDuration > 0) total *= this.rushMultiplier;
@@ -2474,8 +2548,13 @@
         const tokenBonus = 1 + (this.state.prestigeTokens * 0.05);
         base *= tokenBonus;
 
-        if (this.isFrenzyActive) base *= 3.0;
+        if (this.isFrenzyActive) {
+          const fRank = this.state.prestigeRanks["p_frenzy"] || 0;
+          const fBonus = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_frenzy").effect(fRank);
+          base *= (3.0 * fBonus);
+        }
         if (this.isHackathonActive) base *= 4.0;
+        if (this.isCoffeeActive) base *= 3.0;
         if (this.rushDuration > 0) base *= this.rushMultiplier;
 
         return Math.max(1, base);
@@ -2505,7 +2584,7 @@
 
       getBulkBuyInfo(gen, requestedMult) {
         const count = this.getGeneratorCount(gen.id);
-        const r = 1.18;
+        const r = 1.22;
         const money = this.state.money;
 
         if (requestedMult === "max") {
@@ -2603,69 +2682,111 @@
         this.showToast("🚀 HACKATHON INITIATED! 5x Production for 30 seconds!");
       }
 
+      triggerCoffeeOverdrive() {
+        if (this.coffeeCooldown > 0 || this.isCoffeeActive) return;
+        this.isCoffeeActive = true;
+        this.coffeeDuration = 15;
+        this.coffeeCooldown = 60; // 60s cooldown
+
+        this.state.stats.coffeesDrank = (this.state.stats.coffeesDrank || 0) + 1;
+        sound.playFanfare();
+        this.showToast("☕ COFFEE OVERDRIVE! 3x Click Power & +35% Idle Speed for 15s!");
+        this.checkAchievements();
+      }
+
       triggerCrisis() {
-        if (this.crisisActive) return;
+        if (this.crisisActive || this.marketCrashActive) return;
         this.crisisActive = true;
-        this.crisisTimer = 9.0;
-        this.crisisBugsRemaining = 5;
+        this.crisisTimer = 15.0;
 
         sound.playSiren();
-        document.getElementById("emergencyBanner").style.display = "flex";
-        this.showToast("🚨 CRITICAL BUG DETECTED! Productivity slashed by 50%!");
+        const banner = document.getElementById("emergencyBanner");
+        const icon = document.getElementById("emergencyBannerIcon");
+        const msg = document.getElementById("emergencyBannerMsg");
+        const btn = document.getElementById("emergencyResolveBtn");
+        if (icon) icon.textContent = "🚨";
+        if (msg) msg.textContent = "SEV-1 SERVER INCIDENT! Production halved! Click Quick Patch!";
+        if (btn) btn.textContent = "⚡ QUICK PATCH";
+        if (banner) banner.style.display = "flex";
+        this.showToast("🚨 SERVER OUTAGE DETECTED! Productivity slashed by 50%!");
       }
 
-      openCrisisOverlay() {
-        const overlay = document.getElementById("crisisOverlay");
-        const bugField = document.getElementById("crisisBugField");
-        bugField.innerHTML = "";
-        overlay.classList.add("active");
-
-        for (let i = 0; i < this.crisisBugsRemaining; i++) {
-          const bug = document.createElement("div");
-          bug.className = "crisis-bug-node";
-          bug.innerHTML = "🐛";
-          bug.style.left = `${10 + Math.random() * 80}%`;
-          bug.style.top = `${20 + Math.random() * 60}%`;
-
-          bug.addEventListener("click", () => {
-            sound.playClick(true);
-            bug.remove();
-            this.crisisBugsRemaining--;
-            document.getElementById("crisisTimer").textContent = `Tap corrupted bugs: ${this.crisisBugsRemaining} left!`;
-            if (this.crisisBugsRemaining <= 0) {
-              this.resolveCrisisSuccess();
-            }
-          });
-
-          bugField.appendChild(bug);
+      resolveCrisisQuick() {
+        if (this.marketCrashActive) {
+          this.resolveMarketCrash();
+          return;
         }
-      }
-
-      resolveCrisisSuccess() {
+        if (!this.crisisActive) return;
         this.crisisActive = false;
-        document.getElementById("crisisOverlay").classList.remove("active");
-        document.getElementById("emergencyBanner").style.display = "none";
-        this.nextCrisisTimer = 200 + Math.random() * 140;
+        const banner = document.getElementById("emergencyBanner");
+        if (banner) banner.style.display = "none";
+        this.nextCrisisTimer = 160 + Math.random() * 120;
 
         sound.playFanfare();
-        const bounty = Math.max(this.calculateIdleRate() * 90, 5000);
+        const bounty = Math.max(this.calculateIdleRate() * 45, 2500);
         this.state.money += bounty;
         this.state.stats.totalEarned += bounty;
         this.state.stats.crisesResolved += 1;
 
-        // Small chance of rare artifact drop
-        if (Math.random() < 0.35) {
+        if (Math.random() < 0.3) {
           this.rollRandomArtifactDrop();
         }
 
-        this.showToast(`✅ OUTAGE RESOLVED! Incident Bounty: +${formatMoney(bounty)}!`);
+        this.showToast(`✅ INCIDENT PATCHED! Quick-Fix Bounty: +${formatMoney(bounty)}!`);
         this.checkAchievements();
+        this.updateHeaderStats();
+      }
+
+      triggerMarketCrash() {
+        if (this.marketCrashActive || this.crisisActive) return;
+        this.marketCrashActive = true;
+        this.marketCrashTimer = 25.0;
+
+        sound.playSiren();
+        const banner = document.getElementById("emergencyBanner");
+        const icon = document.getElementById("emergencyBannerIcon");
+        const msg = document.getElementById("emergencyBannerMsg");
+        const btn = document.getElementById("emergencyResolveBtn");
+        if (icon) icon.textContent = "📉";
+        if (msg) msg.textContent = "MARKET DOWNTURN! Sector revenues down 60%! Pivot company strategy!";
+        if (btn) btn.textContent = "🔄 PIVOT NOW";
+        if (banner) banner.style.display = "flex";
+        this.showToast("📉 MARKET CRASH IN PROGRESS! Output slashed — click Pivot!");
+      }
+
+      resolveMarketCrash() {
+        if (!this.marketCrashActive) return;
+        this.marketCrashActive = false;
+        const banner = document.getElementById("emergencyBanner");
+        if (banner) banner.style.display = "none";
+        this.nextCrashTimer = 220 + Math.random() * 140;
+
+        this.state.stats.crashesPivoted = (this.state.stats.crashesPivoted || 0) + 1;
+        sound.playFanfare();
+        // Turn the crisis into a pivot boom!
+        this.rushMultiplier = 3;
+        this.rushDuration = 15;
+        this.showToast("🔄 STRATEGIC PIVOT SUCCESSFUL! 3x Revenue Surge for 15s!");
+        this.checkAchievements();
+        this.updateHeaderStats();
+      }
+
+      triggerViralLaunch() {
+        sound.playGolden();
+        this.state.stats.viralHits = (this.state.stats.viralHits || 0) + 1;
+        const rate = this.calculateIdleRate();
+        const windfall = Math.max(rate * 120, this.state.money * 0.15, 10000);
+        this.state.money += windfall;
+        this.state.stats.totalEarned += windfall;
+        this.showToast(`🚀 VIRAL PRODUCT HIT! +${formatMoney(windfall)} Cash Windfall from trending launch!`);
+        this.checkAchievements();
+        this.updateHeaderStats();
       }
 
       resolveCrisisFailure() {
         this.crisisActive = false;
-        document.getElementById("crisisOverlay").classList.remove("active");
-        document.getElementById("emergencyBanner").style.display = "none";
+        const banner = document.getElementById("emergencyBanner");
+        if (banner) banner.style.display = "none";
         this.nextCrisisTimer = 140 + Math.random() * 80;
         this.showToast("💥 System outage timed out. Production stabilized.");
       }
@@ -2799,17 +2920,18 @@
           if (c.completed) return;
           if (c.type === type) {
             if (type === "own_gen" && c.genId === extraId) {
-              c.current = amount;
+              c.current = Math.min(amount, c.target);
               changed = true;
             } else if (type === "clicks") {
-              c.current += amount;
+              c.current = Math.min(c.current + amount, c.target);
               changed = true;
             } else if (type === "earn") {
-              c.current = Math.floor(this.state.money);
+              // Track incremental earnings, not total money
+              c.current = Math.min(c.current + amount, c.target);
               changed = true;
             }
 
-            if (c.current >= c.target) {
+            if (c.current >= c.target && !c.completed) {
               c.completed = true;
               changed = true;
               this.showToast(`📜 Contract Completed: ${c.label}! Claim in Contracts tab!`);
@@ -2827,19 +2949,23 @@
         if (!contract || !contract.completed) return;
 
         sound.playFanfare();
-        this.state.money += contract.reward;
-        this.state.stats.totalEarned += contract.reward;
+        // Contract Synergy prestige perk
+        const cRank = this.state.prestigeRanks["p_contracts"] || 0;
+        const cBonus = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_contracts").effect(cRank);
+        const rewardAmount = Math.round(contract.reward * cBonus);
+
+        // Add reward to money WITHOUT counting it as "earned progress" toward earn-type contracts
+        this.state.money += rewardAmount;
         this.state.stats.contractsDone += 1;
-        this.showToast(`🎉 Contract Claimed! +${formatMoney(contract.reward)} treasury bonus!`);
+        this.showToast(`🎉 Contract Claimed! +${formatMoney(rewardAmount)} treasury bonus!`);
 
         // Generate replacement contract with higher targets and rewards
-        const nextTarget = Math.round(contract.target * 2.2);
-        const nextReward = Math.round(contract.reward * 2.6);
+        const nextTarget = Math.round(contract.target * 2.5);
+        const nextReward = Math.round(contract.reward * 3.0);
         contract.target = nextTarget;
-        contract.current = (contract.type === "earn") ? Math.floor(this.state.money) : 
-                           (contract.type === "own_gen") ? this.getGeneratorCount(contract.genId) : 0;
+        contract.current = (contract.type === "own_gen") ? this.getGeneratorCount(contract.genId) : 0;
         contract.reward = nextReward;
-        contract.completed = contract.current >= contract.target;
+        contract.completed = false;
 
         this.renderContracts();
         this.updateHeaderStats();
@@ -2940,8 +3066,13 @@
         // Hackathon button
         document.getElementById("hackathonBtn").addEventListener("click", () => this.triggerHackathon());
 
-        // Emergency banner
-        document.getElementById("emergencyResolveBtn").addEventListener("click", () => this.openCrisisOverlay());
+        // Coffee Overdrive button
+        const coffeeBtn = document.getElementById("coffeeBtn");
+        if (coffeeBtn) coffeeBtn.addEventListener("click", () => this.triggerCoffeeOverdrive());
+
+        // Emergency quick patch / pivot button
+        const resolveBtn = document.getElementById("emergencyResolveBtn");
+        if (resolveBtn) resolveBtn.addEventListener("click", () => this.resolveCrisisQuick());
 
         // Navigation Tabs
         document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -3636,6 +3767,11 @@ let lastGenUIRefreshTimer = 0;
             this.state.stats.totalEarned += earned;
             this.state.stats.playTimeSeconds += dt;
 
+            // Passively progress "earn" contracts!
+            if (earned > 0) {
+              this.progressContracts("earn", earned);
+            }
+
             // Frenzy handling
             if (this.isFrenzyActive) {
               this.frenzyDuration -= dt;
@@ -3663,18 +3799,51 @@ let lastGenUIRefreshTimer = 0;
             // Update Hackathon UI
             const hackBtn = document.getElementById("hackathonBtn");
             const hackText = document.getElementById("hackathonCooldownText");
-            if (this.isHackathonActive) {
-              hackBtn.className = "ability-btn";
-              hackBtn.disabled = true;
-              hackText.textContent = `ACTIVE (${Math.ceil(this.hackathonDuration)}s)`;
-            } else if (this.hackathonCooldown > 0) {
-              hackBtn.className = "ability-btn";
-              hackBtn.disabled = true;
-              hackText.textContent = `${Math.ceil(this.hackathonCooldown)}s`;
-            } else {
-              hackBtn.className = "ability-btn ready";
-              hackBtn.disabled = false;
-              hackText.textContent = "READY";
+            if (hackBtn && hackText) {
+              if (this.isHackathonActive) {
+                hackBtn.className = "ability-btn";
+                hackBtn.disabled = true;
+                hackText.textContent = `ACTIVE (${Math.ceil(this.hackathonDuration)}s)`;
+              } else if (this.hackathonCooldown > 0) {
+                hackBtn.className = "ability-btn";
+                hackBtn.disabled = true;
+                hackText.textContent = `${Math.ceil(this.hackathonCooldown)}s`;
+              } else {
+                hackBtn.className = "ability-btn ready";
+                hackBtn.disabled = false;
+                hackText.textContent = "READY";
+              }
+            }
+
+            // Coffee Overdrive handling
+            if (this.isCoffeeActive) {
+              this.coffeeDuration -= dt;
+              if (this.coffeeDuration <= 0) {
+                this.isCoffeeActive = false;
+                this.showToast("Coffee buzz wore off!");
+              }
+            }
+            if (this.coffeeCooldown > 0) {
+              this.coffeeCooldown -= dt;
+            }
+
+            // Update Coffee Overdrive UI
+            const coffeeBtn = document.getElementById("coffeeBtn");
+            const coffeeText = document.getElementById("coffeeCooldownText");
+            if (coffeeBtn && coffeeText) {
+              if (this.isCoffeeActive) {
+                coffeeBtn.className = "ability-btn";
+                coffeeBtn.disabled = true;
+                coffeeText.textContent = `ACTIVE (${Math.ceil(this.coffeeDuration)}s)`;
+              } else if (this.coffeeCooldown > 0) {
+                coffeeBtn.className = "ability-btn";
+                coffeeBtn.disabled = true;
+                coffeeText.textContent = `${Math.ceil(this.coffeeCooldown)}s`;
+              } else {
+                coffeeBtn.className = "ability-btn ready";
+                coffeeBtn.disabled = false;
+                coffeeText.textContent = "READY";
+              }
             }
 
             // Rush handling
@@ -3694,6 +3863,30 @@ let lastGenUIRefreshTimer = 0;
               if (this.nextCrisisTimer <= 0) {
                 this.triggerCrisis();
               }
+            }
+
+            // Market Crash handling
+            if (this.marketCrashActive) {
+              this.marketCrashTimer -= dt;
+              if (this.marketCrashTimer <= 0) {
+                this.marketCrashActive = false;
+                const banner = document.getElementById("emergencyBanner");
+                if (banner) banner.style.display = "none";
+                this.nextCrashTimer = 180 + Math.random() * 120;
+                this.showToast("📉 Market crash concluded. Sector conditions stabilized.");
+              }
+            } else {
+              this.nextCrashTimer -= dt;
+              if (this.nextCrashTimer <= 0) {
+                this.triggerMarketCrash();
+              }
+            }
+
+            // Viral Launch random event
+            this.nextViralTimer -= dt;
+            if (this.nextViralTimer <= 0) {
+              this.nextViralTimer = 120 + Math.random() * 120;
+              this.triggerViralLaunch();
             }
 
             // Golden acorn random spawn

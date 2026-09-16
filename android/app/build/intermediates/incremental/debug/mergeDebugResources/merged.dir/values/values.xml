@@ -6434,8 +6434,10 @@
   </style>
     <style name="Theme.Tasks" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#DB4C3F</item>
-        <item name="colorPrimaryDark">#C13B2F</item>
-        <item name="android:statusBarColor">#DB4C3F</item>
+        <item name="colorPrimaryDark">#1A1A1A</item>
+        <item name="android:statusBarColor">#1A1A1A</item>
+        <item name="android:navigationBarColor">#1A1A1A</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
     <style name="ThemeOverlay.AppCompat" parent="Base.ThemeOverlay.AppCompat"/>
     <style name="ThemeOverlay.AppCompat.ActionBar" parent="Base.ThemeOverlay.AppCompat.ActionBar"/>
