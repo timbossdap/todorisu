@@ -1729,7 +1729,7 @@
         <nav class="nav-tabs">
           <button class="tab-btn active" data-tab="generators">
             <span>🏢 Workplaces</span>
-            <span class="tab-badge" id="badgeGen">12</span>
+            <span class="tab-badge" id="badgeGen">15</span>
           </button>
           <button class="tab-btn" data-tab="upgrades">
             <span>⚡ Research</span>
@@ -1839,6 +1839,7 @@
                 <div class="rebirth-hero-desc">
                   Reset your current liquid funds, workplaces, and standard research to become an Angel Venture Capitalist.
                   Each <strong>Golden Acorn 🌰</strong> permanently provides <strong>+5% global revenue boost</strong> and funds your permanent Corporate Ascension Tree!
+                  Every IPO also grants a permanent <strong>Founder's Legacy +8%</strong> (workplace mastery and trophies are kept forever).
                 </div>
 
                 <div class="rebirth-stats-row">
@@ -1860,7 +1861,7 @@
                   🚀 Launch IPO (+0 Acorns)
                 </button>
                 <div style="font-size: 11px; color: var(--text-muted); margin-top: 10px;">
-                  Requires at least $1,000,000,000 (Unicorn Valuation) lifetime earnings to qualify for an initial public offering.
+                  Requires at least $5,000,000,000 (Unicorn Valuation) lifetime earnings to qualify for an initial public offering.
                 </div>
               </div>
 
@@ -1888,6 +1889,10 @@
                 <tr><td>Outages & Crises Resolved</td><td id="statCrisesResolved">0</td></tr>
                 <tr><td>Contracts Completed</td><td id="statContractsDone">0</td></tr>
                 <tr><td>Total Times Rebirthed</td><td id="statRebirths">0</td></tr>
+                <tr><td>Founder's Legacy Bonus</td><td id="statLegacy">+0%</td></tr>
+                <tr><td>Trophy Resonance Bonus</td><td id="statTrophyBonus">+0%</td></tr>
+                <tr><td>Total Mastery Levels</td><td id="statMastery">0</td></tr>
+                <tr><td>Best Daily Streak</td><td id="statStreak">0 days</td></tr>
                 <tr><td>Golden Acorns Harvested</td><td id="statGoldenAcornsFound">0</td></tr>
                 <tr><td>Lifetime Earnings</td><td id="statTotalEarned">$0</td></tr>
               </tbody>
@@ -2120,124 +2125,149 @@
        GAME CATALOGS & DEFINITIONS
        ========================================================= */
     const GENERATORS_DATA = [
-      { id: "gen_intern", name: "Intern Coffee Runner", icon: "☕", baseCost: 25, baseRate: 0.6, unlockAt: 0, desc: "Runs for lattes, accidentally completes low-priority tasks.", bubble: "Need espresso! ☕" },
-      { id: "gen_keyboard", name: "Mechanical Keyboard", icon: "⌨️", baseCost: 180, baseRate: 4.5, unlockAt: 100, desc: "Clicky tactile switches that boost typing output by 400%.", bubble: "Click-clack-clack!" },
-      { id: "gen_cron", name: "Smart Bash Cron Scripts", icon: "⚙️", baseCost: 1400, baseRate: 32.0, unlockAt: 800, desc: "Automated bash scripts clearing backlogs while everyone sleeps.", bubble: "Cron job running..." },
-      { id: "gen_developer", name: "Senior Full-Stack Dev", icon: "💻", baseCost: 12500, baseRate: 240.0, unlockAt: 7000, desc: "Drinks yerba mate and converts legacy spaghetti into profit.", bubble: "Refactoring DB..." },
-      { id: "gen_copilot", name: "AI Agent Swarm", icon: "🤖", baseCost: 110000, baseRate: 1850.0, unlockAt: 60000, desc: "Generates 100 features a minute and auto-resolves merge conflicts.", bubble: "Synthesizing code..." },
-      { id: "gen_scrum", name: "Agile Continuous Pipeline", icon: "🔄", baseCost: 950000, baseRate: 14200.0, unlockAt: 500000, desc: "Continuous delivery pipeline deploying at relativistic speed.", bubble: "Deploying to prod!" },
-      { id: "gen_vc", name: "Silicon Valley VC Fund", icon: "📈", baseCost: 8500000, baseRate: 110000.0, unlockAt: 4500000, desc: "Injects seed funding and turns completed todos into equity.", bubble: "Pivoting to AI 🚀" },
-      { id: "gen_quantum", name: "Quantum Task Server", icon: "⚛️", baseCost: 85000000, baseRate: 920000.0, unlockAt: 45000000, desc: "Solves todo items across multiple parallel timelines at once.", bubble: "Qubits aligned." },
-      { id: "gen_orbital", name: "Orbital Data Colony", icon: "🛰️", baseCost: 900000000, baseRate: 7800000.0, unlockAt: 450000000, desc: "Zero-gravity supercomputing satellite operating at near-absolute zero.", bubble: "Solar beams locked." },
-      { id: "gen_dyson", name: "Dyson Sphere Core", icon: "☀️", baseCost: 11000000000, baseRate: 68000000.0, unlockAt: 5000000000, desc: "Harvests solar energy directly into compute power for cosmic productivity.", bubble: "Power at 100%!" },
-      { id: "gen_multiverse", name: "Multiverse Holding Corp", icon: "🌌", baseCost: 160000000000, baseRate: 620000000.0, unlockAt: 80000000000, desc: "Acquires reality itself and automates todos across all dimensions.", bubble: "Timeline merged." },
-      { id: "gen_reality", name: "Omnipresent Reality Engine", icon: "🔮", baseCost: 2500000000000, baseRate: 5800000000.0, unlockAt: 1200000000000, desc: "Tasks complete themselves before anyone even writes them down.", bubble: "Destiny fulfilled." }
+      { id: "gen_intern", name: "Intern Coffee Runner", icon: "☕", baseCost: 125, baseRate: 0.6, unlockAt: 0, desc: "Runs for lattes, accidentally completes low-priority tasks.", bubble: "Need espresso! ☕" },
+      { id: "gen_keyboard", name: "Mechanical Keyboard", icon: "⌨️", baseCost: 900, baseRate: 4.5, unlockAt: 500, desc: "Clicky tactile switches that boost typing output by 400%.", bubble: "Click-clack-clack!" },
+      { id: "gen_cron", name: "Smart Bash Cron Scripts", icon: "⚙️", baseCost: 7000, baseRate: 32.0, unlockAt: 4000, desc: "Automated bash scripts clearing backlogs while everyone sleeps.", bubble: "Cron job running..." },
+      { id: "gen_developer", name: "Senior Full-Stack Dev", icon: "💻", baseCost: 62500, baseRate: 240.0, unlockAt: 35000, desc: "Drinks yerba mate and converts legacy spaghetti into profit.", bubble: "Refactoring DB..." },
+      { id: "gen_copilot", name: "AI Agent Swarm", icon: "🤖", baseCost: 550000, baseRate: 1850.0, unlockAt: 300000, desc: "Generates 100 features a minute and auto-resolves merge conflicts.", bubble: "Synthesizing code..." },
+      { id: "gen_scrum", name: "Agile Continuous Pipeline", icon: "🔄", baseCost: 4750000, baseRate: 14200.0, unlockAt: 2500000, desc: "Continuous delivery pipeline deploying at relativistic speed.", bubble: "Deploying to prod!" },
+      { id: "gen_vc", name: "Silicon Valley VC Fund", icon: "📈", baseCost: 42500000, baseRate: 110000.0, unlockAt: 22500000, desc: "Injects seed funding and turns completed todos into equity.", bubble: "Pivoting to AI 🚀" },
+      { id: "gen_quantum", name: "Quantum Task Server", icon: "⚛️", baseCost: 425000000, baseRate: 920000.0, unlockAt: 225000000, desc: "Solves todo items across multiple parallel timelines at once.", bubble: "Qubits aligned." },
+      { id: "gen_orbital", name: "Orbital Data Colony", icon: "🛰️", baseCost: 4500000000, baseRate: 7800000.0, unlockAt: 2250000000, desc: "Zero-gravity supercomputing satellite operating at near-absolute zero.", bubble: "Solar beams locked." },
+      { id: "gen_dyson", name: "Dyson Sphere Core", icon: "☀️", baseCost: 55000000000, baseRate: 68000000.0, unlockAt: 25000000000, desc: "Harvests solar energy directly into compute power for cosmic productivity.", bubble: "Power at 100%!" },
+      { id: "gen_multiverse", name: "Multiverse Holding Corp", icon: "🌌", baseCost: 800000000000, baseRate: 620000000.0, unlockAt: 400000000000, desc: "Acquires reality itself and automates todos across all dimensions.", bubble: "Timeline merged." },
+      { id: "gen_reality", name: "Omnipresent Reality Engine", icon: "🔮", baseCost: 12500000000000, baseRate: 5800000000.0, unlockAt: 6000000000000, desc: "Tasks complete themselves before anyone even writes them down.", bubble: "Destiny fulfilled." },
+      { id: "gen_stellar", name: "Stellar Foundry Array", icon: "🌟", baseCost: 75000000000000, baseRate: 32000000000.0, unlockAt: 30000000000000, desc: "Ignites captive stars to forge raw productivity into capital.", bubble: "Fusion stable." },
+      { id: "gen_temporal", name: "Temporal Ops Monopoly", icon: "⏳", baseCost: 450000000000000, baseRate: 185000000000.0, unlockAt: 200000000000000, desc: "Buys yesterday's output today and compounds it across timelines.", bubble: "Timeline arbitraged." },
+      { id: "gen_omniverse", name: "Omniversal Task Singularity", icon: "🌀", baseCost: 3000000000000000, baseRate: 1100000000000.0, unlockAt: 1200000000000000, desc: "Every possible task in every possible universe, completed at once.", bubble: "All realities merged." }
     ];
 
     const UPGRADES_DATA = [
       // Click Research (Tiers 1 - 7)
-      { id: "up_click_1", name: "Ergonomic Grip", icon: "🖱️", cost: 150, type: "click_mult", val: 2, desc: "Double manual click efficiency (+100%)." },
-      { id: "up_click_2", name: "Cherry MX Blues", icon: "⌨️", cost: 2200, type: "click_mult", val: 2, desc: "Crisp click actuation doubles click power again." },
-      { id: "up_click_synergy_1", name: "Macro Scripting", icon: "📜", cost: 25000, type: "click_synergy", val: 0.015, desc: "Each manual click yields +1.5% of your total idle $/s!" },
-      { id: "up_crit_1", name: "Laser Optics", icon: "🎯", cost: 85000, type: "crit_chance", val: 0.05, desc: "+5% Critical Strike chance on clicks." },
-      { id: "up_click_synergy_2", name: "Neural Link Clicker", icon: "🧠", cost: 750000, type: "click_synergy", val: 0.025, desc: "Each click yields an additional +2.5% of idle $/s." },
-      { id: "up_crit_2", name: "Overclocked Reflexes", icon: "⚡", cost: 6000000, type: "crit_mult", val: 2.5, desc: "Critical clicks deal 20x normal damage!" },
-      { id: "up_click_3", name: "Haptic Feedback Array", icon: "📳", cost: 35000000, type: "click_mult", val: 3, desc: "Triple manual click power (3x)." },
-      { id: "up_click_synergy_3", name: "Market Making Algorithm", icon: "📊", cost: 1000000000, type: "click_synergy", val: 0.04, desc: "Each click yields an additional +4% of idle $/s." },
-      { id: "up_crit_3", name: "Probability Engine", icon: "🎲", cost: 500000000, type: "crit_chance", val: 0.08, desc: "+8% additional Critical Strike chance." },
-      { id: "up_click_4", name: "Direct Neural Interface", icon: "🧠", cost: 5000000000, type: "click_mult", val: 5, desc: "5x click power — thought becomes profit." },
-      { id: "up_crit_4", name: "Chaos Theory Module", icon: "🌀", cost: 50000000000, type: "crit_mult", val: 3, desc: "Criticals now deal 30x base damage!" },
-      { id: "up_click_5", name: "Quantum Tunnelling Finger", icon: "👆", cost: 250000000000, type: "click_mult", val: 5, desc: "5x click power — clicks happen before physical contact." },
-      { id: "up_click_synergy_4", name: "High-Frequency Arbitrage", icon: "⚡", cost: 2000000000000, type: "click_synergy", val: 0.06, desc: "Each click yields an additional +6% of idle $/s!" },
-      { id: "up_crit_5", name: "Omniscient Anticipation", icon: "👁️", cost: 15000000000000, type: "crit_chance", val: 0.12, desc: "+12% Critical Strike chance on all manual tasks." },
-      { id: "up_click_6", name: "Chronos Task Warp", icon: "⏳", cost: 500000000000000, type: "click_mult", val: 10, desc: "10x click power — complete tomorrow's tasks today." },
+      { id: "up_click_1", name: "Ergonomic Grip", icon: "🖱️", cost: 750, type: "click_mult", val: 2, desc: "Double manual click efficiency (+100%)." },
+      { id: "up_click_2", name: "Cherry MX Blues", icon: "⌨️", cost: 11000, type: "click_mult", val: 2, desc: "Crisp click actuation doubles click power again." },
+      { id: "up_click_synergy_1", name: "Macro Scripting", icon: "📜", cost: 125000, type: "click_synergy", val: 0.015, desc: "Each manual click yields +1.5% of your total idle $/s!" },
+      { id: "up_crit_1", name: "Laser Optics", icon: "🎯", cost: 425000, type: "crit_chance", val: 0.05, desc: "+5% Critical Strike chance on clicks." },
+      { id: "up_click_synergy_2", name: "Neural Link Clicker", icon: "🧠", cost: 3750000, type: "click_synergy", val: 0.025, desc: "Each click yields an additional +2.5% of idle $/s." },
+      { id: "up_crit_2", name: "Overclocked Reflexes", icon: "⚡", cost: 30000000, type: "crit_mult", val: 2.5, desc: "Critical clicks deal 20x normal damage!" },
+      { id: "up_click_3", name: "Haptic Feedback Array", icon: "📳", cost: 175000000, type: "click_mult", val: 3, desc: "Triple manual click power (3x)." },
+      { id: "up_click_synergy_3", name: "Market Making Algorithm", icon: "📊", cost: 5000000000, type: "click_synergy", val: 0.04, desc: "Each click yields an additional +4% of idle $/s." },
+      { id: "up_crit_3", name: "Probability Engine", icon: "🎲", cost: 2500000000, type: "crit_chance", val: 0.08, desc: "+8% additional Critical Strike chance." },
+      { id: "up_click_4", name: "Direct Neural Interface", icon: "🧠", cost: 25000000000, type: "click_mult", val: 5, desc: "5x click power — thought becomes profit." },
+      { id: "up_crit_4", name: "Chaos Theory Module", icon: "🌀", cost: 250000000000, type: "crit_mult", val: 3, desc: "Criticals now deal 30x base damage!" },
+      { id: "up_click_5", name: "Quantum Tunnelling Finger", icon: "👆", cost: 1250000000000, type: "click_mult", val: 5, desc: "5x click power — clicks happen before physical contact." },
+      { id: "up_click_synergy_4", name: "High-Frequency Arbitrage", icon: "⚡", cost: 10000000000000, type: "click_synergy", val: 0.06, desc: "Each click yields an additional +6% of idle $/s!" },
+      { id: "up_crit_5", name: "Omniscient Anticipation", icon: "👁️", cost: 75000000000000, type: "crit_chance", val: 0.12, desc: "+12% Critical Strike chance on all manual tasks." },
+      { id: "up_click_6", name: "Chronos Task Warp", icon: "⏳", cost: 2500000000000000, type: "click_mult", val: 10, desc: "10x click power — complete tomorrow's tasks today." },
 
       // Intern Upgrades
-      { id: "up_gen_intern_1", name: "Artisanal Cold Brew", icon: "☕", cost: 800, type: "gen_mult", target: "gen_intern", val: 2, desc: "Interns run at double speed (2x $/s)." },
-      { id: "up_gen_intern_2", name: "Intern Incubator Program", icon: "🎓", cost: 50000, type: "gen_mult", target: "gen_intern", val: 4, desc: "Interns are trained quarterly: 4x output." },
-      { id: "up_gen_intern_3", name: "Unlimited Energy Drinks", icon: "🥫", cost: 2500000, type: "gen_mult", target: "gen_intern", val: 4, desc: "Caffeine-infused stamina: Interns output 4x cash." },
-      { id: "up_gen_intern_4", name: "Honorary Junior Titles", icon: "🏅", cost: 150000000, type: "gen_mult", target: "gen_intern", val: 5, desc: "Resume padding motivation: Interns output 5x cash." },
-      { id: "up_gen_intern_5", name: "Intern Hivemind Syndicate", icon: "🐝", cost: 10000000000, type: "gen_mult", target: "gen_intern", val: 10, desc: "Interns coordinate telepathically: 10x output." },
+      { id: "up_gen_intern_1", name: "Artisanal Cold Brew", icon: "☕", cost: 4000, type: "gen_mult", target: "gen_intern", val: 2, desc: "Interns run at double speed (2x $/s)." },
+      { id: "up_gen_intern_2", name: "Intern Incubator Program", icon: "🎓", cost: 250000, type: "gen_mult", target: "gen_intern", val: 4, desc: "Interns are trained quarterly: 4x output." },
+      { id: "up_gen_intern_3", name: "Unlimited Energy Drinks", icon: "🥫", cost: 12500000, type: "gen_mult", target: "gen_intern", val: 4, desc: "Caffeine-infused stamina: Interns output 4x cash." },
+      { id: "up_gen_intern_4", name: "Honorary Junior Titles", icon: "🏅", cost: 750000000, type: "gen_mult", target: "gen_intern", val: 5, desc: "Resume padding motivation: Interns output 5x cash." },
+      { id: "up_gen_intern_5", name: "Intern Hivemind Syndicate", icon: "🐝", cost: 50000000000, type: "gen_mult", target: "gen_intern", val: 10, desc: "Interns coordinate telepathically: 10x output." },
 
       // Mechanical Keyboard Upgrades
-      { id: "up_gen_kb_1", name: "PBT Dye-Sub Keycaps", icon: "🔤", cost: 5500, type: "gen_mult", target: "gen_keyboard", val: 2, desc: "Mechanical Keyboards output 2x cash." },
-      { id: "up_gen_kb_2", name: "Custom Firmware Flash", icon: "💾", cost: 700000, type: "gen_mult", target: "gen_keyboard", val: 4, desc: "Flashed QMK firmware: Keyboards output 4x cash." },
-      { id: "up_gen_kb_3", name: "Lubed Switch Stems", icon: "🧈", cost: 35000000, type: "gen_mult", target: "gen_keyboard", val: 4, desc: "Krytox 205g0 lubed switches: 4x typing output." },
-      { id: "up_gen_kb_4", name: "OLED Macro Displays", icon: "🖥️", cost: 2000000000, type: "gen_mult", target: "gen_keyboard", val: 5, desc: "Real-time task graphs on keyboard: 5x output." },
-      { id: "up_gen_kb_5", name: "Hall-Effect Magnetic Switches", icon: "🧲", cost: 150000000000, type: "gen_mult", target: "gen_keyboard", val: 10, desc: "Zero-latency rapid trigger: 10x keyboard output." },
+      { id: "up_gen_kb_1", name: "PBT Dye-Sub Keycaps", icon: "🔤", cost: 27500, type: "gen_mult", target: "gen_keyboard", val: 2, desc: "Mechanical Keyboards output 2x cash." },
+      { id: "up_gen_kb_2", name: "Custom Firmware Flash", icon: "💾", cost: 3500000, type: "gen_mult", target: "gen_keyboard", val: 4, desc: "Flashed QMK firmware: Keyboards output 4x cash." },
+      { id: "up_gen_kb_3", name: "Lubed Switch Stems", icon: "🧈", cost: 175000000, type: "gen_mult", target: "gen_keyboard", val: 4, desc: "Krytox 205g0 lubed switches: 4x typing output." },
+      { id: "up_gen_kb_4", name: "OLED Macro Displays", icon: "🖥️", cost: 10000000000, type: "gen_mult", target: "gen_keyboard", val: 5, desc: "Real-time task graphs on keyboard: 5x output." },
+      { id: "up_gen_kb_5", name: "Hall-Effect Magnetic Switches", icon: "🧲", cost: 750000000000, type: "gen_mult", target: "gen_keyboard", val: 10, desc: "Zero-latency rapid trigger: 10x keyboard output." },
 
       // Bash Cron Script Upgrades
-      { id: "up_gen_cron_1", name: "Dockerized Containers", icon: "🐳", cost: 45000, type: "gen_mult", target: "gen_cron", val: 2, desc: "Cron Scripts run 2x more efficiently." },
-      { id: "up_gen_cron_2", name: "Kubernetes Orchestration", icon: "☸️", cost: 6000000, type: "gen_mult", target: "gen_cron", val: 4, desc: "K8s orchestration: Cron 4x more efficient." },
-      { id: "up_gen_cron_3", name: "Self-Healing Bash Daemons", icon: "🩺", cost: 300000000, type: "gen_mult", target: "gen_cron", val: 4, desc: "Daemons auto-restart on SIGKILL: 4x output." },
-      { id: "up_gen_cron_4", name: "Serverless Edge Workers", icon: "⚡", cost: 15000000000, type: "gen_mult", target: "gen_cron", val: 5, desc: "Distributed cron on 300 edge PoPs: 5x output." },
-      { id: "up_gen_cron_5", name: "Zero-Overhead Rust Rewrite", icon: "🦀", cost: 1000000000000, type: "gen_mult", target: "gen_cron", val: 10, desc: "Memory-safe microsecond cron daemons: 10x output." },
+      { id: "up_gen_cron_1", name: "Dockerized Containers", icon: "🐳", cost: 225000, type: "gen_mult", target: "gen_cron", val: 2, desc: "Cron Scripts run 2x more efficiently." },
+      { id: "up_gen_cron_2", name: "Kubernetes Orchestration", icon: "☸️", cost: 30000000, type: "gen_mult", target: "gen_cron", val: 4, desc: "K8s orchestration: Cron 4x more efficient." },
+      { id: "up_gen_cron_3", name: "Self-Healing Bash Daemons", icon: "🩺", cost: 1500000000, type: "gen_mult", target: "gen_cron", val: 4, desc: "Daemons auto-restart on SIGKILL: 4x output." },
+      { id: "up_gen_cron_4", name: "Serverless Edge Workers", icon: "⚡", cost: 75000000000, type: "gen_mult", target: "gen_cron", val: 5, desc: "Distributed cron on 300 edge PoPs: 5x output." },
+      { id: "up_gen_cron_5", name: "Zero-Overhead Rust Rewrite", icon: "🦀", cost: 5000000000000, type: "gen_mult", target: "gen_cron", val: 10, desc: "Memory-safe microsecond cron daemons: 10x output." },
 
       // Senior Developer Upgrades
-      { id: "up_gen_dev_1", name: "Standing Desks & Yerba", icon: "🧘", cost: 420000, type: "gen_mult", target: "gen_developer", val: 2, desc: "Senior Devs focus 2x better (2x $/s)." },
-      { id: "up_gen_dev_2", name: "10x Engineer Protocol", icon: "🚀", cost: 60000000, type: "gen_mult", target: "gen_developer", val: 4, desc: "Your devs achieve mythical 10x productivity (4x output)." },
-      { id: "up_gen_dev_3", name: "Triple 4K Curved Monitors", icon: "🖥️", cost: 3000000000, type: "gen_mult", target: "gen_developer", val: 4, desc: "Infinite screen real-estate: 4x dev output." },
-      { id: "up_gen_dev_4", name: "Bespoke Vim Configurations", icon: "⌨️", cost: 150000000000, type: "gen_mult", target: "gen_developer", val: 5, desc: "Never leaving the home row: 5x dev output." },
-      { id: "up_gen_dev_5", name: "Kernel-Level Flow State", icon: "🧬", cost: 10000000000000, type: "gen_mult", target: "gen_developer", val: 10, desc: "Developers think in bytecode: 10x dev output." },
+      { id: "up_gen_dev_1", name: "Standing Desks & Yerba", icon: "🧘", cost: 2100000, type: "gen_mult", target: "gen_developer", val: 2, desc: "Senior Devs focus 2x better (2x $/s)." },
+      { id: "up_gen_dev_2", name: "10x Engineer Protocol", icon: "🚀", cost: 300000000, type: "gen_mult", target: "gen_developer", val: 4, desc: "Your devs achieve mythical 10x productivity (4x output)." },
+      { id: "up_gen_dev_3", name: "Triple 4K Curved Monitors", icon: "🖥️", cost: 15000000000, type: "gen_mult", target: "gen_developer", val: 4, desc: "Infinite screen real-estate: 4x dev output." },
+      { id: "up_gen_dev_4", name: "Bespoke Vim Configurations", icon: "⌨️", cost: 750000000000, type: "gen_mult", target: "gen_developer", val: 5, desc: "Never leaving the home row: 5x dev output." },
+      { id: "up_gen_dev_5", name: "Kernel-Level Flow State", icon: "🧬", cost: 50000000000000, type: "gen_mult", target: "gen_developer", val: 10, desc: "Developers think in bytecode: 10x dev output." },
 
       // AI Agent Swarm Upgrades
-      { id: "up_gen_copilot_1", name: "Chain-of-Thought AI", icon: "🤖", cost: 3800000, type: "gen_mult", target: "gen_copilot", val: 2, desc: "AI Agent swarm doubles task throughput." },
-      { id: "up_gen_copilot_2", name: "AGI Turbo Mode", icon: "🤯", cost: 550000000, type: "gen_mult", target: "gen_copilot", val: 4, desc: "AI agents enter recursive self-improvement (4x)." },
-      { id: "up_gen_copilot_3", name: "Million-Token Context", icon: "📚", cost: 30000000000, type: "gen_mult", target: "gen_copilot", val: 4, desc: "Full codebase in memory simultaneously: 4x output." },
-      { id: "up_gen_copilot_4", name: "Autonomous Task Bounties", icon: "🎯", cost: 1500000000000, type: "gen_mult", target: "gen_copilot", val: 5, desc: "Agents self-assign and close Jira issues: 5x output." },
-      { id: "up_gen_copilot_5", name: "Sentient PR Reviewers", icon: "🧠", cost: 80000000000000, type: "gen_mult", target: "gen_copilot", val: 10, desc: "Zero human intervention required: 10x output." },
+      { id: "up_gen_copilot_1", name: "Chain-of-Thought AI", icon: "🤖", cost: 19000000, type: "gen_mult", target: "gen_copilot", val: 2, desc: "AI Agent swarm doubles task throughput." },
+      { id: "up_gen_copilot_2", name: "AGI Turbo Mode", icon: "🤯", cost: 2750000000, type: "gen_mult", target: "gen_copilot", val: 4, desc: "AI agents enter recursive self-improvement (4x)." },
+      { id: "up_gen_copilot_3", name: "Million-Token Context", icon: "📚", cost: 150000000000, type: "gen_mult", target: "gen_copilot", val: 4, desc: "Full codebase in memory simultaneously: 4x output." },
+      { id: "up_gen_copilot_4", name: "Autonomous Task Bounties", icon: "🎯", cost: 7500000000000, type: "gen_mult", target: "gen_copilot", val: 5, desc: "Agents self-assign and close Jira issues: 5x output." },
+      { id: "up_gen_copilot_5", name: "Sentient PR Reviewers", icon: "🧠", cost: 400000000000000, type: "gen_mult", target: "gen_copilot", val: 10, desc: "Zero human intervention required: 10x output." },
 
       // Agile CI/CD Upgrades
-      { id: "up_gen_scrum_1", name: "Zero-Downtime Blue-Green", icon: "🔄", cost: 32000000, type: "gen_mult", target: "gen_scrum", val: 2, desc: "Agile CI/CD pipeline deploys at 2x rate." },
-      { id: "up_gen_scrum_2", name: "Infinite Feedback Loop", icon: "∞", cost: 5000000000, type: "gen_mult", target: "gen_scrum", val: 4, desc: "Pipeline loops back on itself: 4x output." },
-      { id: "up_gen_scrum_3", name: "Precognition Testing Suite", icon: "🔮", cost: 250000000000, type: "gen_mult", target: "gen_scrum", val: 4, desc: "Tests pass before commits are even pushed: 4x output." },
-      { id: "up_gen_scrum_4", name: "Atomic Micro-Deployments", icon: "⚛️", cost: 12000000000000, type: "gen_mult", target: "gen_scrum", val: 5, desc: "50,000 deploys per minute: 5x output." },
-      { id: "up_gen_scrum_5", name: "Continuous Reality Refactor", icon: "🌀", cost: 600000000000000, type: "gen_mult", target: "gen_scrum", val: 10, desc: "Production updates faster than Planck time: 10x output." },
+      { id: "up_gen_scrum_1", name: "Zero-Downtime Blue-Green", icon: "🔄", cost: 160000000, type: "gen_mult", target: "gen_scrum", val: 2, desc: "Agile CI/CD pipeline deploys at 2x rate." },
+      { id: "up_gen_scrum_2", name: "Infinite Feedback Loop", icon: "∞", cost: 25000000000, type: "gen_mult", target: "gen_scrum", val: 4, desc: "Pipeline loops back on itself: 4x output." },
+      { id: "up_gen_scrum_3", name: "Precognition Testing Suite", icon: "🔮", cost: 1250000000000, type: "gen_mult", target: "gen_scrum", val: 4, desc: "Tests pass before commits are even pushed: 4x output." },
+      { id: "up_gen_scrum_4", name: "Atomic Micro-Deployments", icon: "⚛️", cost: 60000000000000, type: "gen_mult", target: "gen_scrum", val: 5, desc: "50,000 deploys per minute: 5x output." },
+      { id: "up_gen_scrum_5", name: "Continuous Reality Refactor", icon: "🌀", cost: 3000000000000000, type: "gen_mult", target: "gen_scrum", val: 10, desc: "Production updates faster than Planck time: 10x output." },
 
       // VC Fund Upgrades
-      { id: "up_gen_vc_1", name: "Series B Megaround", icon: "💎", cost: 280000000, type: "gen_mult", target: "gen_vc", val: 2, desc: "VC Funds deliver 2x passive return." },
-      { id: "up_gen_vc_2", name: "Sovereign Wealth Merger", icon: "🏦", cost: 45000000000, type: "gen_mult", target: "gen_vc", val: 4, desc: "National fund merger: VC returns 4x." },
-      { id: "up_gen_vc_3", name: "Hostile Takeover Protocol", icon: "🦈", cost: 2000000000000, type: "gen_mult", target: "gen_vc", val: 4, desc: "Swallow competing startups whole: 4x output." },
-      { id: "up_gen_vc_4", name: "Central Bank Board Seats", icon: "🏛️", cost: 100000000000000, type: "gen_mult", target: "gen_vc", val: 5, desc: "Setting global interest rates to zero: 5x output." },
-      { id: "up_gen_vc_5", name: "Intergalactic Currency Monopoly", icon: "🪙", cost: 5000000000000000, type: "gen_mult", target: "gen_vc", val: 10, desc: "You print the entire universe's currency: 10x output." },
+      { id: "up_gen_vc_1", name: "Series B Megaround", icon: "💎", cost: 1400000000, type: "gen_mult", target: "gen_vc", val: 2, desc: "VC Funds deliver 2x passive return." },
+      { id: "up_gen_vc_2", name: "Sovereign Wealth Merger", icon: "🏦", cost: 225000000000, type: "gen_mult", target: "gen_vc", val: 4, desc: "National fund merger: VC returns 4x." },
+      { id: "up_gen_vc_3", name: "Hostile Takeover Protocol", icon: "🦈", cost: 10000000000000, type: "gen_mult", target: "gen_vc", val: 4, desc: "Swallow competing startups whole: 4x output." },
+      { id: "up_gen_vc_4", name: "Central Bank Board Seats", icon: "🏛️", cost: 500000000000000, type: "gen_mult", target: "gen_vc", val: 5, desc: "Setting global interest rates to zero: 5x output." },
+      { id: "up_gen_vc_5", name: "Intergalactic Currency Monopoly", icon: "🪙", cost: 25000000000000000, type: "gen_mult", target: "gen_vc", val: 10, desc: "You print the entire universe's currency: 10x output." },
 
       // Quantum Task Server Upgrades
-      { id: "up_gen_quantum_1", name: "Superconducting Cavities", icon: "⚛️", cost: 2500000000, type: "gen_mult", target: "gen_quantum", val: 2, desc: "Quantum Servers output 2x cash." },
-      { id: "up_gen_quantum_2", name: "Topological Qubits", icon: "🔬", cost: 400000000000, type: "gen_mult", target: "gen_quantum", val: 4, desc: "Error-resistant qubits: Quantum servers 4x." },
-      { id: "up_gen_quantum_3", name: "Quantum Entangled Bus", icon: "🔗", cost: 20000000000000, type: "gen_mult", target: "gen_quantum", val: 4, desc: "Zero-latency inter-qubit transfers: 4x output." },
-      { id: "up_gen_quantum_4", name: "Superposition Task Queues", icon: "🌌", cost: 1000000000000000, type: "gen_mult", target: "gen_quantum", val: 5, desc: "Todos both complete and incomplete simultaneously: 5x." },
-      { id: "up_gen_quantum_5", name: "Many-Worlds Branch Harvester", icon: "🪐", cost: 50000000000000000, type: "gen_mult", target: "gen_quantum", val: 10, desc: "Harvest profit from all branches of the multiverse: 10x." },
+      { id: "up_gen_quantum_1", name: "Superconducting Cavities", icon: "⚛️", cost: 12500000000, type: "gen_mult", target: "gen_quantum", val: 2, desc: "Quantum Servers output 2x cash." },
+      { id: "up_gen_quantum_2", name: "Topological Qubits", icon: "🔬", cost: 2000000000000, type: "gen_mult", target: "gen_quantum", val: 4, desc: "Error-resistant qubits: Quantum servers 4x." },
+      { id: "up_gen_quantum_3", name: "Quantum Entangled Bus", icon: "🔗", cost: 100000000000000, type: "gen_mult", target: "gen_quantum", val: 4, desc: "Zero-latency inter-qubit transfers: 4x output." },
+      { id: "up_gen_quantum_4", name: "Superposition Task Queues", icon: "🌌", cost: 5000000000000000, type: "gen_mult", target: "gen_quantum", val: 5, desc: "Todos both complete and incomplete simultaneously: 5x." },
+      { id: "up_gen_quantum_5", name: "Many-Worlds Branch Harvester", icon: "🪐", cost: 250000000000000000, type: "gen_mult", target: "gen_quantum", val: 10, desc: "Harvest profit from all branches of the multiverse: 10x." },
 
       // Orbital Colony Upgrades
-      { id: "up_gen_orbital_1", name: "Zero-G Liquid Helium", icon: "🛰️", cost: 25000000000, type: "gen_mult", target: "gen_orbital", val: 2, desc: "Orbital colonies deliver 2x passive compute." },
-      { id: "up_gen_orbital_2", name: "Geostationary Microwave Links", icon: "📡", cost: 4000000000000, type: "gen_mult", target: "gen_orbital", val: 4, desc: "Beam gigawatts of data straight down: 4x output." },
-      { id: "up_gen_orbital_3", name: "Asteroid Mining Data Foundry", icon: "☄️", cost: 200000000000000, type: "gen_mult", target: "gen_orbital", val: 4, desc: "Refine rare earth metals into silicon in orbit: 4x." },
-      { id: "up_gen_orbital_4", name: "Lagrange Swarm Satellites", icon: "✨", cost: 10000000000000000, type: "gen_mult", target: "gen_orbital", val: 5, desc: "Stable orbits around L1 through L5: 5x output." },
+      { id: "up_gen_orbital_1", name: "Zero-G Liquid Helium", icon: "🛰️", cost: 125000000000, type: "gen_mult", target: "gen_orbital", val: 2, desc: "Orbital colonies deliver 2x passive compute." },
+      { id: "up_gen_orbital_2", name: "Geostationary Microwave Links", icon: "📡", cost: 20000000000000, type: "gen_mult", target: "gen_orbital", val: 4, desc: "Beam gigawatts of data straight down: 4x output." },
+      { id: "up_gen_orbital_3", name: "Asteroid Mining Data Foundry", icon: "☄️", cost: 1000000000000000, type: "gen_mult", target: "gen_orbital", val: 4, desc: "Refine rare earth metals into silicon in orbit: 4x." },
+      { id: "up_gen_orbital_4", name: "Lagrange Swarm Satellites", icon: "✨", cost: 50000000000000000, type: "gen_mult", target: "gen_orbital", val: 5, desc: "Stable orbits around L1 through L5: 5x output." },
 
       // Dyson Sphere Upgrades
-      { id: "up_gen_dyson_1", name: "Stellar Flux Harvester", icon: "☀️", cost: 5000000000000, type: "gen_mult", target: "gen_dyson", val: 2, desc: "Dyson Sphere harvests stellar flux: 2x output." },
-      { id: "up_gen_dyson_2", name: "Photonic Computation Grid", icon: "💡", cost: 800000000000000, type: "gen_mult", target: "gen_dyson", val: 4, desc: "Compute at the speed of starlight: 4x output." },
-      { id: "up_gen_dyson_3", name: "Coronal Mass Discharge Siphon", icon: "🔥", cost: 40000000000000000, type: "gen_mult", target: "gen_dyson", val: 5, desc: "Harness solar flare plasma directly: 5x output." },
+      { id: "up_gen_dyson_1", name: "Stellar Flux Harvester", icon: "☀️", cost: 25000000000000, type: "gen_mult", target: "gen_dyson", val: 2, desc: "Dyson Sphere harvests stellar flux: 2x output." },
+      { id: "up_gen_dyson_2", name: "Photonic Computation Grid", icon: "💡", cost: 4000000000000000, type: "gen_mult", target: "gen_dyson", val: 4, desc: "Compute at the speed of starlight: 4x output." },
+      { id: "up_gen_dyson_3", name: "Coronal Mass Discharge Siphon", icon: "🔥", cost: 200000000000000000, type: "gen_mult", target: "gen_dyson", val: 5, desc: "Harness solar flare plasma directly: 5x output." },
 
       // Multiverse Corp Upgrades
-      { id: "up_gen_multiverse_1", name: "Dimension Compression", icon: "🌌", cost: 80000000000000, type: "gen_mult", target: "gen_multiverse", val: 2, desc: "Compressed realities: Multiverse Corp 2x." },
-      { id: "up_gen_multiverse_2", name: "Extradimensional Subsidiary", icon: "🚪", cost: 10000000000000000, type: "gen_mult", target: "gen_multiverse", val: 4, desc: "Incorporate companies in 11th dimension: 4x output." },
-      { id: "up_gen_multiverse_3", name: "Cosmic String Pipeline", icon: "🧵", cost: 500000000000000000, type: "gen_mult", target: "gen_multiverse", val: 5, desc: "Vibrate spacetime to execute code: 5x output." },
+      { id: "up_gen_multiverse_1", name: "Dimension Compression", icon: "🌌", cost: 400000000000000, type: "gen_mult", target: "gen_multiverse", val: 2, desc: "Compressed realities: Multiverse Corp 2x." },
+      { id: "up_gen_multiverse_2", name: "Extradimensional Subsidiary", icon: "🚪", cost: 50000000000000000, type: "gen_mult", target: "gen_multiverse", val: 4, desc: "Incorporate companies in 11th dimension: 4x output." },
+      { id: "up_gen_multiverse_3", name: "Cosmic String Pipeline", icon: "🧵", cost: 2500000000000000000, type: "gen_mult", target: "gen_multiverse", val: 5, desc: "Vibrate spacetime to execute code: 5x output." },
 
       // Omnipresent Reality Engine Upgrades
-      { id: "up_gen_reality_1", name: "Ontological Compiler", icon: "🔮", cost: 25000000000000, type: "gen_mult", target: "gen_reality", val: 3, desc: "Concepts become products without execution: 3x output." },
-      { id: "up_gen_reality_2", name: "Teleological Inversion", icon: "👁️", cost: 5000000000000000, type: "gen_mult", target: "gen_reality", val: 4, desc: "All paths lead directly to profit: 4x output." },
-      { id: "up_gen_reality_3", name: "Universal Constants Overwrite", icon: "✨", cost: 200000000000000000, type: "gen_mult", target: "gen_reality", val: 6, desc: "Speed of light is now whatever you choose: 6x output." },
+      { id: "up_gen_reality_1", name: "Ontological Compiler", icon: "🔮", cost: 125000000000000, type: "gen_mult", target: "gen_reality", val: 3, desc: "Concepts become products without execution: 3x output." },
+      { id: "up_gen_reality_2", name: "Teleological Inversion", icon: "👁️", cost: 25000000000000000, type: "gen_mult", target: "gen_reality", val: 4, desc: "All paths lead directly to profit: 4x output." },
+      { id: "up_gen_reality_3", name: "Universal Constants Overwrite", icon: "✨", cost: 1000000000000000000, type: "gen_mult", target: "gen_reality", val: 6, desc: "Speed of light is now whatever you choose: 6x output." },
 
       // Global Corporate Infrastructure Buffs (Tiers 1 - 8)
-      { id: "up_global_1", name: "Lofi Beats to Code To", icon: "🎧", cost: 15000, type: "global_mult", val: 1.25, desc: "+25% to ALL idle generators." },
-      { id: "up_global_2", name: "Microservice Decoupling", icon: "📐", cost: 1500000, type: "global_mult", val: 1.4, desc: "+40% to ALL idle generators." },
-      { id: "up_global_3", name: "Quantum Terabit Backbone", icon: "🌐", cost: 120000000, type: "global_mult", val: 1.6, desc: "+60% to ALL idle generators." },
-      { id: "up_global_4", name: "Dark Matter Compute Grid", icon: "🌑", cost: 15000000000, type: "global_mult", val: 2.0, desc: "+100% (2x) to ALL idle generators." },
-      { id: "up_global_5", name: "Omega Protocol Deployment", icon: "♾️", cost: 2000000000000, type: "global_mult", val: 2.5, desc: "+150% (2.5x) to ALL idle generators." },
-      { id: "up_global_6", name: "Unified Theory of Production", icon: "📐", cost: 100000000000000, type: "global_mult", val: 3.0, desc: "+200% (3x) to ALL idle generators." },
-      { id: "up_global_7", name: "Thermodynamic Reversal Core", icon: "❄️", cost: 5000000000000000, type: "global_mult", val: 3.5, desc: "+250% (3.5x) to ALL idle generators." },
-      { id: "up_global_8", name: "Kardashev Type IV Synthesis", icon: "🌟", cost: 250000000000000000, type: "global_mult", val: 5.0, desc: "+400% (5x) to ALL idle generators across all planes." }
+      { id: "up_global_1", name: "Lofi Beats to Code To", icon: "🎧", cost: 75000, type: "global_mult", val: 1.25, desc: "+25% to ALL idle generators." },
+      { id: "up_global_2", name: "Microservice Decoupling", icon: "📐", cost: 7500000, type: "global_mult", val: 1.4, desc: "+40% to ALL idle generators." },
+      { id: "up_global_3", name: "Quantum Terabit Backbone", icon: "🌐", cost: 600000000, type: "global_mult", val: 1.6, desc: "+60% to ALL idle generators." },
+      { id: "up_global_4", name: "Dark Matter Compute Grid", icon: "🌑", cost: 75000000000, type: "global_mult", val: 2.0, desc: "+100% (2x) to ALL idle generators." },
+      { id: "up_global_5", name: "Omega Protocol Deployment", icon: "♾️", cost: 10000000000000, type: "global_mult", val: 2.5, desc: "+150% (2.5x) to ALL idle generators." },
+      { id: "up_global_6", name: "Unified Theory of Production", icon: "📐", cost: 500000000000000, type: "global_mult", val: 3.0, desc: "+200% (3x) to ALL idle generators." },
+      { id: "up_global_7", name: "Thermodynamic Reversal Core", icon: "❄️", cost: 25000000000000000, type: "global_mult", val: 3.5, desc: "+250% (3.5x) to ALL idle generators." },
+      { id: "up_global_8", name: "Kardashev Type IV Synthesis", icon: "🌟", cost: 1250000000000000000, type: "global_mult", val: 5.0, desc: "+400% (5x) to ALL idle generators across all planes." },
+
+      // High-ceiling Click Research (Tiers 8 - 9)
+      { id: "up_click_7", name: "Singularity Tap Engine", icon: "👆", cost: 10000000000000000, type: "click_mult", val: 10, desc: "10x click power — every tap collapses a timeline into cash." },
+      { id: "up_click_synergy_5", name: "Omniversal Market Oracle", icon: "🔮", cost: 50000000000000000, type: "click_synergy", val: 0.08, desc: "Each click yields an additional +8% of idle $/s." },
+
+      // Stellar Foundry Array Upgrades
+      { id: "up_gen_stellar_1", name: "Magnetar Containment", icon: "🧲", cost: 400000000000000, type: "gen_mult", target: "gen_stellar", val: 2, desc: "Stellar Foundries burn stable: 2x output." },
+      { id: "up_gen_stellar_2", name: "Supernova Assembly Line", icon: "💥", cost: 8000000000000000, type: "gen_mult", target: "gen_stellar", val: 4, desc: "Detonate stars on schedule: 4x output." },
+      { id: "up_gen_stellar_3", name: "Galaxy-Scale Smelting", icon: "🌌", cost: 400000000000000000, type: "gen_mult", target: "gen_stellar", val: 5, desc: "Smelt entire spiral arms at once: 5x output." },
+
+      // Temporal Ops Monopoly Upgrades
+      { id: "up_gen_temporal_1", name: "Closed-Loop Futures Desk", icon: "⏳", cost: 2000000000000000, type: "gen_mult", target: "gen_temporal", val: 2, desc: "Temporal Ops Monopoly compounds retroactively: 2x." },
+      { id: "up_gen_temporal_2", name: "Century-Long Compounding", icon: "📈", cost: 50000000000000000, type: "gen_mult", target: "gen_temporal", val: 4, desc: "Collect 100 years of interest instantly: 4x output." },
+      { id: "up_gen_temporal_3", name: "Causality Violation Insurance", icon: "🛡️", cost: 2000000000000000000, type: "gen_mult", target: "gen_temporal", val: 5, desc: "Profit from paradoxes risk-free: 5x output." },
+
+      // Omniversal Task Singularity Upgrades
+      { id: "up_gen_omniverse_1", name: "Branch-Reality Load Balancer", icon: "🌀", cost: 15000000000000000, type: "gen_mult", target: "gen_omniverse", val: 3, desc: "Route tasks across infinite branches: 3x output." },
+      { id: "up_gen_omniverse_2", name: "Infinite Parallel Standups", icon: "👥", cost: 300000000000000000, type: "gen_mult", target: "gen_omniverse", val: 4, desc: "Every you in every universe ships daily: 4x output." },
+      { id: "up_gen_omniverse_3", name: "Heat-Death Escrow Fund", icon: "💠", cost: 12000000000000000000, type: "gen_mult", target: "gen_omniverse", val: 6, desc: "Earn yield past the end of time itself: 6x output." },
+
+      // Global Corporate Infrastructure Buff (Tier 9)
+      { id: "up_global_9", name: "Omniversal Productivity Constant", icon: "♾️", cost: 6000000000000000000, type: "global_mult", val: 5.0, desc: "+400% (5x) to ALL idle generators across every timeline." }
     ];
 
     const ARTIFACTS_DATA = [
@@ -2258,7 +2288,7 @@
       { id: "p_luck", name: "Lucky Acorn Magnet", icon: "🧲", maxRank: 5, cost: (r) => (r + 1) * 3, desc: "Golden Acorns spawn 25% faster & pay 35% more.", effect: (r) => 1 + r * 0.25 },
       { id: "p_hackathon", name: "Hackathon Sponsor", icon: "🚀", maxRank: 5, cost: (r) => (r + 1) * 5, desc: "Hackathon ability cooldown reduced by 30s per rank.", effect: (r) => r * 30 },
       { id: "p_contracts", name: "Contract Synergy", icon: "📑", maxRank: 5, cost: (r) => (r + 1) * 6, desc: "Contract rewards increased by +25% per rank.", effect: (r) => 1 + r * 0.25 },
-      { id: "p_moat", name: "Silicon Moat", icon: "🏰", maxRank: 5, cost: (r) => Math.pow(r + 1, 2) * 8, desc: "Reduces building cost escalation multiplier by 2% per rank.", effect: (r) => 1 - r * 0.02 },
+      { id: "p_moat", name: "Silicon Moat", icon: "🏰", maxRank: 10, cost: (r) => Math.pow(r + 1, 2) * 8, desc: "Reduces building cost escalation multiplier by 2% per rank.", effect: (r) => 1 - r * 0.02 },
       { id: "p_frenzy", name: "Flow State Mastery", icon: "⚡", maxRank: 5, cost: (r) => (r + 1) * 5, desc: "Focus Flow frenzy multiplier increased by +0.5x per rank.", effect: (r) => 1 + r * 0.2 }
     ];
 
@@ -2284,7 +2314,16 @@
       { id: "ach_golden_10", name: "Acorn Hoarder", icon: "🐿️", desc: "Catch 10 Golden Acorns.", check: (s) => s.stats.goldenAcornsFound >= 10 },
       { id: "ach_market_pivot", name: "Agile Pivot King", icon: "📉", desc: "Survive and pivot through a market crash.", check: (s) => (s.stats.crashesPivoted || 0) >= 1 },
       { id: "ach_viral_hit", name: "Front Page of Hacker News", icon: "🔥", desc: "Catch a viral product boom.", check: (s) => (s.stats.viralHits || 0) >= 1 },
-      { id: "ach_coffee_fan", name: "Caffeine Fueled", icon: "☕", desc: "Activate Coffee Overdrive 10 times.", check: (s) => (s.stats.coffeesDrank || 0) >= 10 }
+      { id: "ach_coffee_fan", name: "Caffeine Fueled", icon: "☕", desc: "Activate Coffee Overdrive 10 times.", check: (s) => (s.stats.coffeesDrank || 0) >= 10 },
+      { id: "ach_money_1qa", name: "Quadrillion Hegemony", icon: "🌌", desc: "Earn $1 Quadrillion total.", check: (s) => s.stats.totalEarned >= 1e15 },
+      { id: "ach_money_100qa", name: "Omniversal Monopoly", icon: "🌀", desc: "Earn $100 Quadrillion total.", check: (s) => s.stats.totalEarned >= 1e17 },
+      { id: "ach_gen_stellar", name: "Star Forger", icon: "🌟", desc: "Own a Stellar Foundry Array.", check: (s) => (s.generators["gen_stellar"] || 0) >= 1 },
+      { id: "ach_gen_omniverse", name: "Beyond the Endgame", icon: "♾️", desc: "Own an Omniversal Task Singularity.", check: (s) => (s.generators["gen_omniverse"] || 0) >= 1 },
+      { id: "ach_mastery_10", name: "Seasoned Operator", icon: "🎖️", desc: "Reach 10 total Workplace Mastery levels.", check: (s) => Object.keys(s.mastery || {}).length > 0 && window.gameInstance && window.gameInstance.getTotalMasteryLevels() >= 10 },
+      { id: "ach_mastery_50", name: "Centuries of Practice", icon: "🏵️", desc: "Reach 50 total Workplace Mastery levels.", check: (s) => window.gameInstance && window.gameInstance.getTotalMasteryLevels() >= 50 },
+      { id: "ach_streak_7", name: "Loyal Founder", icon: "📅", desc: "Reach a 7-day Daily Briefcase streak.", check: (s) => ((s.dailyStreakBest || 0) >= 7) },
+      { id: "ach_contracts_150", name: "Venture Mogul", icon: "💼", desc: "Complete 150 contracts.", check: (s) => s.stats.contractsDone >= 150 },
+      { id: "ach_rebirth_25", name: "Eternal CEO", icon: "👑", desc: "Complete 25 company IPO Rebirths.", check: (s) => s.stats.rebirths >= 25 }
     ];
 
     /* =========================================================
@@ -2307,13 +2346,17 @@
         upgrades: {},
         prestigeRanks: {},
         achievements: {},
+        // Long-term progression: per-workplace mastery XP (persists through IPO)
+        mastery: {},
+        // Daily briefcase streak { lastDay: "YYYY-MM-DD", streak: 0 }
+        daily: { lastDay: "", streak: 0 },
         contracts: [
-          { id: 1, type: "clicks", target: 50, current: 0, reward: 2500, label: "Complete 50 manual tasks" },
-          { id: 2, type: "own_gen", genId: "gen_intern", target: 10, current: 0, reward: 5000, label: "Hire 10 Intern Coffee Runners" },
-          { id: 3, type: "earn", target: 20000, current: 0, reward: 8000, label: "Earn $20,000 from operations" },
-          { id: 4, type: "clicks", target: 200, current: 0, reward: 25000, label: "Complete 200 sprint tasks" },
-          { id: 5, type: "own_gen", genId: "gen_keyboard", target: 5, current: 0, reward: 40000, label: "Deploy 5 Mechanical Keyboards" },
-          { id: 6, type: "earn", target: 500000, current: 0, reward: 150000, label: "Earn $500,000 from operations" }
+          { id: 1, type: "clicks", target: 250, current: 0, reward: 2500, label: "Complete 250 manual tasks" },
+          { id: 2, type: "own_gen", genId: "gen_intern", target: 25, current: 0, reward: 5000, label: "Hire 25 Intern Coffee Runners" },
+          { id: 3, type: "earn", target: 100000, current: 0, reward: 8000, label: "Earn $100,000 from operations" },
+          { id: 4, type: "clicks", target: 1000, current: 0, reward: 25000, label: "Complete 1,000 sprint tasks" },
+          { id: 5, type: "own_gen", genId: "gen_keyboard", target: 15, current: 0, reward: 40000, label: "Deploy 15 Mechanical Keyboards" },
+          { id: 6, type: "earn", target: 2500000, current: 0, reward: 150000, label: "Earn $2,500,000 from operations" }
         ],
         stats: {
           totalClicks: 0,
@@ -2324,6 +2367,7 @@
           crisesResolved: 0,
           contractsDone: 0,
           goldenAcornsFound: 0,
+          dailyStreakBest: 0,
           playTimeSeconds: 0
         },
         lastSaveTime: Date.now()
@@ -2375,6 +2419,11 @@
         this.rushMultiplier = 1;
         this.rushDuration = 0;
 
+        // Market Spotlight rotation (anti-repetition: featured workplace earns 2x)
+        this.spotlightGenId = null;
+        this.spotlightTimer = 0;
+        this.nextSpotlightTimer = 150 + Math.random() * 90; // first rotation ~2.5-4 min in
+
         this.lastTickTime = performance.now();
       }
 
@@ -2382,6 +2431,7 @@
         this.loadSave();
         this.initBackgroundCanvas();
         this.initDOM();
+        this.checkDailyReward();
         this.checkOfflineProgress();
         this.startLoop();
       }
@@ -2418,6 +2468,9 @@
                 if (c.type === "own_gen") {
                   c.current = this.getGeneratorCount(c.genId);
                   if (c.current >= c.target) c.completed = true;
+                } else if (c.type === "total_gen") {
+                  c.current = this.getTotalGenerators();
+                  if (c.current >= c.target) c.completed = true;
                 } else if (c.type === "earn") {
                   // Don't re-sync earn contracts from current money - preserve tracked progress
                   if (c.current >= c.target) c.completed = true;
@@ -2435,8 +2488,12 @@
         const diffSeconds = (now - this.state.lastSaveTime) / 1000;
         if (diffSeconds > 10) {
           const rate = this.calculateIdleRate();
-          const offlineEfficiency = 0.5 + (this.state.strategyPointsAllocated.finance * 0.05);
-          const earned = rate * diffSeconds * offlineEfficiency;
+          const offlineEfficiency = 0.3 + (this.state.strategyPointsAllocated.finance * 0.05);
+          // Long-term pacing: offline gains capped (12h base + 1h per Finance point)
+          const capSeconds = (12 + (this.state.strategyPointsAllocated.finance || 0)) * 3600;
+          const effSeconds = Math.min(diffSeconds, capSeconds);
+          const wasCapped = diffSeconds > capSeconds;
+          const earned = rate * effSeconds * offlineEfficiency;
           if (earned > 2) {
             this.state.money += earned;
             this.state.stats.totalEarned += earned;
@@ -2446,7 +2503,7 @@
 
             const msgEl = document.getElementById("offlineModalMsg");
             if (msgEl) {
-              msgEl.innerHTML = `While you were offline for <strong>${timeStr}</strong>, your company accumulated <strong style="color: var(--green);">${formatMoney(earned)}</strong>!`;
+              msgEl.innerHTML = `While you were offline for <strong>${timeStr}</strong>, your company accumulated <strong style="color: var(--green);">${formatMoney(earned)}</strong>!${wasCapped ? `<br><span style="font-size: 11px;">(Offline gains capped at ${Math.round(capSeconds / 3600)}h — invest in Finance to extend it.)</span>` : ""}`;
               document.getElementById("offlineModal").classList.add("open");
             }
           }
@@ -2456,12 +2513,14 @@
       /* ================= Mathematical Calculations ================= */
       getCompanyTier() {
         const earned = this.state.stats.totalEarned;
-        if (earned > 1e12) return "Tier 7: Multiverse Conglomerate";
-        if (earned > 1e9) return "Tier 6: Silicon Unicorn";
-        if (earned > 5e7) return "Tier 5: Pre-IPO Powerhouse";
-        if (earned > 5e6) return "Tier 4: Series B Growth";
-        if (earned > 250000) return "Tier 3: Seed Funded";
-        if (earned > 10000) return "Tier 2: Bootstrapped Team";
+        if (earned > 5e15) return "Tier 9: Omniversal Singularity";
+        if (earned > 5e13) return "Tier 8: Galactic Empire";
+        if (earned > 5e12) return "Tier 7: Multiverse Conglomerate";
+        if (earned > 5e9) return "Tier 6: Silicon Unicorn";
+        if (earned > 2.5e8) return "Tier 5: Pre-IPO Powerhouse";
+        if (earned > 2.5e7) return "Tier 4: Series B Growth";
+        if (earned > 1250000) return "Tier 3: Seed Funded";
+        if (earned > 50000) return "Tier 2: Bootstrapped Team";
         return "Tier 1: Garage Startup";
       }
 
@@ -2484,23 +2543,133 @@
         if (count >= 750) mult *= 3;
         if (count >= 1000) mult *= 4;
         if (count >= 1500) mult *= 5;
+        if (count >= 2500) mult *= 5;
+        if (count >= 4000) mult *= 6;
+        if (count >= 6000) mult *= 8;
         return mult;
       }
 
       getNextMilestone(count) {
-        const milestones = [10, 25, 50, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500];
+        const milestones = [10, 25, 50, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2500, 4000, 6000];
         for (const m of milestones) {
           if (count < m) return m;
         }
-        return count + 250;
+        return count + 500;
+      }
+
+      getPrevMilestone(count) {
+        const milestones = [0, 10, 25, 50, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2500, 4000, 6000];
+        let prev = 0;
+        for (const m of milestones) {
+          if (count >= m) prev = m;
+          else break;
+        }
+        return prev;
+      }
+
+      getTotalGenerators() {
+        return Object.values(this.state.generators || {}).reduce((a, b) => a + (b || 0), 0);
+      }
+
+      /* ============ Long-term progression: Legacy, Trophies, Mastery ============ */
+      // Founder's Legacy: every IPO permanently adds +8% global income (unbounded,
+      // so repeat rebirths stay valuable forever).
+      getLegacyMultiplier() {
+        return 1 + (this.state.stats.rebirths || 0) * 0.08;
+      }
+
+      // Trophy Resonance: every unlocked trophy permanently adds +1% global income.
+      getTrophyMultiplier() {
+        const n = this.state.achievements ? Object.keys(this.state.achievements).length : 0;
+        return 1 + n * 0.01;
+      }
+
+      // Workplace Mastery: each generator type earns XP from its own lifetime
+      // production. Levels take exponentially longer (weeks-to-months tail) and
+      // grant +6% to that generator per level (max 20). Persists through IPO.
+      masteryXpForLevel(gen, level) {
+        return gen.baseCost * 10 * Math.pow(6, level);
+      }
+
+      getMasteryLevel(id) {
+        const gen = GENERATORS_DATA.find(g => g.id === id);
+        if (!gen) return 0;
+        let xp = (this.state.mastery && this.state.mastery[id]) || 0;
+        let level = 0;
+        while (level < 20) {
+          const need = this.masteryXpForLevel(gen, level);
+          if (xp < need) break;
+          xp -= need;
+          level++;
+        }
+        return level;
+      }
+
+      getMasteryBonus(id) {
+        return 1 + this.getMasteryLevel(id) * 0.06;
+      }
+
+      getTotalMasteryLevels() {
+        return GENERATORS_DATA.reduce((a, g) => a + this.getMasteryLevel(g.id), 0);
+      }
+
+      addMasteryXp(id, amount) {
+        if (!this.state.mastery) this.state.mastery = {};
+        this.state.mastery[id] = (this.state.mastery[id] || 0) + amount;
+      }
+
+      /* ============ Daily Briefcase (retention over weeks) ============ */
+      checkDailyReward() {
+        try {
+          if (!this.state.daily) this.state.daily = { lastDay: "", streak: 0 };
+          const today = new Date().toISOString().slice(0, 10);
+          const d = this.state.daily;
+          if (d.lastDay === today) return;
+          const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+          d.streak = (d.lastDay === yesterday) ? (d.streak || 0) + 1 : 1;
+          d.lastDay = today;
+          const rate = this.calculateIdleRate();
+          const award = Math.max(rate * 3600, this.state.stats.totalEarned * 0.05, 1000) * (1 + (d.streak - 1) * 0.05);
+          this.state.money += award;
+          this.state.stats.totalEarned += award;
+          let extra = "";
+          if (d.streak % 7 === 0) {
+            this.state.strategyPointsTotal += 1;
+            extra = " Plus +1 Strategy Point for a full week!";
+            this.renderDepartments();
+          }
+          this.showToast(`📅 Daily Briefcase (day ${d.streak} streak): +${formatMoney(award)}!${extra}`);
+          this.state.stats.dailyStreakBest = Math.max(this.state.stats.dailyStreakBest || 0, d.streak);
+          this.save();
+          this.updateHeaderStats();
+          this.checkAchievements();
+        } catch (e) {
+          console.warn("daily reward error:", e);
+        }
+      }
+
+      /* ============ Market Spotlight (rotating variety) ============ */
+      rotateSpotlight() {
+        const owned = GENERATORS_DATA.filter(g => this.state.stats.totalEarned >= g.unlockAt && this.getGeneratorCount(g.id) > 0);
+        const pool = owned.length > 0 ? owned : GENERATORS_DATA.filter(g => this.state.stats.totalEarned >= g.unlockAt);
+        if (pool.length === 0) {
+          this.nextSpotlightTimer = 120;
+          return;
+        }
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        this.spotlightGenId = pick.id;
+        this.spotlightTimer = 90;
+        this.nextSpotlightTimer = 240 + Math.random() * 120; // every 4-6 min
+        this.showToast(`✨ Market Spotlight: ${pick.name} earns 2x for 90s!`);
+        if (this.activeTab === "generators") this.renderGenerators();
       }
 
       getGeneratorCost(gen, count) {
-        // Base cost * r^count (steeper than the classic 1.15 Cookie Clicker ratio, for a harder curve)
-        let r = 1.17;
+        // Base cost * r^count (hard-mode: 5x base costs + slightly steeper 1.19 growth to stretch the late game)
+        let r = 1.19;
         const moatRank = this.state.prestigeRanks["p_moat"] || 0;
         if (moatRank > 0) {
-          r = 1 + (0.15 * PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_moat").effect(moatRank));
+          r = 1 + (0.17 * PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_moat").effect(moatRank));
         }
         let cost = gen.baseCost * Math.pow(r, count);
 
@@ -2557,6 +2726,18 @@
         const tokenBonus = 1 + (this.state.prestigeTokens * 0.05);
         rate *= tokenBonus;
 
+        // Founder's Legacy (+8% per IPO) & Trophy Resonance (+1% per trophy)
+        rate *= this.getLegacyMultiplier();
+        rate *= this.getTrophyMultiplier();
+
+        // Workplace Mastery (+6% per mastery level on this generator)
+        rate *= this.getMasteryBonus(gen.id);
+
+        // Market Spotlight (featured workplace earns 2x)
+        if (this.spotlightGenId === gen.id && this.spotlightTimer > 0) {
+          rate *= 2;
+        }
+
         return rate;
       }
 
@@ -2594,7 +2775,7 @@
       calculateClickPower() {
         let base = 1;
         const internCount = this.getGeneratorCount("gen_intern");
-        base += internCount * 0.15;
+        base += internCount * 0.03;
 
         // Click research upgrades
         UPGRADES_DATA.forEach(u => {
@@ -2628,6 +2809,10 @@
         // Golden Acorn multiplier (+5% each)
         const tokenBonus = 1 + (this.state.prestigeTokens * 0.05);
         base *= tokenBonus;
+
+        // Founder's Legacy & Trophy Resonance apply to clicks too
+        base *= this.getLegacyMultiplier();
+        base *= this.getTrophyMultiplier();
 
         if (this.isFrenzyActive) {
           const fRank = this.state.prestigeRanks["p_frenzy"] || 0;
@@ -2692,10 +2877,10 @@
       }
 
       calculatePendingRebirthAcorns() {
-        // High prestige requirement: $1,000,000,000 (Unicorn level) lifetime earnings
-        if (this.state.stats.totalEarned < 1000000000) return 0;
-        // Formula: floor(3 * cbrt(totalEarned / 1,000,000,000)) — slower acorn gain for a harder late-game curve
-        const totalPossible = Math.floor(3 * Math.cbrt(this.state.stats.totalEarned / 1000000000));
+        // Hard-mode prestige: $5,000,000,000 lifetime earnings to qualify (5x harder), slower acorn gain, higher ceiling
+        if (this.state.stats.totalEarned < 5000000000) return 0;
+        // Formula: floor(2 * cbrt(totalEarned / 5,000,000,000)) — need ~5x more earnings per acorn tier
+        const totalPossible = Math.floor(2 * Math.cbrt(this.state.stats.totalEarned / 5000000000));
         const bonusFromArtifact = this.isArtifactEquipped("art_term_sheet") ? 2 : 0;
         return Math.max(0, (totalPossible + bonusFromArtifact) - this.state.totalPrestigeEarned);
       }
@@ -2725,8 +2910,8 @@
           }
         }
 
-        // Random Artifact Loot Drop! (0.3% chance per click)
-        if (Math.random() < 0.003) {
+        // Random Artifact Loot Drop! (0.2% chance per click, hard-mode)
+        if (Math.random() < 0.002) {
           this.rollRandomArtifactDrop();
         }
 
@@ -2803,10 +2988,11 @@
         this.nextCrisisTimer = 160 + Math.random() * 120;
 
         sound.playFanfare();
-        const bounty = Math.max(this.calculateIdleRate() * 45, 2500);
+        const bounty = Math.max(this.calculateIdleRate() * 30, 2500);
         this.state.money += bounty;
         this.state.stats.totalEarned += bounty;
         this.state.stats.crisesResolved += 1;
+        this.progressContracts("resolve", 1);
 
         if (Math.random() < 0.3) {
           this.rollRandomArtifactDrop();
@@ -2842,6 +3028,7 @@
         this.nextCrashTimer = 220 + Math.random() * 140;
 
         this.state.stats.crashesPivoted = (this.state.stats.crashesPivoted || 0) + 1;
+        this.progressContracts("resolve", 1);
         sound.playFanfare();
         // Turn the crisis into a pivot boom!
         this.rushMultiplier = 3;
@@ -2855,7 +3042,7 @@
         sound.playGolden();
         this.state.stats.viralHits = (this.state.stats.viralHits || 0) + 1;
         const rate = this.calculateIdleRate();
-        const windfall = Math.max(rate * 120, this.state.money * 0.15, 10000);
+        const windfall = Math.max(rate * 80, this.state.money * 0.1, 10000);
         this.state.money += windfall;
         this.state.stats.totalEarned += windfall;
         this.showToast(`🚀 VIRAL PRODUCT HIT! +${formatMoney(windfall)} Cash Windfall from trending launch!`);
@@ -2912,6 +3099,7 @@
         sound.playBuy();
 
         this.progressContracts("own_gen", this.state.generators[id], id);
+        this.progressContracts("total_gen", this.getTotalGenerators());
 
         this.renderGenerators();
         this.renderOfficeStage();
@@ -2977,6 +3165,7 @@
         if (totalBought > 0) {
           sound.playBuy();
           this.showToast(`⬆️ Upgrade All: purchased ${totalBought} workplace upgrade${totalBought > 1 ? "s" : ""}!`);
+          this.progressContracts("total_gen", this.getTotalGenerators());
           this.renderGenerators();
           this.renderOfficeStage();
           this.updateHeaderStats();
@@ -3120,7 +3309,10 @@
             if (type === "own_gen" && c.genId === extraId) {
               c.current = Math.min(amount, c.target);
               changed = true;
-            } else if (type === "clicks") {
+            } else if (type === "total_gen") {
+              c.current = Math.min(amount, c.target);
+              changed = true;
+            } else if (type === "clicks" || type === "resolve" || type === "acorns") {
               c.current = Math.min(c.current + amount, c.target);
               changed = true;
             } else if (type === "earn") {
@@ -3157,12 +3349,78 @@
         this.state.stats.contractsDone += 1;
         this.showToast(`🎉 Contract Claimed! +${formatMoney(rewardAmount)} treasury bonus!`);
 
-        // Generate replacement contract with higher targets and rewards
-        const nextTarget = Math.round(contract.target * 2.5);
-        const nextReward = Math.round(contract.reward * 3.0);
-        contract.target = nextTarget;
-        contract.current = (contract.type === "own_gen") ? this.getGeneratorCount(contract.genId) : 0;
-        contract.reward = nextReward;
+        // Generate replacement contract (endless rotation: same-lineage scaling,
+        // rotating build targets, periodic event bounties & marathons).
+        contract.cycles = (contract.cycles || 0) + 1;
+        const cycles = contract.cycles;
+
+        if (cycles % 8 === 0 && contract.type !== "resolve" && contract.type !== "acorns" && contract.type !== "total_gen") {
+          // Marathon: huge target, generous reward
+          contract.target = Math.round(contract.target * 8.0);
+          contract.reward = Math.round(contract.reward * 6.0);
+          if (contract.type === "own_gen") {
+            const idx = (GENERATORS_DATA.findIndex(g => g.id === contract.genId) + 1) % GENERATORS_DATA.length;
+            contract.genId = GENERATORS_DATA[idx].id;
+            contract.label = `🏁 Marathon: Deploy ${contract.target} ${GENERATORS_DATA[idx].name}s`;
+            contract.current = this.getGeneratorCount(contract.genId);
+          } else {
+            contract.label = `🏁 Marathon: ${contract.label}`;
+            contract.current = 0;
+          }
+        } else if (cycles % 4 === 0 && contract.type !== "resolve" && contract.type !== "acorns" && contract.type !== "total_gen") {
+          // Event bounty: breaks the "same 6 contracts" repetitiveness
+          const kinds = ["resolve", "acorns", "total_gen"];
+          const kind = kinds[(Math.floor(cycles / 4) + contract.id) % kinds.length];
+          const step = Math.floor(cycles / 4);
+          contract.type = kind;
+          delete contract.genId;
+          if (kind === "resolve") {
+            contract.target = 2 + Math.floor(cycles * 1.5);
+            contract.label = `⛑️ Bounty: Resolve ${contract.target} outages & crashes`;
+            contract.current = 0;
+          } else if (kind === "acorns") {
+            contract.target = 1 + Math.floor(cycles / 2);
+            contract.label = `🌰 Bounty: Catch ${contract.target} Golden Acorns`;
+            contract.current = 0;
+          } else {
+            contract.target = this.getTotalGenerators() + 20 + cycles * 5;
+            contract.label = `🏭 Bounty: Operate ${contract.target} total workplaces`;
+            contract.current = this.getTotalGenerators();
+          }
+          contract.reward = Math.round(contract.reward * 3.0);
+        } else if (contract.type === "resolve" || contract.type === "acorns" || contract.type === "total_gen") {
+          // Event bounty completed: return slot to its original lineage
+          const lineage = contract.id % 2 === 0 ? "own_gen" : (contract.id % 3 === 0 ? "earn" : "clicks");
+          contract.type = lineage;
+          if (lineage === "own_gen") {
+            const idx = (contract.id + cycles) % GENERATORS_DATA.length;
+            contract.genId = GENERATORS_DATA[idx].id;
+            contract.target = Math.max(10, Math.round(contract.target * 1.5));
+            contract.label = `Deploy ${contract.target} ${GENERATORS_DATA[idx].name}s`;
+            contract.current = this.getGeneratorCount(contract.genId);
+          } else if (lineage === "earn") {
+            contract.target = Math.round(contract.target * 3.0);
+            contract.label = `Earn ${formatMoney(contract.target)} from operations`;
+            contract.current = 0;
+          } else {
+            contract.target = Math.round(contract.target * 3.0);
+            contract.label = `Complete ${contract.target.toLocaleString()} manual tasks`;
+            contract.current = 0;
+          }
+          contract.reward = Math.round(contract.reward * 2.5);
+        } else {
+          // Standard hard-mode scaling: targets outpace rewards
+          contract.target = Math.round(contract.target * 3.0);
+          contract.reward = Math.round(contract.reward * 2.5);
+          if (contract.type === "own_gen") {
+            const idx = (GENERATORS_DATA.findIndex(g => g.id === contract.genId) + 1 + contract.id) % GENERATORS_DATA.length;
+            contract.genId = GENERATORS_DATA[idx].id;
+            contract.label = `Deploy ${contract.target} ${GENERATORS_DATA[idx].name}s`;
+            contract.current = this.getGeneratorCount(contract.genId);
+          } else {
+            contract.current = 0;
+          }
+        }
         contract.completed = false;
 
         this.renderContracts();
@@ -3190,7 +3448,7 @@
         this.isFrenzyActive = false;
 
         sound.playFanfare();
-        this.showToast(`🚀 IPO Complete! Ascended with +${pending} Golden Acorns!`);
+        this.showToast(`🚀 IPO Complete! Ascended with +${pending} Golden Acorns! Founder's Legacy now +${this.state.stats.rebirths * 8}% forever.`);
 
         this.save();
         this.renderGenerators();
@@ -3234,6 +3492,7 @@
       collectGoldenAcorn() {
         sound.playGolden();
         this.state.stats.goldenAcornsFound += 1;
+        this.progressContracts("acorns", 1);
 
         const luckRank = this.state.prestigeRanks["p_luck"] || 0;
         let luckBonus = PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_luck").effect(luckRank);
@@ -3246,7 +3505,7 @@
           this.showToast(`🌰 LUCKY ACORN! 7x Productivity Rush for ${Math.round(this.rushDuration)}s!`);
         } else {
           const idleRate = this.calculateIdleRate();
-          const baseAward = Math.max(idleRate * 75, this.state.money * 0.12, 500);
+          const baseAward = Math.max(idleRate * 50, this.state.money * 0.08, 500);
           const award = baseAward * luckBonus;
           this.state.money += award;
           this.state.stats.totalEarned += award;
@@ -3431,9 +3690,11 @@
           const buyInfo = this.getBulkBuyInfo(gen, this.buyMultiplier);
           const genRate = this.getGeneratorRate(gen);
           const nextMile = this.getNextMilestone(count);
-          const prevMile = count >= 200 ? 200 : count >= 100 ? 100 : count >= 50 ? 50 : count >= 25 ? 25 : count >= 10 ? 10 : 0;
+          const prevMile = this.getPrevMilestone(count);
           const milePct = Math.min(100, Math.max(0, ((count - prevMile) / (nextMile - prevMile)) * 100));
           const isUnlocked = this.state.stats.totalEarned >= gen.unlockAt;
+          const masteryLv = this.getMasteryLevel(gen.id);
+          const isSpotlight = this.spotlightGenId === gen.id && this.spotlightTimer > 0;
 
           html += `
             <div class="gen-card ${!buyInfo.canAfford ? "cant-afford" : ""} ${!isUnlocked ? "locked" : ""}" data-gen-id="${gen.id}">
@@ -3441,12 +3702,13 @@
                 <div class="gen-icon">${isUnlocked ? gen.icon : "🔒"}</div>
                 <div class="gen-details">
                   <div class="gen-title-row">
-                    <span class="gen-name">${isUnlocked ? gen.name : "Locked Infrastructure"}</span>
+                    <span class="gen-name">${isUnlocked ? (isSpotlight ? `✨ ${gen.name}` : gen.name) : "Locked Infrastructure"}</span>
                     <span class="gen-count-badge">lvl ${count}</span>
                   </div>
                   <div class="gen-meta">
                     <span class="gen-rate">+${formatMoney(genRate)} /s</span>
                     <span class="gen-mile-text" style="opacity: 0.6;">Bonus: ${count}/${nextMile}</span>
+                    ${masteryLv > 0 ? `<span class="gen-mastery" style="opacity: 0.9; color: var(--gold);" title="Workplace Mastery: +${masteryLv * 6}% output">★Lv ${masteryLv}</span>` : ""}
                   </div>
                   <div class="gen-progress-bar-wrap" title="Milestone: ${count}/${nextMile}">
                     <div class="gen-progress-bar-fill" style="width: ${milePct}%"></div>
@@ -3497,7 +3759,7 @@
           const buyInfo = this.getBulkBuyInfo(gen, this.buyMultiplier);
           const genRate = this.getGeneratorRate(gen);
           const nextMile = this.getNextMilestone(count);
-          const prevMile = count >= 200 ? 200 : count >= 100 ? 100 : count >= 50 ? 50 : count >= 25 ? 25 : count >= 10 ? 10 : 0;
+          const prevMile = this.getPrevMilestone(count);
           const milePct = Math.min(100, Math.max(0, ((count - prevMile) / (nextMile - prevMile)) * 100));
 
           card.classList.toggle("cant-afford", !buyInfo.canAfford);
@@ -3507,6 +3769,14 @@
 
           const countEl = card.querySelector(".gen-count-badge");
           if (countEl) countEl.textContent = `lvl ${count}`;
+
+          const masteryLv = this.getMasteryLevel(gen.id);
+          let masteryEl = card.querySelector(".gen-mastery");
+          if (masteryLv > 0 && !masteryEl) {
+            needsFullRerender = true;
+            return;
+          }
+          if (masteryEl) masteryEl.textContent = `★Lv ${masteryLv}`;
 
           const mileEl = card.querySelector(".gen-mile-text");
           if (mileEl) mileEl.textContent = `Bonus: ${count}/${nextMile}`;
@@ -3955,6 +4225,10 @@
         document.getElementById("statCrisesResolved").textContent = s.crisesResolved.toString();
         document.getElementById("statContractsDone").textContent = s.contractsDone.toString();
         document.getElementById("statRebirths").textContent = s.rebirths.toString();
+        document.getElementById("statLegacy").textContent = `+${Math.round((this.getLegacyMultiplier() - 1) * 100)}%`;
+        document.getElementById("statTrophyBonus").textContent = `+${Math.round((this.getTrophyMultiplier() - 1) * 100)}%`;
+        document.getElementById("statMastery").textContent = this.getTotalMasteryLevels().toString();
+        document.getElementById("statStreak").textContent = `${(s.dailyStreakBest || (this.state.daily && this.state.daily.streak) || 0)} days`;
         document.getElementById("statGoldenAcornsFound").textContent = s.goldenAcornsFound.toString();
         document.getElementById("statTotalEarned").textContent = formatMoney(s.totalEarned);
       }
@@ -4035,6 +4309,42 @@ let lastGenUIRefreshTimer = 0;
             // Passively progress "earn" contracts!
             if (earned > 0) {
               this.progressContracts("earn", earned);
+            }
+
+            // Workplace Mastery: each generator accrues XP from its own output.
+            // Throttled to ~4Hz so level math (≤20 iterations/gen) stays cheap.
+            this._masteryAccum = (this._masteryAccum || 0) + dt;
+            if (this._masteryAccum >= 0.25) {
+              const chunk = this._masteryAccum;
+              this._masteryAccum = 0;
+              let leveled = false;
+              GENERATORS_DATA.forEach(g => {
+                if ((this.state.generators[g.id] || 0) <= 0) return;
+                const before = this.getMasteryLevel(g.id);
+                this.addMasteryXp(g.id, this.getGeneratorRate(g) * chunk);
+                if (this.getMasteryLevel(g.id) > before) {
+                  leveled = true;
+                  this.showToast(`★ ${g.name} mastered to Lv ${this.getMasteryLevel(g.id)} (+6% output)!`);
+                }
+              });
+              if (leveled) {
+                this.checkAchievements();
+                if (this.activeTab === "generators") this.renderGenerators();
+              }
+            }
+
+            // Market Spotlight rotation
+            if (this.spotlightTimer > 0) {
+              this.spotlightTimer -= dt;
+              if (this.spotlightTimer <= 0) {
+                this.spotlightGenId = null;
+                if (this.activeTab === "generators") this.renderGenerators();
+              }
+            } else {
+              this.nextSpotlightTimer -= dt;
+              if (this.nextSpotlightTimer <= 0) {
+                this.rotateSpotlight();
+              }
             }
 
             // Frenzy handling
