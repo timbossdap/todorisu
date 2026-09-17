@@ -1597,6 +1597,151 @@
       from { opacity: 0.7; }
       to { opacity: 1; }
     }
+
+    /* =========================================================
+       FLAT THEME (Cookie-Clicker-like): no glows, no gradients,
+       no floaty animations. Plain panels, solid colors.
+       ========================================================= */
+    :root {
+      --radius: 4px;
+      --radius-sm: 2px;
+    }
+
+    header {
+      background: #12151f;
+      backdrop-filter: none;
+    }
+
+    .brand-icon {
+      animation: none;
+      filter: none;
+    }
+
+    .brand-title {
+      background: none;
+      -webkit-text-fill-color: #fff;
+      color: #fff;
+    }
+
+    .stat-pill.money-pill .val { color: #7ee2a8; text-shadow: none; }
+    .stat-pill.rate-pill .val { color: #7cc7e6; text-shadow: none; }
+    .stat-pill.prestige-pill .val { color: #e8b64c; text-shadow: none; }
+    .stat-pill .val { text-shadow: none; }
+
+    #emergencyBanner {
+      background: #991b1b;
+      animation: none;
+    }
+
+    .office-stage-wrap { background: #0d1017; }
+    .office-station:hover { transform: none; }
+    .office-station .station-bubble { transform: none; }
+    .station-avatar { animation: none; }
+    .equipped-slot.filled:hover { transform: none; }
+
+    .frenzy-header.active { animation: none; }
+    .frenzy-bar-bg { background: #090c13; }
+    .frenzy-bar-fill { background: #8b5cf6; box-shadow: none; }
+
+    .aura-ring { display: none; }
+
+    .click-target-btn {
+      background: #b82d20;
+      border: 3px solid #7d1a10;
+      box-shadow: none;
+    }
+    .click-target-btn:hover { box-shadow: none; }
+    .click-target-btn:active { transform: scale(0.96); box-shadow: none; }
+    .click-btn-icon { filter: none; }
+    .click-btn-text { text-shadow: none; }
+
+    .ability-btn { background: #1a2133; }
+    .ability-btn:hover:not(:disabled) { box-shadow: none; transform: none; }
+    .ability-btn.ready { animation: none; }
+
+    .particle-number { text-shadow: 0 1px 2px #000; }
+    .particle-number.crit { text-shadow: 0 1px 2px #000; }
+
+    .golden-acorn-event { animation: none; filter: none; }
+    .golden-acorn-event:hover { transform: none; }
+
+    .buy-btn { background: #0e7a55; box-shadow: none; }
+    .buy-btn:hover:not(:disabled) { transform: none; box-shadow: none; filter: none; }
+    .buy-btn:active:not(:disabled) { transform: none; }
+
+    .icon-btn:hover { transform: none; }
+    .rebirth-launch-btn:hover:not(:disabled) { transform: none; filter: none; }
+
+    #genUpgradeAllBtn, #upgradeAllResearchBtn, #allocateAllStrategyBtn {
+      background: #0e7490 !important;
+      box-shadow: none !important;
+    }
+    #claimAllContractsBtn, #maxVenturePerksBtn, .prestige-card .buy-btn {
+      background: #d97706 !important;
+      color: #000 !important;
+      box-shadow: none !important;
+    }
+
+    .dept-header-box { background: #141a28; border-color: var(--border); }
+    .rebirth-hero { background: #141a28; border-color: var(--border); }
+    .rebirth-launch-btn { background: #d97706; color: #000; box-shadow: none; }
+
+    .artifact-card.rarity-rare,
+    .artifact-card.rarity-epic,
+    .artifact-card.rarity-legendary { box-shadow: none; }
+
+    .crisis-overlay { backdrop-filter: none; background: rgba(120, 20, 20, 0.45); }
+    .crisis-hud { box-shadow: none; }
+    .crisis-bug-node {
+      background: #b91c1c;
+      box-shadow: none;
+      animation: none;
+    }
+    .crisis-bug-node:active { transform: scale(0.92); }
+
+    .modal-overlay { backdrop-filter: none; background: rgba(0, 0, 0, 0.7); }
+    .modal-box { box-shadow: none; transform: none; }
+
+    /* Cookie-Clicker-style bank readout above the big button */
+    .clicker-bank {
+      width: 100%;
+      text-align: center;
+      background: #0d1017;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 8px;
+    }
+    .bank-money {
+      font-size: 26px;
+      font-weight: 800;
+      color: #7ee2a8;
+    }
+    .bank-rate {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Deletable notifications */
+    #toastContainer { pointer-events: auto; }
+    .toast-msg {
+      box-shadow: none;
+      pointer-events: auto;
+      cursor: pointer;
+      animation: none;
+    }
+    .toast-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0 0 0 4px;
+      margin-left: auto;
+    }
+    .toast-close:hover { color: #fff; }
   </style>
 </head>
 <body>
@@ -1617,16 +1762,6 @@
       </div>
 
       <div class="header-stats">
-        <div class="stat-pill money-pill" title="Company Treasury">
-          <span class="icon">💰</span>
-          <span class="val" id="statMoney">$0</span>
-        </div>
-
-        <div class="stat-pill rate-pill" title="Idle Generation Rate">
-          <span class="icon">⚡</span>
-          <span class="val" id="statRate">$0 /s</span>
-        </div>
-
         <div class="stat-pill prestige-pill" title="Golden Acorns (Permanent IPO Currency)">
           <span class="icon">🌰</span>
           <span class="val" id="statAcorns">0</span>
@@ -1662,6 +1797,12 @@
     <div class="game-body">
       <!-- Left Column: Big Clicker & Active Play -->
       <section class="clicker-pane" id="clickerPane">
+        <!-- Cookie-Clicker-style bank readout -->
+        <div class="clicker-bank">
+          <div class="bank-money" id="statMoney">$0</div>
+          <div class="bank-rate" id="statRate">$0 /s</div>
+        </div>
+
         <!-- Focus Flow Frenzy Bar -->
         <div class="frenzy-meter-wrap">
           <div class="frenzy-header" id="frenzyHeader">
@@ -4238,9 +4379,30 @@
         if (!container) return;
         const toast = document.createElement("div");
         toast.className = "toast-msg";
-        toast.textContent = text;
+        const msg = document.createElement("span");
+        msg.textContent = text;
+        msg.style.flex = "1";
+        const close = document.createElement("button");
+        close.className = "toast-close";
+        close.textContent = "×";
+        close.setAttribute("aria-label", "Dismiss notification");
+        const timer = setTimeout(() => toast.remove(), 6000);
+        const dismiss = () => {
+          clearTimeout(timer);
+          toast.remove();
+        };
+        close.addEventListener("click", (e) => {
+          e.stopPropagation();
+          dismiss();
+        });
+        toast.addEventListener("click", dismiss);
+        toast.appendChild(msg);
+        toast.appendChild(close);
         container.appendChild(toast);
-        setTimeout(() => toast.remove(), 4000);
+        // Keep the stack short: drop oldest beyond 5
+        while (container.children.length > 5) {
+          container.firstChild.remove();
+        }
       }
 
       /* ================= Background Canvas ================= */
