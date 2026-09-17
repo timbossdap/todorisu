@@ -1762,13 +1762,22 @@
         <!-- Subheader Bar (visible in workplaces tab) -->
         <div class="tab-action-bar" id="generatorSubBar">
           <span class="section-headline">Corporate Infrastructure</span>
-          <div class="multiplier-selector">
-            <button class="mult-btn active" data-mult="1">1x</button>
-            <button class="mult-btn" data-mult="10">10x</button>
-            <button class="mult-btn" data-mult="25">25x</button>
-            <button class="mult-btn" data-mult="100">100x</button>
-            <button class="mult-btn" data-mult="max">MAX</button>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="buy-btn" id="genUpgradeAllBtn" style="background: linear-gradient(135deg, var(--cyan) 0%, #0891b2 100%); box-shadow: 0 4px 12px var(--cyan-glow);">⬆️ Upgrade All</button>
+            <div class="multiplier-selector">
+              <button class="mult-btn active" data-mult="1">1x</button>
+              <button class="mult-btn" data-mult="10">10x</button>
+              <button class="mult-btn" data-mult="25">25x</button>
+              <button class="mult-btn" data-mult="100">100x</button>
+              <button class="mult-btn" data-mult="max">MAX</button>
+            </div>
           </div>
+        </div>
+
+        <!-- Subheader Bar (visible in research tab) -->
+        <div class="tab-action-bar" id="upgradesSubBar" style="display: none;">
+          <span class="section-headline">R&D Department</span>
+          <button class="buy-btn" id="upgradeAllResearchBtn" style="background: linear-gradient(135deg, var(--cyan) 0%, #0891b2 100%); box-shadow: 0 4px 12px var(--cyan-glow);">🔬 Research All Affordable</button>
         </div>
 
         <div class="tab-scroll-container">
@@ -1795,6 +1804,7 @@
                 <div style="text-align: right;">
                   <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Available Points</div>
                   <div style="font-size: 20px; font-weight: 800; color: var(--cyan);" id="strategyPointsVal">0</div>
+                  <button class="buy-btn" id="allocateAllStrategyBtn" style="margin-top: 6px; background: linear-gradient(135deg, var(--cyan) 0%, #0891b2 100%); box-shadow: 0 4px 12px var(--cyan-glow); font-size: 11px; padding: 6px 12px;">⬆️ Allocate All</button>
                 </div>
               </div>
 
@@ -1813,7 +1823,10 @@
           <!-- 5. Contracts Tab -->
           <div class="tab-content-panel" id="tab-contracts">
             <div class="contracts-panel">
-              <div class="section-headline">Active Venture Bounties:</div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="section-headline">Active Venture Bounties:</div>
+                <button class="buy-btn" id="claimAllContractsBtn" style="background: linear-gradient(135deg, var(--gold) 0%, #d97706 100%); color:#000; box-shadow: 0 4px 12px var(--gold-glow);">🎉 Claim All Ready</button>
+              </div>
               <div id="contractsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
           </div>
@@ -1851,7 +1864,10 @@
                 </div>
               </div>
 
-              <div class="section-headline" style="margin: 10px 0;">Permanent Venture Tree</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0;">
+                <div class="section-headline" style="margin: 0;">Permanent Venture Tree</div>
+                <button class="buy-btn" id="maxVenturePerksBtn" style="background: linear-gradient(135deg, var(--gold) 0%, #d97706 100%); color:#000; box-shadow: 0 4px 12px var(--gold-glow);">🌰 Max Perks</button>
+              </div>
               <div class="prestige-shop-grid" id="prestigeShopList"></div>
             </div>
           </div>
@@ -2465,20 +2481,23 @@
         if (count >= 300) mult *= 2;
         if (count >= 400) mult *= 2.5;
         if (count >= 500) mult *= 3;
+        if (count >= 750) mult *= 3;
+        if (count >= 1000) mult *= 4;
+        if (count >= 1500) mult *= 5;
         return mult;
       }
 
       getNextMilestone(count) {
-        const milestones = [10, 25, 50, 100, 150, 200, 250, 300, 400, 500];
+        const milestones = [10, 25, 50, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500];
         for (const m of milestones) {
           if (count < m) return m;
         }
-        return count + 100;
+        return count + 250;
       }
 
       getGeneratorCost(gen, count) {
-        // Base cost * r^count (Cookie Clicker classic ratio: 1.15)
-        let r = 1.15;
+        // Base cost * r^count (steeper than the classic 1.15 Cookie Clicker ratio, for a harder curve)
+        let r = 1.17;
         const moatRank = this.state.prestigeRanks["p_moat"] || 0;
         if (moatRank > 0) {
           r = 1 + (0.15 * PRESTIGE_UPGRADES_DATA.find(p => p.id === "p_moat").effect(moatRank));
@@ -2675,8 +2694,8 @@
       calculatePendingRebirthAcorns() {
         // High prestige requirement: $1,000,000,000 (Unicorn level) lifetime earnings
         if (this.state.stats.totalEarned < 1000000000) return 0;
-        // Formula: floor(4 * cbrt(totalEarned / 1,000,000,000))
-        const totalPossible = Math.floor(4 * Math.cbrt(this.state.stats.totalEarned / 1000000000));
+        // Formula: floor(3 * cbrt(totalEarned / 1,000,000,000)) — slower acorn gain for a harder late-game curve
+        const totalPossible = Math.floor(3 * Math.cbrt(this.state.stats.totalEarned / 1000000000));
         const bonusFromArtifact = this.isArtifactEquipped("art_term_sheet") ? 2 : 0;
         return Math.max(0, (totalPossible + bonusFromArtifact) - this.state.totalPrestigeEarned);
       }
@@ -2933,6 +2952,124 @@
         this.updateHeaderStats();
       }
 
+      // Buys the most expensive affordable Workplace first, then cascades down to
+      // cheaper ones, repeating the sweep until nothing more can be afforded.
+      buyAllGenerators() {
+        let totalBought = 0;
+        let safety = 0;
+        while (safety < 5000) {
+          safety++;
+          const affordable = GENERATORS_DATA
+            .filter(gen => this.state.stats.totalEarned >= gen.unlockAt)
+            .map(gen => ({ gen, cost: this.getGeneratorCost(gen, this.getGeneratorCount(gen.id)) }))
+            .filter(x => x.cost <= this.state.money)
+            .sort((a, b) => b.cost - a.cost);
+
+          if (affordable.length === 0) break;
+
+          const target = affordable[0].gen;
+          this.state.money -= affordable[0].cost;
+          this.state.generators[target.id] = (this.state.generators[target.id] || 0) + 1;
+          this.progressContracts("own_gen", this.state.generators[target.id], target.id);
+          totalBought++;
+        }
+
+        if (totalBought > 0) {
+          sound.playBuy();
+          this.showToast(`⬆️ Upgrade All: purchased ${totalBought} workplace upgrade${totalBought > 1 ? "s" : ""}!`);
+          this.renderGenerators();
+          this.renderOfficeStage();
+          this.updateHeaderStats();
+          this.checkAchievements();
+        } else {
+          this.showToast("Not enough funds to upgrade any workplace right now.");
+        }
+      }
+
+      // Researches the most expensive affordable item first, cascading down to cheaper
+      // ones in the same pass (each research is one-time-only, so a single sorted sweep suffices).
+      buyAllUpgrades() {
+        const candidates = UPGRADES_DATA
+          .filter(u => !this.state.upgrades[u.id])
+          .sort((a, b) => b.cost - a.cost);
+
+        let totalBought = 0;
+        candidates.forEach(u => {
+          if (this.state.money >= u.cost) {
+            this.state.money -= u.cost;
+            this.state.upgrades[u.id] = true;
+            totalBought++;
+          }
+        });
+
+        if (totalBought > 0) {
+          sound.playBuy();
+          this.showToast(`🔬 Research All: completed ${totalBought} research item${totalBought > 1 ? "s" : ""}!`);
+          this.renderUpgrades();
+          this.renderGenerators();
+          this.updateHeaderStats();
+          this.checkAchievements();
+        } else {
+          this.showToast("No affordable research available right now.");
+        }
+      }
+
+      // Spends every available Strategy point, round-robining across departments.
+      allocateAllStrategyPoints() {
+        const totalAllocated = Object.values(this.state.strategyPointsAllocated).reduce((a, b) => a + b, 0);
+        let available = Math.max(0, this.state.strategyPointsTotal - totalAllocated);
+        if (available <= 0) {
+          this.showToast("No Strategy points available to allocate.");
+          return;
+        }
+        const depts = ["engineering", "marketing", "finance"];
+        let i = 0;
+        let spent = 0;
+        while (available > 0) {
+          const dept = depts[i % depts.length];
+          this.state.strategyPointsAllocated[dept] = (this.state.strategyPointsAllocated[dept] || 0) + 1;
+          available--;
+          spent++;
+          i++;
+        }
+        sound.playBuy();
+        this.showToast(`⬆️ Allocated ${spent} Strategy point${spent > 1 ? "s" : ""} across departments!`);
+        this.renderDepartments();
+        this.updateHeaderStats();
+      }
+
+      // Upgrades the most expensive affordable Venture Perk first, cascading down to
+      // cheaper ranks, looping across all perks until banked Acorns run out.
+      buyAllPrestigeUpgrades() {
+        let totalBought = 0;
+        let safety = 0;
+        while (safety < 500) {
+          safety++;
+          const affordable = PRESTIGE_UPGRADES_DATA
+            .map(p => ({ p, rank: this.state.prestigeRanks[p.id] || 0 }))
+            .filter(x => x.rank < x.p.maxRank)
+            .map(x => ({ ...x, cost: x.p.cost(x.rank) }))
+            .filter(x => x.cost <= this.state.prestigeTokens)
+            .sort((a, b) => b.cost - a.cost);
+
+          if (affordable.length === 0) break;
+
+          const pick = affordable[0];
+          this.state.prestigeTokens -= pick.cost;
+          this.state.prestigeRanks[pick.p.id] = pick.rank + 1;
+          totalBought++;
+        }
+
+        if (totalBought > 0) {
+          sound.playBuy();
+          this.showToast(`🌰 Max Perks: purchased ${totalBought} Venture Perk rank${totalBought > 1 ? "s" : ""}!`);
+          this.renderPrestigeShop();
+          this.updateHeaderStats();
+        } else {
+          this.showToast("Not enough banked Acorns to upgrade any perk right now.");
+        }
+      }
+
       allocateStrategyPoint(dept) {
         const totalAllocated = Object.values(this.state.strategyPointsAllocated).reduce((a, b) => a + b, 0);
         const available = Math.max(0, this.state.strategyPointsTotal - totalAllocated);
@@ -3135,6 +3272,20 @@
         const resolveBtn = document.getElementById("emergencyResolveBtn");
         if (resolveBtn) resolveBtn.addEventListener("click", () => this.resolveCrisisQuick());
 
+        // Claim All contracts
+        const claimAllBtn = document.getElementById("claimAllContractsBtn");
+        if (claimAllBtn) claimAllBtn.addEventListener("click", () => this.claimAllContracts());
+
+        // Bulk-action buttons: Workplaces / Research / Strategy / IPO Rebirth
+        const genUpgradeAllBtn = document.getElementById("genUpgradeAllBtn");
+        if (genUpgradeAllBtn) genUpgradeAllBtn.addEventListener("click", () => this.buyAllGenerators());
+        const upgradeAllResearchBtn = document.getElementById("upgradeAllResearchBtn");
+        if (upgradeAllResearchBtn) upgradeAllResearchBtn.addEventListener("click", () => this.buyAllUpgrades());
+        const allocateAllStrategyBtn = document.getElementById("allocateAllStrategyBtn");
+        if (allocateAllStrategyBtn) allocateAllStrategyBtn.addEventListener("click", () => this.allocateAllStrategyPoints());
+        const maxVenturePerksBtn = document.getElementById("maxVenturePerksBtn");
+        if (maxVenturePerksBtn) maxVenturePerksBtn.addEventListener("click", () => this.buyAllPrestigeUpgrades());
+
         // Navigation Tabs
         document.querySelectorAll(".tab-btn").forEach(btn => {
           btn.addEventListener("click", () => {
@@ -3146,6 +3297,8 @@
             document.getElementById(`tab-${tabName}`).classList.add("active");
 
             document.getElementById("generatorSubBar").style.display = tabName === "generators" ? "flex" : "none";
+            const upgSubBar = document.getElementById("upgradesSubBar");
+            if (upgSubBar) upgSubBar.style.display = tabName === "upgrades" ? "flex" : "none";
           });
         });
 
@@ -3584,7 +3737,7 @@
         this.state.contracts.forEach(c => {
           const pct = Math.min(100, Math.round((c.current / c.target) * 100));
           html += `
-            <div class="contract-card ${c.completed ? "completed" : ""}">
+            <div class="contract-card ${c.completed ? "completed" : ""}" data-contract-id="${c.id}">
               <div class="contract-left">
                 <div class="contract-title">${c.label}</div>
                 <div class="contract-desc">Progress: ${formatNumber(c.current)} / ${formatNumber(c.target)} (${pct}%)</div>
@@ -3610,11 +3763,62 @@
             this.claimContract(id);
           });
         });
+
+        this.updateClaimAllButton();
         }
-  // Update Contracts UI in-place (currently just re-renders)
+
+  // Update Contracts UI in-place without destroying DOM nodes/listeners. The old version
+  // called renderContracts() (a full innerHTML rebuild) every 200ms while this tab was open,
+  // which could yank the Claim button out from under an in-flight click - that's why some
+  // contracts "didn't work on click". This only touches text/width/disabled state instead.
   updateContractsUI() {
     if (this.activeTab !== "contracts") return;
-    this.renderContracts();
+    const container = document.getElementById("contractsList");
+    if (!container) return;
+
+    let needsFullRerender = false;
+
+    this.state.contracts.forEach(c => {
+      const card = container.querySelector(`.contract-card[data-contract-id="${c.id}"]`);
+      if (!card) { needsFullRerender = true; return; }
+
+      const pct = Math.min(100, Math.round((c.current / c.target) * 100));
+      card.classList.toggle("completed", !!c.completed);
+
+      const descEl = card.querySelector(".contract-desc");
+      if (descEl) descEl.textContent = `Progress: ${formatNumber(c.current)} / ${formatNumber(c.target)} (${pct}%)`;
+
+      const fillEl = card.querySelector(".contract-progress-fill");
+      if (fillEl) fillEl.style.width = `${pct}%`;
+
+      const rewardEl = card.querySelector(".contract-reward-label");
+      if (rewardEl) rewardEl.textContent = `+${formatMoney(c.reward)}`;
+
+      const btn = card.querySelector(".buy-btn");
+      if (btn) {
+        btn.disabled = !c.completed;
+        btn.textContent = c.completed ? "Claim Reward" : "In Progress";
+      }
+    });
+
+    this.updateClaimAllButton();
+
+    if (needsFullRerender) this.renderContracts();
+  }
+
+  updateClaimAllButton() {
+    const btn = document.getElementById("claimAllContractsBtn");
+    if (!btn) return;
+    const readyCount = this.state.contracts.filter(c => c.completed).length;
+    btn.disabled = readyCount === 0;
+    btn.textContent = readyCount > 0 ? `🎉 Claim All Ready (${readyCount})` : "🎉 Claim All Ready";
+  }
+
+  claimAllContracts() {
+    const ready = this.state.contracts.filter(c => c.completed).map(c => c.id);
+    if (ready.length === 0) return;
+    ready.forEach(id => this.claimContract(id));
+    this.showToast(`🎉 Claimed ${ready.length} contract${ready.length > 1 ? "s" : ""} at once!`);
   }
 
       renderPrestigeShop() {
