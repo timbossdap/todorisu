@@ -28,6 +28,7 @@ class MainActivity : Activity() {
         requestNotificationPermissionIfNeeded()
 
         webView = findViewById(R.id.webView)
+        webView.setBackgroundColor(android.graphics.Color.parseColor("#1e1e1e"))
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.useWideViewPort = true
