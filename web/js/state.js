@@ -12,7 +12,7 @@ let customLabels = ["read", "Exams/Tests", "Homework", "Hobby"];
 let isMyFiltersCollapsed = false;
 let isLabelsCollapsed = false;
 let editingTaskId = null;
-let selectedWeekStart = getMonday(new Date(2026, 8, 10)); // Anchor to Sep 10, 2026 (or current date)
+let selectedWeekStart = getMonday(new Date());
 let isOverdueCollapsed = false;
 let collapsedCalendarDays = {};
 let showCalendarEvents = localStorage.getItem("tasks_show_calendar") !== "false";
@@ -21,6 +21,18 @@ let showCompletedTasks = false;
 function recordRecentView(name) {
   if (!name) return;
   recentViews = [name, ...recentViews.filter(v => v.toLowerCase() !== name.toLowerCase())].slice(0, 5);
+}
+
+/**
+ * Switch the active view/project/tag/filter and re-render.
+ */
+function switchToView(view, { project = null, tag = null, filter = null, label = null } = {}) {
+  currentView = view;
+  currentProject = project;
+  currentTag = tag;
+  currentFilter = filter;
+  recordRecentView(label || (view.charAt(0).toUpperCase() + view.slice(1)));
+  render();
 }
 
 const $ = (id) => document.getElementById(id);

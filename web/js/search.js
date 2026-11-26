@@ -91,40 +91,19 @@ function renderSearchResults(query) {
     addItem({
       icon: iconUpcoming,
       title: "Upcoming",
-      onSelect: () => {
-        currentView = "upcoming";
-        currentProject = null;
-        currentTag = null;
-        currentFilter = null;
-        recordRecentView("Upcoming");
-        render();
-      }
+      onSelect: () => switchToView("upcoming", { label: "Upcoming" })
     });
 
     addItem({
       icon: iconInbox,
       title: "Inbox",
-      onSelect: () => {
-        currentView = "inbox";
-        currentProject = null;
-        currentTag = null;
-        currentFilter = null;
-        recordRecentView("Inbox");
-        render();
-      }
+      onSelect: () => switchToView("inbox", { label: "Inbox" })
     });
 
     addItem({
       icon: iconToday,
       title: "Today",
-      onSelect: () => {
-        currentView = "today";
-        currentProject = null;
-        currentTag = null;
-        currentFilter = null;
-        recordRecentView("Today");
-        render();
-      }
+      onSelect: () => switchToView("today", { label: "Today" })
     });
 
     // Navigation section
@@ -134,70 +113,35 @@ function renderSearchResults(query) {
       icon: iconHome,
       title: "Go to home",
       badge: `<kbd>G</kbd> then <kbd>H</kbd>`,
-      onSelect: () => {
-        currentView = "upcoming";
-        currentProject = null;
-        currentTag = null;
-        currentFilter = null;
-        recordRecentView("Upcoming");
-        render();
-      }
+      onSelect: () => switchToView("upcoming", { label: "Upcoming" })
     });
 
     addItem({
       icon: iconInbox,
       title: "Go to Inbox",
       badge: `<kbd>G</kbd> then <kbd>i</kbd>`,
-      onSelect: () => {
-        currentView = "inbox";
-        currentProject = null;
-        currentTag = null;
-        currentFilter = null;
-        recordRecentView("Inbox");
-        render();
-      }
+      onSelect: () => switchToView("inbox", { label: "Inbox" })
     });
 
     addItem({
       icon: iconToday,
       title: "Go to Today",
       badge: `<kbd>G</kbd> then <kbd>T</kbd>`,
-      onSelect: () => {
-        currentView = "today";
-        currentProject = null;
-        currentTag = null;
-        currentFilter = null;
-        recordRecentView("Today");
-        render();
-      }
+      onSelect: () => switchToView("today", { label: "Today" })
     });
 
     addItem({
       icon: iconUpcoming,
       title: "Go to Upcoming",
       badge: `<kbd>G</kbd> then <kbd>U</kbd>`,
-      onSelect: () => {
-        currentView = "upcoming";
-        currentProject = null;
-        currentTag = null;
-        currentFilter = null;
-        recordRecentView("Upcoming");
-        render();
-      }
+      onSelect: () => switchToView("upcoming", { label: "Upcoming" })
     });
 
     addItem({
       icon: iconFilters,
       title: "Go to Filters & Labels",
       badge: `<kbd>G</kbd> then <kbd>V</kbd>`,
-      onSelect: () => {
-        currentView = "filters";
-        currentProject = null;
-        currentTag = null;
-        currentFilter = null;
-        recordRecentView("Filters & Labels");
-        render();
-      }
+      onSelect: () => switchToView("filters", { label: "Filters & Labels" })
     });
   } else {
     // Filter tasks
@@ -253,19 +197,18 @@ function renderSearchResults(query) {
           title: n.title,
           badge: n.badge,
           onSelect: () => {
-            currentView = n.view;
-            currentProject = null;
-            currentTag = null;
-            currentFilter = null;
-            recordRecentView(n.title.replace("Go to ", ""));
-            render();
+            if (n.view === "settings") {
+              openSettings();
+            } else {
+              switchToView(n.view, { label: n.title.replace("Go to ", "") });
+            }
           }
         });
       });
     }
 
     if (matchedTasks.length === 0 && matchedNav.length === 0) {
-      list.innerHTML = `<div style="color:var(--app-text-muted);padding:16px 18px;font-size:13px;">No results found for "${query}"</div>`;
+      list.innerHTML = `<div style="color:var(--app-text-muted);padding:16px 18px;font-size:13px;">No results found for "${escapeHtml(query)}"</div>`;
     }
   }
 

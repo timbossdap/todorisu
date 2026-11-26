@@ -121,7 +121,7 @@ function renderReportingView() {
       const chip = document.createElement("button");
       chip.className = "reporting-task-chip";
       chip.title = "Click to mark active again";
-      chip.innerHTML = `<span>✓</span><span>${escapeReportingHtml(t.title)}</span>`;
+      chip.innerHTML = `<span>✓</span><span>${escapeHtml(t.title)}</span>`;
       chip.addEventListener("click", () => {
         // Toggle task back to active
         toggleTask(t.id);
@@ -181,12 +181,6 @@ function getTaskCompletionDate(t) {
     if (!isNaN(d.getTime())) return d;
   }
   return new Date();
-}
-
-function escapeReportingHtml(str) {
-  return String(str || "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  }[c]));
 }
 
 // Wire Reporting Filter Interactivity

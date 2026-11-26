@@ -64,3 +64,29 @@ function getTags() {
   const all = tasks.flatMap(t => t.tags || []);
   return [...new Set(all)].sort();
 }
+
+function escapeHtml(str) {
+  return String(str || "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+/**
+ * Build the HTML for a list of calendar events inside `.calendar-events-grid`.
+ */
+function renderCalendarEventsGrid(events) {
+  return `
+    <div class="calendar-events-grid">
+      ${events.map(evt => evt.isPastGroup ? `
+        <div class="past-events-summary"><span class="past-events-bars">|||</span> <span>${evt.count} past events</span></div>
+      ` : `
+        <div class="calendar-event-item">
+          <span class="event-stripe ${evt.stripe || "red"}"></span>
+          ${evt.isOutlook ? `<span class="outlook-tag">Outlook</span>` : ""}
+          ${evt.time ? `<span class="event-time">${escapeHtml(evt.time)}</span>` : ""}
+          <span class="event-summary" title="${escapeHtml(evt.location ? `${evt.title} (${evt.location})` : evt.title)}">${escapeHtml(evt.title)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}

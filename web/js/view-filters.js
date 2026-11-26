@@ -11,18 +11,11 @@ function renderFiltersView() {
   container.innerHTML = "";
 
   const allTags = [...new Set([...customLabels, ...getTags()])];
-  const tagColorMap = {
-    "read": "#888888",
-    "exams/tests": "#dc4c3e",
-    "homework": "#4caf50",
-    "hobby": "#ff9800"
-  };
-  const fallbackColors = ["#2196f3", "#9c27b0", "#009688", "#e91e63", "#ff5722"];
 
-  allTags.forEach((tag, idx) => {
+  allTags.forEach((tag) => {
     const row = document.createElement("button");
     row.className = "filter-row-item";
-    const color = tagColorMap[tag.toLowerCase()] || fallbackColors[idx % fallbackColors.length];
+    const color = getTagColor(tag);
     const count = tasks.filter(t => !t.completed && (t.tags || []).includes(tag)).length;
 
     row.innerHTML = `
@@ -31,18 +24,13 @@ function renderFiltersView() {
           <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
           <line x1="7" y1="7" x2="7.01" y2="7"></line>
         </svg>
-        <span class="filter-row-label">${tag}</span>
+        <span class="filter-row-label">${escapeHtml(tag)}</span>
       </div>
       <span class="filter-row-count">${count > 0 ? count : ""}</span>
     `;
 
     row.addEventListener("click", () => {
-      currentTag = tag;
-      currentProject = null;
-      currentFilter = null;
-      currentView = "tag";
-      recordRecentView("@" + tag);
-      render();
+      switchToView("tag", { tag, label: "@" + tag });
     });
 
     container.appendChild(row);
@@ -51,12 +39,11 @@ function renderFiltersView() {
 
 document.querySelectorAll(".filter-row-item[data-filter]").forEach(item => {
   item.addEventListener("click", () => {
-    currentFilter = item.dataset.filter;
-    currentProject = null;
-    currentTag = null;
-    currentView = "standard";
-    recordRecentView(currentFilter === "priority1" ? "Priority 1" : "Assigned to me");
-    render();
+    const filter = item.dataset.filter;
+    switchToView("standard", {
+      filter,
+      label: filter === "priority1" ? "Priority 1" : "Assigned to me",
+    });
   });
 });
 

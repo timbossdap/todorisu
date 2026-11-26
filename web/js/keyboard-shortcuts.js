@@ -71,43 +71,18 @@ document.addEventListener("keydown", (e) => {
   if (pendingKeyG && now - lastKeyTime < 1200) {
     pendingKeyG = false;
     const k = e.key.toLowerCase();
-    if (k === "h" || k === "u") {
+    const goRoutes = {
+      h: ["upcoming", "Upcoming"],
+      u: ["upcoming", "Upcoming"],
+      i: ["inbox", "Inbox"],
+      t: ["today", "Today"],
+      v: ["filters", "Filters & Labels"],
+      a: ["reporting", "Reporting"],
+    };
+    if (goRoutes[k]) {
       e.preventDefault();
-      currentView = "upcoming";
-      currentProject = null;
-      currentTag = null;
-      currentFilter = null;
-      recordRecentView("Upcoming");
-      render();
-    } else if (k === "i") {
-      e.preventDefault();
-      currentView = "inbox";
-      currentProject = null;
-      currentTag = null;
-      currentFilter = null;
-      recordRecentView("Inbox");
-      render();
-    } else if (k === "t") {
-      e.preventDefault();
-      currentView = "today";
-      currentProject = null;
-      currentTag = null;
-      currentFilter = null;
-      recordRecentView("Today");
-      render();
-    } else if (k === "v") {
-      e.preventDefault();
-      currentView = "filters";
-      currentProject = null;
-      currentTag = null;
-      currentFilter = null;
-      recordRecentView("Filters & Labels");
-      render();
-    } else if (k === "a") {
-      e.preventDefault();
-      currentView = "reporting";
-      recordRecentView("Reporting");
-      render();
+      const [view, label] = goRoutes[k];
+      switchToView(view, { label });
     }
   } else {
     pendingKeyG = false;

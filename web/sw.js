@@ -1,4 +1,4 @@
-const CACHE = "tasks-v7";
+const CACHE = "tasks-v8";
 const FILES = [
   "./index.html",
   "./idle-game.html",
@@ -10,6 +10,7 @@ const FILES = [
   "./js/state.js",
   "./js/calendar-manager.js",
   "./js/date-utils.js",
+  "./js/date-picker.js",
   "./js/tasks-data.js",
   "./js/smart-input.js",
   "./js/task-edit.js",

@@ -94,29 +94,7 @@ function renderUpcomingView() {
       calBox.appendChild(calHeader);
 
       if (!isCollapsed) {
-        const eventsGrid = document.createElement("div");
-        eventsGrid.className = "calendar-events-grid";
-
-        calendarEvents.forEach(evt => {
-          if (evt.isPastGroup) {
-            const pastRow = document.createElement("div");
-            pastRow.className = "past-events-summary";
-            pastRow.innerHTML = `<span class="past-events-bars">|||</span> <span>${evt.count} past events</span>`;
-            eventsGrid.appendChild(pastRow);
-          } else {
-            const row = document.createElement("div");
-            row.className = "calendar-event-item";
-            const stripeClass = evt.stripe || "red";
-            row.innerHTML = `
-              <span class="event-stripe ${stripeClass}"></span>
-              ${evt.isOutlook ? `<span class="outlook-tag">Outlook</span>` : ''}
-              ${evt.time ? `<span class="event-time">${evt.time}</span>` : ''}
-              <span class="event-summary" title="${evt.location ? `${evt.title} (${evt.location})` : evt.title}">${evt.title}</span>
-            `;
-            eventsGrid.appendChild(row);
-          }
-        });
-        calBox.appendChild(eventsGrid);
+        calBox.insertAdjacentHTML("beforeend", renderCalendarEventsGrid(calendarEvents));
       }
       daySection.appendChild(calBox);
     }

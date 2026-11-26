@@ -211,15 +211,6 @@ $("toggleCompleted").addEventListener("click", () => {
 // ============================================================
 // VIEW SWITCHING (sidebar nav items + mobile bottom nav)
 // ============================================================
-function switchToView(view) {
-  currentView = view;
-  currentProject = null;
-  currentTag = null;
-  currentFilter = null;
-  recordRecentView(view.charAt(0).toUpperCase() + view.slice(1));
-  render();
-}
-
 document.querySelectorAll(".nav-item[data-view]").forEach(btn => {
   btn.addEventListener("click", () => {
     switchToView(btn.dataset.view);

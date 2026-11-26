@@ -29,20 +29,7 @@ function renderStandardView() {
     const events = CalendarManager.getEventsForDate(new Date());
     if (events.length > 0) {
       todayBox.classList.remove("hidden");
-      todayBox.innerHTML = `
-        <div class="calendar-events-grid">
-          ${events.map(evt => evt.isPastGroup ? `
-            <div class="past-events-summary"><span class="past-events-bars">|||</span> <span>${evt.count} past events</span></div>
-          ` : `
-            <div class="calendar-event-item">
-              <span class="event-stripe ${evt.stripe || 'red'}"></span>
-              ${evt.isOutlook ? `<span class="outlook-tag">Outlook</span>` : ''}
-              ${evt.time ? `<span class="event-time">${evt.time}</span>` : ''}
-              <span class="event-summary" title="${evt.location ? `${evt.title} (${evt.location})` : evt.title}">${evt.title}</span>
-            </div>
-          `).join("")}
-        </div>
-      `;
+      todayBox.innerHTML = renderCalendarEventsGrid(events);
     } else {
       todayBox.classList.add("hidden");
     }

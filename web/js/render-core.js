@@ -23,12 +23,7 @@ function render() {
     const color = projColors[idx % projColors.length];
     btn.innerHTML = `<span class="project-dot" style="background:${color}"></span><span class="nav-label">${p}</span>`;
     btn.addEventListener("click", () => {
-      currentProject = p;
-      currentTag = null;
-      currentFilter = null;
-      currentView = "project";
-      recordRecentView(p);
-      render();
+      switchToView("project", { project: p, label: p });
     });
     projectList.appendChild(btn);
   });
@@ -41,12 +36,7 @@ function render() {
     btn.className = "nav-item project-item" + (currentTag === tag ? " active" : "");
     btn.innerHTML = `<span class="nav-label">@${tag}</span>`;
     btn.addEventListener("click", () => {
-      currentTag = tag;
-      currentProject = null;
-      currentFilter = null;
-      currentView = "tag";
-      recordRecentView("@" + tag);
-      render();
+      switchToView("tag", { tag, label: "@" + tag });
     });
     tagList.appendChild(btn);
   });
@@ -73,9 +63,10 @@ function render() {
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
   });
   const todayCompleted = todayTasks.filter(t => t.completed).length;
+  const dailyGoal = parseInt(localStorage.getItem("tasks_daily_goal") || "5", 10) || 5;
   const menuGoalSub = $("menuUserTasksCount");
   if (menuGoalSub) {
-    menuGoalSub.textContent = `${todayCompleted}/5 tasks`;
+    menuGoalSub.textContent = `${todayCompleted}/${dailyGoal} tasks`;
   }
 
   if (currentView === "upcoming") {

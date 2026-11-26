@@ -74,9 +74,7 @@ const menuItemReporting = $("menuItemReporting");
 if (menuItemReporting) {
   menuItemReporting.addEventListener("click", () => {
     closeProfileDropdown();
-    currentView = "reporting";
-    recordRecentView("Reporting");
-    render();
+    switchToView("reporting", { label: "Reporting" });
   });
 }
 
@@ -769,6 +767,7 @@ function renderSettingsTabContent(tab) {
       return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
     });
     const completedCount = todayTasks.filter(t => t.completed).length;
+    const savedGoal = parseInt(localStorage.getItem("tasks_daily_goal") || "5", 10) || 5;
 
     container.innerHTML = `
       <div class="settings-group-heading" style="margin-top: 0;">Productivity</div>
@@ -778,7 +777,7 @@ function renderSettingsTabContent(tab) {
         <div>
           <label style="font-size: 13px; font-weight: 600; color: #ccc; display: block; margin-bottom: 6px;">Daily task goal</label>
           <div style="display: flex; align-items: center; gap: 12px;">
-            <input type="number" min="1" max="50" value="5" style="width: 80px; background: #262626; border: 1px solid #383838; border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 14px;" />
+            <input type="number" id="settingsDailyGoalInput" min="1" max="50" value="${savedGoal}" style="width: 80px; background: #262626; border: 1px solid #383838; border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 14px;" />
             <span style="color: #888; font-size: 13px;">tasks completed today: <strong>${completedCount}</strong></span>
           </div>
         </div>
@@ -804,6 +803,13 @@ function renderSettingsTabContent(tab) {
         </div>
       </div>
     `;
+
+    $("settingsDailyGoalInput")?.addEventListener("change", (e) => {
+      const val = Math.max(1, Math.min(50, parseInt(e.target.value, 10) || 5));
+      e.target.value = val;
+      localStorage.setItem("tasks_daily_goal", String(val));
+      render();
+    });
   } else {
     // Default fallback for reminders, backups, integrations, sidebar, quickadd
     const formattedTab = tab.charAt(0).toUpperCase() + tab.slice(1);
@@ -820,12 +826,6 @@ function renderSettingsTabContent(tab) {
 // ============================================================
 // ACCOUNT TAB (matches Todoist "Account" settings screen)
 // ============================================================
-function escapeHtml(str) {
-  return String(str || "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  }[c]));
-}
-
 const PROVIDER_ICONS = {
   google: `<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.9c-.5 2.8-2.1 5.1-4.4 6.7v5.5h7.1c4.2-3.8 6.5-9.5 6.5-16.2z"/><path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-7.1-5.5c-2 1.3-4.5 2.1-7.4 2.1-5.7 0-10.5-3.8-12.2-9h-7.3v5.7C7.7 40.9 15.2 46 24 46z"/><path fill="#FBBC05" d="M11.8 28.3c-.4-1.3-.7-2.7-.7-4.1s.2-2.8.7-4.1v-5.7H4.5C3 17.3 2.2 20.5 2.2 24s.8 6.7 2.3 9.6l7.3-5.3z"/><path fill="#EA4335" d="M24 10.6c3.2 0 6.1 1.1 8.4 3.3l6.3-6.3C34.9 4.2 29.9 2 24 2 15.2 2 7.7 7.1 4.5 14.4l7.3 5.7c1.7-5.2 6.5-9.5 12.2-9.5z"/></svg>`,
   facebook: `<svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#1877F2"/><path fill="#fff" d="M15.1 12.9h-2v7.9h-3.3v-7.9H8.1v-2.8h1.7V8.4c0-1.7.8-3.4 3.4-3.4h2.5v2.7h-1.8c-.3 0-.7.2-.7.9v1.5h2.6l-.4 2.8z"/></svg>`,
