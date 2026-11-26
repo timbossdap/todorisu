@@ -1,18 +1,28 @@
 package com.yourname.todolist
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.OffsetDateTime
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 
 object NotificationHelper {
+    fun hasNotificationPermission(context: Context): Boolean {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+    }
     fun ensureChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = context.getSystemService(NotificationManager::class.java)
@@ -98,6 +108,7 @@ object NotificationHelper {
                 .setStyle(inbox)
         }
 
+        if (!hasNotificationPermission(context)) return
         NotificationManagerCompat.from(context).notify(Constants.SUMMARY_NOTIFICATION_ID, builder.build())
     }
 
@@ -107,11 +118,14 @@ object NotificationHelper {
     }
 
     private fun formatDueDate(iso: String?): String {
-        if (iso == null) return "No due date"
+        if (iso.isNullOrBlank()) return "No due date"
         return try {
-            val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-            parser.timeZone = TimeZone.getTimeZone("UTC")
-            val date = parser.parse(iso.substring(0, 19)) ?: return "No due date"
+            val millis = try {
+                OffsetDateTime.parse(iso).toInstant().toEpochMilli()
+            } catch (_: Exception) {
+                Instant.parse(iso).toEpochMilli()
+            }
+            val date = Date(millis)
 
             val due = Calendar.getInstance().apply { time = date }
             val now = Calendar.getInstance()

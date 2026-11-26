@@ -69,6 +69,15 @@ class MainActivity : Activity() {
         }
     }
 
+    @Suppress("DEPRECATION")
+    override fun onBackPressed() {
+        if (::webView.isInitialized && webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     private fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -103,6 +112,7 @@ class MainActivity : Activity() {
 
         @JavascriptInterface
         fun onSignOut() {
+            SyncWorker.cancelAllScheduledAlarms(applicationContext)
             TokenStore.clear(applicationContext)
             WorkManager.getInstance(applicationContext).cancelUniqueWork(Constants.SYNC_WORK_NAME)
             NotificationHelper.cancelSummaryNotification(applicationContext)

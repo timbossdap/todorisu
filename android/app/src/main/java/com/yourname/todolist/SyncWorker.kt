@@ -7,9 +7,8 @@ import android.content.Intent
 import android.os.Build
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
+import java.time.Instant
+import java.time.OffsetDateTime
 
 /**
  * Runs periodically (via WorkManager) and right after boot / sign-in.
@@ -98,13 +97,29 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
     }
 
     private fun parseIso(value: String?): Long? {
-        if (value == null) return null
+        if (value.isNullOrBlank()) return null
         return try {
-            val fmt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-            fmt.timeZone = TimeZone.getTimeZone("UTC")
-            fmt.parse(value.substring(0, 19))?.time
-        } catch (e: Exception) {
-            null
+            OffsetDateTime.parse(value).toInstant().toEpochMilli()
+        } catch (_: Exception) {
+            try {
+                Instant.parse(value).toEpochMilli()
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
+    companion object {
+        fun cancelAllScheduledAlarms(context: Context) {
+            val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            for (taskId in TokenStore.scheduledTaskIds(context)) {
+                val intent = Intent(context, AlarmReceiver::class.java)
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context, taskId.hashCode(), intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                am.cancel(pendingIntent)
+            }
         }
     }
 }
