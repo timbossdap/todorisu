@@ -24,11 +24,16 @@ $("authForm").addEventListener("submit", async (e) => {
   onSignedIn(data.session);
 });
 
-sb.auth.onAuthStateChange((_event, session) => {
-  if (session) onSignedIn(session);
+let authInitializedUserId = null;
+
+sb.auth.onAuthStateChange((event, session) => {
+  if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+    onSignedIn(session);
+  }
 });
 
 async function onSignedIn(session) {
+  const isSameUser = authInitializedUserId === session.user.id;
   currentUser = session.user;
   $("authScreen").classList.add("hidden");
   $("app").classList.remove("hidden");
@@ -40,6 +45,9 @@ async function onSignedIn(session) {
   if (window.AndroidBridge && window.AndroidBridge.onAuth) {
     window.AndroidBridge.onAuth(session.access_token, session.refresh_token, session.user.id);
   }
+
+  if (isSameUser) return;
+  authInitializedUserId = session.user.id;
 
   await loadTasks();
   render();

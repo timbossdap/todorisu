@@ -10,45 +10,50 @@ async function loadTasks() {
 }
 
 async function addTask({ title, project, due_at, has_time, priority, recurrence_rule, tags: taskTags }) {
+  const tempId = "task_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+  const tempTask = {
+    id: tempId,
+    title,
+    project: project || "Inbox",
+    due_at: due_at || null,
+    has_time: !!has_time,
+    priority: priority || 4,
+    recurrence_rule: recurrence_rule || null,
+    tags: taskTags || [],
+    completed: false,
+    created_at: new Date().toISOString()
+  };
+
+  // Render optimistically right away
+  tasks.push(tempTask);
+  render();
+
   let data = null;
   let error = null;
   try {
     ({ data, error } = await sb.from("tasks").insert({
       user_id: currentUser ? currentUser.id : "guest",
       title,
-      project: project || "Inbox",
-      due_at: due_at || null,
-      has_time: !!has_time,
-      priority: priority || 4,
-      recurrence_rule: recurrence_rule || null,
-      tags: taskTags || [],
+      project: tempTask.project,
+      due_at: tempTask.due_at,
+      has_time: tempTask.has_time,
+      priority: tempTask.priority,
+      recurrence_rule: tempTask.recurrence_rule,
+      tags: tempTask.tags,
     }).select());
   } catch (err) {
     error = err;
   }
 
   if (!error && data && data[0]) {
-    tasks.push(data[0]);
-  } else {
-    if (error) console.warn("Supabase insert failed, using local fallback:", error.message || error);
-    // Fallback in memory
-    const tempTask = {
-      id: "task_" + Date.now(),
-      title,
-      project: project || "Inbox",
-      due_at: due_at || null,
-      has_time: !!has_time,
-      priority: priority || 4,
-      recurrence_rule: recurrence_rule || null,
-      tags: taskTags || [],
-      completed: false,
-      created_at: new Date().toISOString()
-    };
-    tasks.push(tempTask);
+    const idx = tasks.findIndex(t => t.id === tempId);
+    if (idx !== -1) tasks[idx] = data[0];
+    else tasks.push(data[0]);
+    render();
+    scheduleWebNotification(data[0]);
+  } else if (error) {
+    console.warn("Supabase insert failed, keeping local task:", error.message || error);
   }
-
-  render();
-  if (data && data[0]) scheduleWebNotification(data[0]);
 }
 
 async function toggleTask(id) {
