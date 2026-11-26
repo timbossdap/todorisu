@@ -29,7 +29,7 @@ function renderUpcomingView() {
     dayCol.addEventListener("click", () => {
       document.querySelectorAll(".week-strip-col").forEach(c => c.classList.remove("selected"));
       dayCol.classList.add("selected");
-      const targetSec = document.getElementById("day_sec_" + dayDate.toISOString().slice(0, 10));
+      const targetSec = document.getElementById("day_sec_" + toLocalDateKey(dayDate));
       if (targetSec) targetSec.scrollIntoView({ behavior: "smooth" });
     });
 
@@ -37,7 +37,9 @@ function renderUpcomingView() {
   }
 
   // Overdue Section
-  const overdueTasks = tasks.filter(t => !t.completed && isOverdue(t.due_at));
+  const overdueTasks = tasks
+    .filter(t => !t.completed && isOverdue(t.due_at))
+    .sort((a, b) => (a.due_at || "").localeCompare(b.due_at || ""));
   const overdueSection = $("overdueSection");
   const overdueList = $("overdueTaskList");
 
@@ -59,7 +61,7 @@ function renderUpcomingView() {
   for (let i = 0; i < 7; i++) {
     const dayDate = new Date(selectedWeekStart);
     dayDate.setDate(dayDate.getDate() + i);
-    const dateKey = dayDate.toISOString().slice(0, 10);
+    const dateKey = toLocalDateKey(dayDate);
 
     const daySection = document.createElement("div");
     daySection.className = "day-section";
@@ -100,7 +102,9 @@ function renderUpcomingView() {
     }
 
     // Tasks for this Day
-    const dayTasks = tasks.filter(t => !t.completed && t.due_at && isSameDay(t.due_at, dayDate));
+    const dayTasks = tasks
+      .filter(t => !t.completed && t.due_at && isSameDay(t.due_at, dayDate))
+      .sort((a, b) => (a.due_at || "").localeCompare(b.due_at || ""));
     if (dayTasks.length > 0) {
       const taskUl = document.createElement("ul");
       taskUl.className = "task-list";

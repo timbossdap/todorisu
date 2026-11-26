@@ -171,7 +171,7 @@ function renderSmartPreview() {
     el.innerHTML = "";
   } else {
     el.classList.remove("hidden");
-    el.innerHTML = chips.map(c => `<span class="smart-chip">${c}</span>`).join("");
+    el.innerHTML = chips.map(c => `<span class="smart-chip">${escapeHtml(c)}</span>`).join("");
   }
 
   if (parsed.dueDate) {

@@ -39,7 +39,7 @@ function renderStandardView() {
 
   const visible = visibleTasks();
   const uncompleted = visible.filter(t => !t.completed);
-  const completed = tasks.filter(t => t.completed);
+  const completed = visible.filter(t => t.completed);
 
   $("taskList").innerHTML = "";
   $("emptyState").classList.toggle("hidden", uncompleted.length > 0);

@@ -130,8 +130,8 @@ function renderConnectedFeeds() {
     const li = document.createElement("li");
     li.className = "feed-item";
     li.innerHTML = `
-      <span class="feed-name">${f.name}</span>
-      <button class="feed-delete-btn" data-id="${f.id}">✕</button>
+      <span class="feed-name">${escapeHtml(f.name)}</span>
+      <button class="feed-delete-btn" data-id="${escapeHtml(f.id)}">✕</button>
     `;
     li.querySelector(".feed-delete-btn").addEventListener("click", () => {
       CalendarManager.removeFeed(f.id);

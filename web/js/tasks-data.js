@@ -74,7 +74,12 @@ async function toggleTask(id) {
     render();
 
     try {
-      const { data } = await sb.from("tasks").insert(completionInstance).select();
+      let { data, error } = await sb.from("tasks").insert(completionInstance).select();
+      if (error) {
+        const fallbackInstance = { ...completionInstance };
+        delete fallbackInstance.completed_at;
+        ({ data } = await sb.from("tasks").insert(fallbackInstance).select());
+      }
       if (data && data[0]) {
         tasks.push(data[0]);
       } else {

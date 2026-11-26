@@ -75,7 +75,7 @@ function openTaskEdit(id) {
   // Project selector
   const projSel = $("taskEditProject");
   projSel.innerHTML = `<option value="Inbox">Inbox</option>` +
-    getProjects().map(p => `<option value="${p}"${(t.project || "Inbox") === p ? " selected" : ""}>${p}</option>`).join("");
+    getProjects().map(p => `<option value="${escapeHtml(p)}"${(t.project || "Inbox") === p ? " selected" : ""}>${escapeHtml(p)}</option>`).join("");
   projSel.value = t.project || "Inbox";
 
   // Check button
@@ -389,7 +389,7 @@ function taskRow(t) {
     hasMeta = true;
     const projSpan = document.createElement("span");
     projSpan.className = "task-project-tag";
-    projSpan.innerHTML = `<span>${t.project}</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>`;
+    projSpan.innerHTML = `<span>${escapeHtml(t.project)}</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>`;
     meta.appendChild(projSpan);
   }
 

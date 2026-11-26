@@ -21,7 +21,7 @@ function render() {
     const btn = document.createElement("button");
     btn.className = "nav-item project-item" + (currentProject === p ? " active" : "");
     const color = projColors[idx % projColors.length];
-    btn.innerHTML = `<span class="project-dot" style="background:${color}"></span><span class="nav-label">${p}</span>`;
+    btn.innerHTML = `<span class="project-dot" style="background:${color}"></span><span class="nav-label">${escapeHtml(p)}</span>`;
     btn.addEventListener("click", () => {
       switchToView("project", { project: p, label: p });
     });
@@ -34,7 +34,7 @@ function render() {
   getTags().forEach(tag => {
     const btn = document.createElement("button");
     btn.className = "nav-item project-item" + (currentTag === tag ? " active" : "");
-    btn.innerHTML = `<span class="nav-label">@${tag}</span>`;
+    btn.innerHTML = `<span class="nav-label">@${escapeHtml(tag)}</span>`;
     btn.addEventListener("click", () => {
       switchToView("tag", { tag, label: "@" + tag });
     });
@@ -43,7 +43,7 @@ function render() {
 
   // Populate quick add projects
   const qp = $("quickAddProject");
-  qp.innerHTML = `<option value="Inbox">Inbox</option>` + getProjects().map(p => `<option value="${p}">${p}</option>`).join("");
+  qp.innerHTML = `<option value="Inbox">Inbox</option>` + getProjects().map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
 
   // Switch view containers
   const isReporting = currentView === "reporting";

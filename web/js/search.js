@@ -56,7 +56,7 @@ function renderSearchResults(query) {
     item.innerHTML = `
       <div class="search-item-left">
         <span class="search-item-icon">${icon}</span>
-        <span class="search-item-title">${title}</span>
+        <span class="search-item-title">${escapeHtml(title)}</span>
       </div>
       ${metaHtml || badgeHtml}
     `;
