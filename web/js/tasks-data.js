@@ -9,6 +9,20 @@ async function loadTasks() {
   }
 }
 
+function showSyncToast(msg) {
+  let toast = document.getElementById("syncErrorToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "syncErrorToast";
+    toast.style.cssText = "position:fixed;bottom:20px;right:20px;z-index:9999;background:#dc4c3e;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,0.35);max-width:340px;";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.display = "block";
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => { toast.style.display = "none"; }, 6000);
+}
+
 async function addTask({ title, project, due_at, has_time, priority, recurrence_rule, tags: taskTags }) {
   const tempId = "task_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
   const tempTask = {
@@ -28,19 +42,39 @@ async function addTask({ title, project, due_at, has_time, priority, recurrence_
   tasks.push(tempTask);
   render();
 
+  if (!currentUser) {
+    try {
+      const { data: sess } = await sb.auth.getSession();
+      if (sess?.session?.user) currentUser = sess.session.user;
+    } catch (_) {}
+  }
+
+  let payload = {
+    user_id: currentUser ? currentUser.id : null,
+    title,
+    project: tempTask.project,
+    due_at: tempTask.due_at,
+    has_time: tempTask.has_time,
+    priority: tempTask.priority,
+    recurrence_rule: tempTask.recurrence_rule,
+    tags: tempTask.tags,
+  };
+
   let data = null;
   let error = null;
   try {
-    ({ data, error } = await sb.from("tasks").insert({
-      user_id: currentUser ? currentUser.id : "guest",
-      title,
-      project: tempTask.project,
-      due_at: tempTask.due_at,
-      has_time: tempTask.has_time,
-      priority: tempTask.priority,
-      recurrence_rule: tempTask.recurrence_rule,
-      tags: tempTask.tags,
-    }).select());
+    ({ data, error } = await sb.from("tasks").insert(payload).select());
+    // Retry with core columns if an optional column is missing from the DB schema
+    if (error && /column|schema cache/i.test(error.message || "")) {
+      const corePayload = {
+        user_id: payload.user_id,
+        title: payload.title,
+        project: payload.project,
+        due_at: payload.due_at,
+        priority: payload.priority,
+      };
+      ({ data, error } = await sb.from("tasks").insert(corePayload).select());
+    }
   } catch (err) {
     error = err;
   }
@@ -53,6 +87,7 @@ async function addTask({ title, project, due_at, has_time, priority, recurrence_
     scheduleWebNotification(data[0]);
   } else if (error) {
     console.warn("Supabase insert failed, keeping local task:", error.message || error);
+    showSyncToast("Task not saved to cloud: " + (error.message || error));
   }
 }
 
