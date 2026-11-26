@@ -10,21 +10,27 @@ async function loadTasks() {
 }
 
 async function addTask({ title, project, due_at, has_time, priority, recurrence_rule, tags: taskTags }) {
-  const { data, error } = await sb.from("tasks").insert({
-    user_id: currentUser ? currentUser.id : "guest",
-    title,
-    project: project || "Inbox",
-    due_at: due_at || null,
-    has_time: !!has_time,
-    priority: priority || 4,
-    recurrence_rule: recurrence_rule || null,
-    tags: taskTags || [],
-  }).select();
+  let data = null;
+  let error = null;
+  try {
+    ({ data, error } = await sb.from("tasks").insert({
+      user_id: currentUser ? currentUser.id : "guest",
+      title,
+      project: project || "Inbox",
+      due_at: due_at || null,
+      has_time: !!has_time,
+      priority: priority || 4,
+      recurrence_rule: recurrence_rule || null,
+      tags: taskTags || [],
+    }).select());
+  } catch (err) {
+    error = err;
+  }
 
-  if (!error && data) {
+  if (!error && data && data[0]) {
     tasks.push(data[0]);
   } else {
-    if (error) console.warn("Supabase insert failed, using local fallback:", error.message);
+    if (error) console.warn("Supabase insert failed, using local fallback:", error.message || error);
     // Fallback in memory
     const tempTask = {
       id: "task_" + Date.now(),

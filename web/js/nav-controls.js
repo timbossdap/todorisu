@@ -147,7 +147,7 @@ if (window.DatePicker) DatePicker.attach("quickAddDate", "quickAddDateBtn", { al
 function openQuickAdd() {
   if (currentProject) $("quickAddProject").value = currentProject;
   if (currentTag && !$("quickAddTags").value.trim()) $("quickAddTags").value = currentTag;
-  if (currentView === "today" && !$("quickAddDate").value) {
+  if ((currentView === "today" || currentView === "upcoming") && !$("quickAddDate").value) {
     if (window.DatePicker) {
       DatePicker.setValue("quickAddDate", DatePicker.formatPickerValue(new Date(), false));
     } else {
