@@ -3,7 +3,12 @@
 // ============================================================
 async function loadTasks() {
   const { data, error } = await sb.from("tasks").select("*").order("created_at", { ascending: true });
-  if (!error && data) {
+  if (error) {
+    console.warn("Supabase loadTasks failed:", error.message || error);
+    showSyncToast("Could not load tasks: " + (error.message || error));
+    return;
+  }
+  if (data) {
     tasks = data;
     if (typeof scheduleAllWebNotifications === "function") scheduleAllWebNotifications();
   }
@@ -85,9 +90,10 @@ async function addTask({ title, project, due_at, has_time, priority, recurrence_
     else tasks.push(data[0]);
     render();
     scheduleWebNotification(data[0]);
-  } else if (error) {
-    console.warn("Supabase insert failed, keeping local task:", error.message || error);
-    showSyncToast("Task not saved to cloud: " + (error.message || error));
+  } else {
+    const msg = error ? (error.message || String(error)) : "No row returned from server (check RLS policies)";
+    console.warn("Supabase insert failed, keeping local task:", msg);
+    showSyncToast("Task not saved to cloud: " + msg);
   }
 }
 
