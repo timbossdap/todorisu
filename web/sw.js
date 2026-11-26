@@ -1,4 +1,4 @@
-const CACHE = "tasks-v9";
+const CACHE = "tasks-v10";
 const FILES = [
   "./index.html",
   "./idle-game.html",

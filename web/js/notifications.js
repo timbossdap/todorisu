@@ -2,7 +2,7 @@
 // WEB NOTIFICATIONS & REMINDERS
 // ============================================================
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js", { updateViaCache: "none" })
+  navigator.serviceWorker.register("sw.js?v=10", { updateViaCache: "none" })
     .then((reg) => reg.update().catch(() => {}))
     .catch(() => {});
 }
