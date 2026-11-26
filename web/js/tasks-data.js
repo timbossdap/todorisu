@@ -1,16 +1,87 @@
 // ============================================================
 // DATA & TASK OPERATIONS
 // ============================================================
+const PENDING_TASKS_KEY = "tasks_pending_inserts";
+
+function getPendingTasks() {
+  try {
+    return JSON.parse(localStorage.getItem(PENDING_TASKS_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function savePendingTasks(list) {
+  try {
+    localStorage.setItem(PENDING_TASKS_KEY, JSON.stringify(list));
+  } catch {}
+}
+
+function addPendingTask(task) {
+  const list = getPendingTasks().filter(t => t.id !== task.id);
+  list.push(task);
+  savePendingTasks(list);
+}
+
+function removePendingTask(id) {
+  const list = getPendingTasks().filter(t => t.id !== id);
+  savePendingTasks(list);
+}
+
+async function insertToSupabase(payload) {
+  let { data, error } = await sb.from("tasks").insert(payload).select();
+  if (error && /column|schema cache/i.test(error.message || "")) {
+    const corePayload = {
+      user_id: payload.user_id,
+      title: payload.title,
+      project: payload.project,
+      due_at: payload.due_at,
+      priority: payload.priority,
+    };
+    ({ data, error } = await sb.from("tasks").insert(corePayload).select());
+  }
+  return { data, error };
+}
+
+async function syncPendingTasks() {
+  const pending = getPendingTasks();
+  if (!pending.length || !currentUser) return;
+  for (const pt of pending) {
+    try {
+      const { data, error } = await insertToSupabase({
+        user_id: currentUser.id,
+        title: pt.title,
+        project: pt.project || "Inbox",
+        due_at: pt.due_at || null,
+        has_time: !!pt.has_time,
+        priority: pt.priority || 4,
+        recurrence_rule: pt.recurrence_rule || null,
+        tags: pt.tags || [],
+      });
+      if (!error && data && data[0]) {
+        removePendingTask(pt.id);
+        const idx = tasks.findIndex(t => t.id === pt.id);
+        if (idx !== -1) tasks[idx] = data[0];
+        else tasks.push(data[0]);
+        render();
+      }
+    } catch (_) {}
+  }
+}
+
 async function loadTasks() {
   const { data, error } = await sb.from("tasks").select("*").order("created_at", { ascending: true });
   if (error) {
     console.warn("Supabase loadTasks failed:", error.message || error);
     showSyncToast("Could not load tasks: " + (error.message || error));
+    tasks = getPendingTasks();
     return;
   }
   if (data) {
-    tasks = data;
+    const pending = getPendingTasks();
+    tasks = [...data, ...pending];
     if (typeof scheduleAllWebNotifications === "function") scheduleAllWebNotifications();
+    if (pending.length) syncPendingTasks();
   }
 }
 
@@ -43,8 +114,9 @@ async function addTask({ title, project, due_at, has_time, priority, recurrence_
     created_at: new Date().toISOString()
   };
 
-  // Render optimistically right away
+  // Render optimistically right away and persist locally until cloud insert succeeds
   tasks.push(tempTask);
+  addPendingTask(tempTask);
   render();
 
   if (!currentUser) {
@@ -54,7 +126,7 @@ async function addTask({ title, project, due_at, has_time, priority, recurrence_
     } catch (_) {}
   }
 
-  let payload = {
+  const payload = {
     user_id: currentUser ? currentUser.id : null,
     title,
     project: tempTask.project,
@@ -68,23 +140,13 @@ async function addTask({ title, project, due_at, has_time, priority, recurrence_
   let data = null;
   let error = null;
   try {
-    ({ data, error } = await sb.from("tasks").insert(payload).select());
-    // Retry with core columns if an optional column is missing from the DB schema
-    if (error && /column|schema cache/i.test(error.message || "")) {
-      const corePayload = {
-        user_id: payload.user_id,
-        title: payload.title,
-        project: payload.project,
-        due_at: payload.due_at,
-        priority: payload.priority,
-      };
-      ({ data, error } = await sb.from("tasks").insert(corePayload).select());
-    }
+    ({ data, error } = await insertToSupabase(payload));
   } catch (err) {
     error = err;
   }
 
   if (!error && data && data[0]) {
+    removePendingTask(tempId);
     const idx = tasks.findIndex(t => t.id === tempId);
     if (idx !== -1) tasks[idx] = data[0];
     else tasks.push(data[0]);
@@ -93,7 +155,7 @@ async function addTask({ title, project, due_at, has_time, priority, recurrence_
   } else {
     const msg = error ? (error.message || String(error)) : "No row returned from server (check RLS policies)";
     console.warn("Supabase insert failed, keeping local task:", msg);
-    showSyncToast("Task not saved to cloud: " + msg);
+    showSyncToast("Saved locally (cloud sync failed): " + msg);
   }
 }
 
@@ -162,9 +224,12 @@ async function toggleTask(id) {
 
 async function deleteTask(id) {
   if (typeof cancelWebNotification === "function") cancelWebNotification(id);
+  removePendingTask(id);
   tasks = tasks.filter(t => t.id !== id);
   render();
-  await sb.from("tasks").delete().eq("id", id);
+  if (!String(id).startsWith("task_")) {
+    await sb.from("tasks").delete().eq("id", id);
+  }
 }
 
 // Delete only the current occurrence of a repeating task (advances to next occurrence)
