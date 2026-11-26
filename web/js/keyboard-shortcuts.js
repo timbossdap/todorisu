@@ -23,8 +23,7 @@ document.addEventListener("keydown", (e) => {
 
   if (e.key === "q") {
     e.preventDefault();
-    $("quickAdd").classList.remove("hidden");
-    $("quickAddInput").focus();
+    openQuickAdd();
     return;
   }
 

@@ -143,14 +143,24 @@ function renderConnectedFeeds() {
 
 // Quick Add Global Bar
 if (window.DatePicker) DatePicker.attach("quickAddDate", "quickAddDateBtn", { allowTime: true });
-$("quickAddBtn").addEventListener("click", () => {
+
+function openQuickAdd() {
+  if (currentProject) $("quickAddProject").value = currentProject;
+  if (currentTag && !$("quickAddTags").value.trim()) $("quickAddTags").value = currentTag;
+  if (currentView === "today" && !$("quickAddDate").value) {
+    if (window.DatePicker) {
+      DatePicker.setValue("quickAddDate", DatePicker.formatPickerValue(new Date(), false));
+    } else {
+      $("quickAddDate").value = toLocalDatetimeString(new Date(), false);
+    }
+  }
   $("quickAdd").classList.remove("hidden");
+  $("quickAdd").scrollIntoView({ behavior: "smooth", block: "nearest" });
   $("quickAddInput").focus();
-});
-$("standardInlineAddBtn").addEventListener("click", () => {
-  $("quickAdd").classList.remove("hidden");
-  $("quickAddInput").focus();
-});
+}
+
+$("quickAddBtn").addEventListener("click", openQuickAdd);
+$("standardInlineAddBtn").addEventListener("click", openQuickAdd);
 $("quickAddCancel").addEventListener("click", () => $("quickAdd").classList.add("hidden"));
 $("quickAddSave").addEventListener("click", saveQuickAdd);
 $("quickAddInput").addEventListener("keydown", (e) => { if (e.key === "Enter") saveQuickAdd(); });
@@ -234,11 +244,7 @@ if (mobileBrowseBtn) {
 
 const mobileFab = $("mobileFab");
 if (mobileFab) {
-  mobileFab.addEventListener("click", () => {
-    $("quickAdd").classList.remove("hidden");
-    $("quickAddInput").focus();
-    $("quickAdd").scrollIntoView({ behavior: "smooth", block: "center" });
-  });
+  mobileFab.addEventListener("click", openQuickAdd);
 }
 
 function updateMobileNavActive() {

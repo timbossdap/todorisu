@@ -24,6 +24,7 @@ async function addTask({ title, project, due_at, has_time, priority, recurrence_
   if (!error && data) {
     tasks.push(data[0]);
   } else {
+    if (error) console.warn("Supabase insert failed, using local fallback:", error.message);
     // Fallback in memory
     const tempTask = {
       id: "task_" + Date.now(),

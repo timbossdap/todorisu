@@ -273,6 +273,42 @@
       </div>
     </div>
 
+    <!-- Global Quick Add Composer -->
+    <div id="quickAdd" class="quick-add hidden">
+      <input id="quickAddInput" type="text" placeholder='e.g. "Pay rent every thursday biweekly around 5pm @bills #Home"' />
+      <div id="smartPreview" class="smart-preview hidden"></div>
+      <div class="quick-add-row">
+        <select id="quickAddProject"></select>
+        <input id="quickAddDate" type="hidden" value="" />
+        <button type="button" id="quickAddDateBtn" class="date-trigger-btn" title="Set due date">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span class="date-trigger-label">Date</span>
+          <span class="date-trigger-clear hidden" title="Clear date">✕</span>
+        </button>
+        <select id="quickAddPriority">
+          <option value="4">No priority</option>
+          <option value="3">Priority 3</option>
+          <option value="2">Priority 2</option>
+          <option value="1">Priority 1</option>
+        </select>
+        <select id="quickAddRecurrence">
+          <option value="">Doesn't repeat</option>
+          <option value="daily">Every day</option>
+          <option value="weekday">Every weekday</option>
+          <option value="weekly">Every week</option>
+          <option value="biweekly">Every 2 weeks (Biweekly)</option>
+          <option value="monthly">Every month</option>
+          <option value="bimonthly">Every 2 months</option>
+          <option value="yearly">Every year</option>
+        </select>
+        <input id="quickAddTags" type="text" placeholder="tags, comma separated" />
+      </div>
+      <div class="quick-add-actions">
+        <button id="quickAddSave" class="btn-primary">Add task</button>
+        <button id="quickAddCancel" class="btn-ghost">Cancel</button>
+      </div>
+    </div>
+
     <!-- UPCOMING VIEW -->
     <div id="upcomingView" class="view-content">
       <h1 class="view-main-title">Upcoming</h1>
@@ -362,42 +398,6 @@
 
       <!-- Calendar Events on Today View -->
       <div id="todayCalendarCard" class="day-calendar-box hidden"></div>
-
-      <!-- Quick Add Composer -->
-      <div id="quickAdd" class="quick-add hidden">
-        <input id="quickAddInput" type="text" placeholder='e.g. "Pay rent every thursday biweekly around 5pm @bills #Home"' />
-        <div id="smartPreview" class="smart-preview hidden"></div>
-        <div class="quick-add-row">
-          <select id="quickAddProject"></select>
-          <input id="quickAddDate" type="hidden" value="" />
-          <button type="button" id="quickAddDateBtn" class="date-trigger-btn" title="Set due date">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            <span class="date-trigger-label">Date</span>
-            <span class="date-trigger-clear hidden" title="Clear date">✕</span>
-          </button>
-          <select id="quickAddPriority">
-            <option value="4">No priority</option>
-            <option value="3">Priority 3</option>
-            <option value="2">Priority 2</option>
-            <option value="1">Priority 1</option>
-          </select>
-          <select id="quickAddRecurrence">
-            <option value="">Doesn't repeat</option>
-            <option value="daily">Every day</option>
-            <option value="weekday">Every weekday</option>
-            <option value="weekly">Every week</option>
-            <option value="biweekly">Every 2 weeks (Biweekly)</option>
-            <option value="monthly">Every month</option>
-            <option value="bimonthly">Every 2 months</option>
-            <option value="yearly">Every year</option>
-          </select>
-          <input id="quickAddTags" type="text" placeholder="tags, comma separated" />
-        </div>
-        <div class="quick-add-actions">
-          <button id="quickAddSave" class="btn-primary">Add task</button>
-          <button id="quickAddCancel" class="btn-ghost">Cancel</button>
-        </div>
-      </div>
 
       <div class="inline-add-row" id="standardAddRow">
         <button id="standardInlineAddBtn" class="inline-add-task-btn">
